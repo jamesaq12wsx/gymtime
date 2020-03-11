@@ -1,0 +1,25 @@
+package com.jamesaq12wsx.gymtime.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class LaFitnessClubInfoRequest {
+
+    @JsonProperty("clubID")
+    String clubId;
+
+    String clubCity;
+
+    String clubState;
+
+    @JsonProperty("clubStatusID")
+    String clubStatusId;
+
+}
