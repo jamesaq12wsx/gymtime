@@ -8,3 +8,8 @@ spring:
   profiles:
     active: '@spring.profiles.active@'
 
+application:
+  jwt:
+    secretKey: testsecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecure
+    tokenPrefix: Bearer
+    tokenExpirationAfterDays: 30

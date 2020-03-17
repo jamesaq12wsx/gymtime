@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,19 +22,22 @@ public class FitnessClubController {
         this.fitnessClubService = fitnessClubService;
     }
 
-
     @GetMapping
-    public List<FitnessClub> getAllFitnessClubs(){
+    public List<FitnessClub> getAllFitnessClubs(Principal principal){
         return fitnessClubService.getAllFitnessClubs();
     }
 
     @GetMapping("/location")
-    public List<FitnessClub> getAllFitnessClubsWithLocation(@RequestParam("lat") double latitude, @RequestParam("lon") double longitude){
+    public List<FitnessClub> getAllFitnessClubsWithLocation(
+            @RequestParam("lat") double latitude,
+            @RequestParam("lon") double longitude,
+            Principal principal
+    ){
         return fitnessClubService.getAllFitnessClubsWithLocation(latitude, longitude);
     }
 
     @GetMapping("/club/{uuid}")
-    public FitnessClubDetail getFitnessByUuid(@PathVariable("uuid") UUID uuid){
+    public FitnessClubDetail getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
         return fitnessClubService.getFitnessDetail(uuid);
     }
 
