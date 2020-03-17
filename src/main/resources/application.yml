@@ -4,6 +4,7 @@ app:
     username: postgres
     password: password
 
-#spring:
-#  profiles:
-#    active: @spring.profiles.active@
+spring:
+  profiles:
+    active: '@spring.profiles.active@'
+

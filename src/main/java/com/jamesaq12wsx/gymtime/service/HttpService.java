@@ -1,21 +1,14 @@
 package com.jamesaq12wsx.gymtime.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jamesaq12wsx.gymtime.model.LAFitnessClubsResponse;
-import com.jamesaq12wsx.gymtime.model.LaFitnessClubInfoRequest;
-import com.jamesaq12wsx.gymtime.model.LaFitnessClubsRequest;
-import com.jamesaq12wsx.gymtime.model.LaFitnessInfoResponse;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.*;
 
 public class HttpService {

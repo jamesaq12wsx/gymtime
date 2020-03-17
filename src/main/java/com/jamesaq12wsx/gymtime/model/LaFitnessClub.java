@@ -6,49 +6,44 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+import java.util.Map;
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class LaFitnessClub {
+public class LaFitnessClub implements FitnessClub, Serializable {
 
-    @JsonProperty("ClubID")
-    int clubId;
+    private UUID uuid;
 
-    @JsonProperty("Longitude")
-    double longitude;
+    private final GymBrand brand = GymBrand.LA_FITNESS;
 
-    @JsonProperty("Latitude")
-    double latitude;
+    private int id;
 
-    @JsonProperty("Address")
-    String address;
+    private double longitude;
 
-    @JsonProperty("Description")
-    String description;
+    private double latitude;
 
-    @JsonProperty("ClubStatus")
-    int clubStatus;
+    private String name;
 
-    @JsonProperty("IsEsporta")
-    boolean isEsporta;
+    private String address;
 
-    @JsonProperty("State")
-    String state;
+    private String city;
 
-    @JsonProperty("City")
-    String City;
+    private String state;
 
-    @JsonProperty("BrandId")
-    int brandId;
+    private String zipCode;
 
-    @JsonProperty("Distance")
-    int distance;
+    private String homeUrl;
 
-    @JsonProperty("FacebookURL")
-    String facebookUrl;
+    private Map<String,String> openHours;
 
-    @JsonProperty("ClubHomeURL")
-    String clubHomeUrl;
+    private String distance;
 
+    @Override
+    public GymBrand getBrand() {
+        return brand;
+    }
 }

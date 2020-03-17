@@ -1,0 +1,14 @@
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/gymtime
+    username: postgres
+    password: password
+
+
+spring:
+  profiles:
+    active: '@spring.profiles.active@'
+
+
+server:
+  port: 5000
