@@ -13,3 +13,9 @@ application:
     secretKey: testsecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecuresecure
     tokenPrefix: Bearer
     tokenExpirationAfterDays: 30
+  password:
+    specialChar: true
+    capitalLetter: true
+    number: true
+    min: 8
+    max: 30

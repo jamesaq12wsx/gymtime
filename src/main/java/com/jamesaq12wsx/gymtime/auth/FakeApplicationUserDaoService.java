@@ -12,54 +12,54 @@ import java.util.UUID;
 
 import static com.jamesaq12wsx.gymtime.security.ApplicationUserRole.*;
 
-@Repository("fake")
-public class FakeApplicationUserDaoService implements ApplicationUserDao {
-
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public FakeApplicationUserDaoService(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Override
-    public Optional<ApplicationUser> selectApplicationUserByUsername(String username) {
-        return getApplicationUsers().stream().filter(user -> user.getUsername().equals(username)).findFirst();
-    }
-
-    private List<ApplicationUser> getApplicationUsers(){
-        List<ApplicationUser> applicationUsers = Lists.newArrayList(
-                new ApplicationUser(
-                        "annasmith",
-                        passwordEncoder.encode("password"),
-                        USER.getGrantedAuthorities(),
-                        UUID.randomUUID(),
-                        true,
-                        true,
-                        true,
-                        true,
-                        LocalDateTime.now(), LocalDateTime.now()),
-                new ApplicationUser(
-                        "linda",
-                        passwordEncoder.encode("password"),
-                        ADMIN.getGrantedAuthorities(),
-                        UUID.randomUUID(), true,
-                        true,
-                        true,
-                        true,
-                        LocalDateTime.now(), LocalDateTime.now()),
-                new ApplicationUser(
-                        "tom",
-                        passwordEncoder.encode("password"),
-                        ADMINTRAINEE.getGrantedAuthorities(),
-                        UUID.randomUUID(), true,
-                        true,
-                        true,
-                        true,
-                        LocalDateTime.now(), LocalDateTime.now())
-        );
-
-        return applicationUsers;
-    }
-
-}
+//@Repository("fake")
+//public class FakeApplicationUserDaoService implements ApplicationUserDao {
+//
+//    private PasswordEncoder passwordEncoder;
+//
+//    @Autowired
+//    public FakeApplicationUserDaoService(PasswordEncoder passwordEncoder) {
+//        this.passwordEncoder = passwordEncoder;
+//    }
+//
+//    @Override
+//    public Optional<ApplicationUser> selectApplicationUserByUsername(String username) {
+//        return getApplicationUsers().stream().filter(user -> user.getUsername().equals(username)).findFirst();
+//    }
+//
+//    private List<ApplicationUser> getApplicationUsers(){
+//        List<ApplicationUser> applicationUsers = Lists.newArrayList(
+//                new ApplicationUser(
+//                        "annasmith",
+//                        passwordEncoder.encode("password"),
+//                        USER.getGrantedAuthorities(),
+//                        role, UUID.randomUUID(),
+//                        true,
+//                        true,
+//                        true,
+//                        true,
+//                        LocalDateTime.now(), LocalDateTime.now()),
+//                new ApplicationUser(
+//                        "linda",
+//                        passwordEncoder.encode("password"),
+//                        ADMIN.getGrantedAuthorities(),
+//                        role, UUID.randomUUID(), true,
+//                        true,
+//                        true,
+//                        true,
+//                        LocalDateTime.now(), LocalDateTime.now()),
+//                new ApplicationUser(
+//                        "tom",
+//                        passwordEncoder.encode("password"),
+//                        ADMINTRAINEE.getGrantedAuthorities(),
+//                        role, UUID.randomUUID(), true,
+//                        true,
+//                        true,
+//                        true,
+//                        LocalDateTime.now(), LocalDateTime.now())
+//        );
+//
+//        return applicationUsers;
+//    }
+//
+//}

@@ -1,19 +1,21 @@
 package com.jamesaq12wsx.gymtime.auth;
 
+import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Set;
 import java.util.UUID;
 
 public class ApplicationUser implements UserDetails {
 
-    final private Set<? extends  GrantedAuthority> grantedAuthorities;
+    //    final private Set<? extends  GrantedAuthority> grantedAuthorities;
     final private UUID uuid;
     final private String username;
     final private String password;
+    final private String email;
+    final private ApplicationUserRole role;
     final private boolean isAccountNonExpired;
     final private boolean isAccountNonLocked;
     final private boolean isCredentialsNonExpired;
@@ -22,16 +24,24 @@ public class ApplicationUser implements UserDetails {
     final private LocalDateTime updatedAt;
 
 
-    public ApplicationUser(String username,
-                           String password,
-                           Set<? extends GrantedAuthority> grantedAuthorities,
-                           UUID uuid, boolean isAccountNonExpired,
-                           boolean isAccountNonLocked,
-                           boolean isCredentialsNonExpired,
-                           boolean isEnabled, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.grantedAuthorities = grantedAuthorities;
+    public ApplicationUser(
+            UUID uuid,
+            String username,
+            String password,
+//                           Set<? extends GrantedAuthority> grantedAuthorities,
+            String email,
+            ApplicationUserRole role,
+            boolean isAccountNonExpired,
+            boolean isAccountNonLocked,
+            boolean isCredentialsNonExpired,
+            boolean isEnabled,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+//        this.grantedAuthorities = grantedAuthorities;
         this.username = username;
         this.password = password;
+        this.email = email;
+        this.role = role;
         this.uuid = uuid;
         this.isAccountNonExpired = isAccountNonExpired;
         this.isAccountNonLocked = isAccountNonLocked;
@@ -43,7 +53,7 @@ public class ApplicationUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return grantedAuthorities;
+        return role.getGrantedAuthorities();
     }
 
     @Override
@@ -74,6 +84,18 @@ public class ApplicationUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return isEnabled;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public ApplicationUserRole getRole() {
+        return role;
     }
 
     public LocalDateTime getCreatedAt() {
