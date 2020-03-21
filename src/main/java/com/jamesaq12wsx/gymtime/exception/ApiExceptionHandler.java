@@ -21,4 +21,18 @@ public class ApiExceptionHandler {
         return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<Object> handleApiInternalException(Exception e){
+
+        e.printStackTrace();
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

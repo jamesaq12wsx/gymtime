@@ -10,7 +10,9 @@ public interface FitnessClub {
 
     int getId();
 
-    GymBrand getBrand();
+    int getBrandId();
+
+    String getBrandName();
 
     String getName();
 
@@ -29,31 +31,5 @@ public interface FitnessClub {
     String getZipCode();
 
     Map<String, String> getOpenHours();
-
-    String getDistance();
-
-    void setUuid(UUID uuid);
-
-    void setId(int id);
-
-    void setName(String name);
-
-    void setLatitude(double latitude);
-
-    void setLongitude(double longitude);
-
-    void setHomeUrl(String homeUrl);
-
-    void setAddress(String address);
-
-    void setCity(String city);
-
-    void setState(String state);
-
-    void setZipCode(String zipCode);
-
-    void setOpenHours(Map<String, String> openHours);
-
-    void setDistance(String distance);
 
 }

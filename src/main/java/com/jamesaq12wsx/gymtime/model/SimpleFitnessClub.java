@@ -1,6 +1,5 @@
 package com.jamesaq12wsx.gymtime.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,21 +13,21 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class LaFitnessClub implements FitnessClub, Serializable {
+public class SimpleFitnessClub implements FitnessClub, Serializable {
 
     private UUID uuid;
 
-    private final int brandId = 1;
+    private int brandId;
 
-    private final String brandName = "LA Fitness";
+    private String brandName;
+
+    private String name;
 
     private int id;
 
-    private double longitude;
-
     private double latitude;
 
-    private String name;
+    private double longitude;
 
     private String address;
 
@@ -38,20 +37,10 @@ public class LaFitnessClub implements FitnessClub, Serializable {
 
     private String zipCode;
 
+    private String country;
+
     private String homeUrl;
 
     private Map<String,String> openHours;
-
-    private String distance;
-
-    @Override
-    public int getBrandId() {
-        return brandId;
-    }
-
-    @Override
-    public String getBrandName() {
-        return null;
-    }
 
 }
