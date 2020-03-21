@@ -25,6 +25,8 @@ export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/loc
 
 export const getClubDetail = (uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
 
+export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`);
+
 // export const getStudentCourses = studentId => fetch(`/api/students/${studentId}/courses`).then(checkStatus);
 
 // export const addNewStudent = student => 

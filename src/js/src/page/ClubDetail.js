@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import EmptyBar from '../components/chart/EmptyBar';
 import SimpleMap from '../components/SimpleMap';
 import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button } from 'antd';
-import { getClubDetail } from '../api/client';
+import { getClubDetail, getClubPosts } from '../api/client';
 import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined } from '@ant-design/icons';
+import PostChart from '../components/chart/PostChart';
 
 const { Meta } = Card;
 
@@ -17,6 +18,44 @@ const weekday = {
     0: 'SUNDAY'
 };
 
+// const getDate = () => {
+//     let d = new Date();
+//     let year = appendFront(4, d.getFullYear());
+//     let month = appendFront(2, d.getMonth() + 1);
+//     let date = appendFront(2, d.getDate());
+
+//     return `${year}-${month}-${date}`;
+// }
+
+const getDate = (number, add) => {
+
+    let today = new Date();
+
+    let d;
+
+    if (add) {
+        d = new Date(new Date().setDate(today.getDate() + number));
+      } else {
+        d = new Date(new Date().setDate(today.getDate() - number));
+      }
+
+    let year = appendFront(4, d.getFullYear());
+    let month = appendFront(2, d.getMonth() + 1);
+    let date = appendFront(2, d.getDate());
+
+    return `${year}-${month}-${date}`;
+}
+
+const appendFront = (len, val) => {
+
+    let valStr = val.toString();
+
+    for (let i = valStr.length; i < len; i++) {
+        valStr = '0' + valStr;
+    }
+
+    return valStr;
+}
 
 const ClubDetail = (props) => {
 
@@ -25,6 +64,8 @@ const ClubDetail = (props) => {
 
     const [club, setClub] = useState(null);
     const [fetchingChartData, setFetchingChartData] = useState(false);
+    const [posts, setPosts] = useState([]);
+    const [lastWeekPosts, setLastWeekPosts] = useState([]);
 
     console.log('Club Detail', clubUuid);
 
@@ -38,13 +79,17 @@ const ClubDetail = (props) => {
 
             getClubDetail(clubUuid).then(r => r.json()).then(club => setClub(club));
 
+            getClubPosts(clubUuid, getDate(0, false)).then(r => r.json()).then(posts => setPosts(posts));
+
+            getClubPosts(clubUuid, getDate(7, false)).then(r => r.json()).then(posts => setLastWeekPosts(posts));
+
             setFetchingChartData(false);
         }
 
     }, []);
 
     const getMarksChart = () => {
-        if (club && club.marks) {
+        if (posts.length == 0) {
             return (
                 <List.Item>
                     <EmptyBar />
@@ -55,6 +100,15 @@ const ClubDetail = (props) => {
                 </List.Item>
             );
         }
+
+        return (
+            <List.Item>
+                <PostChart today={posts} lastWeek={lastWeekPosts} />
+
+                <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>Exercise</Button>
+
+            </List.Item>
+        )
 
     }
 

@@ -20,7 +20,7 @@ const App = (props) => {
 
   const positionHandler = (position) => {
 
-    setLocation({...location, lat: position.coords.latitude, lon: position.coords.longitude});
+    setLocation({ ...location, lat: position.coords.latitude, lon: position.coords.longitude });
 
     getAllClubsWithLocation(position.coords.latitude, position.coords.longitude)
       .then(r => r.json())
@@ -54,7 +54,7 @@ const App = (props) => {
   // getLocation();
 
   const fetchingClubs = () => {
-    
+
     setFetching(true);
 
     getLocation(positionHandler, positionErrorHandler);
@@ -76,7 +76,7 @@ const App = (props) => {
   const listDetailOnClickHander = (e, club) => {
     // console.log(`詳細資料 ${clubUuid}`);
 
-    if(club){
+    if (club) {
       setSelectClub(club);
     }
   }
@@ -100,10 +100,12 @@ const App = (props) => {
         <div className="App">
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
-          <h1>GYM TIME</h1>
+          <Link to='/clubs'>
+            <h1>GYM TIME</h1>
+          </Link>
           <Switch>
             <Route path="/clubs">
-              <Clubs fetching={fetching} clubs={clubs} markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander}/>
+              <Clubs fetching={fetching} clubs={clubs} markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander} />
             </Route>
             <Route path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
             <Route path={`/user`}>
