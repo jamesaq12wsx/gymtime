@@ -5,18 +5,33 @@ import { getAllClubs, getAllClubsWithLocation } from './api/client';
 import ClubList from './components/list/ClubList';
 import LoadingList from './components/list/LoadingList';
 import 'antd/dist/antd.css';
-import { successNotification } from './components/Notification';
+import { successNotification, errorNotification } from './components/Notification';
 import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
 import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
+import AppContextProvider from './context/AppContextProvider';
+import { Modal, Row, Col } from 'antd';
+import {
+  LoginOutlined,
+  UserOutlined
+} from '@ant-design/icons';
+import LoginModal from './components/LoginModal';
+import { AppContext } from './context/AppContextProvider';
 
 const App = (props) => {
+
+  const appContext = useContext(AppContext);
+  const { state, dispatch } = appContext;
 
   const [fetching, setFetching] = useState(false);
   const [clubs, setClubs] = useState([]);
   const [location, setLocation] = useState({ lat: null, lon: null });
   const [selectClub, setSelectClub] = useState(null);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
+
+  const openLoginModal = () => setLoginModalVisible(true);
+  const closeLoginModal = () => setLoginModalVisible(false);
 
   const positionHandler = (position) => {
 
@@ -29,6 +44,21 @@ const App = (props) => {
       }).finally(() => {
         setFetching(false);
       });
+  }
+
+  const getIcon = () => {
+
+    const {login} = state;
+
+    if (login) {
+      return (
+        <Link to="/user">
+          <UserOutlined style={{ fontSize: '16px', marginTop: '7px', color: '#FFF' }} />
+        </Link>
+      );
+    } else {
+      return <LoginOutlined onClick={() => openLoginModal()} style={{ fontSize: '16px', marginTop: '7px' }} />;
+    }
   }
 
   const positionErrorHandler = () => {
@@ -95,14 +125,43 @@ const App = (props) => {
         <h1>GYM TIME</h1>
         {getClubList()}
       </div> */}
+      <LoginModal
+        visible={loginModalVisible}
+        onSuccess={(res) => {
+          const token = res.headers.get('Authorization').slice(7);
+
+          dispatch({ type: 'LOGIN', value: token });
+
+          closeLoginModal();
+
+        }}
+        onFailure={(err) => {
+
+          console.error(err);
+
+          const message = err.error.message;
+          const description = err.error.httpStatus;
+          console.log(JSON.stringify(err));
+          errorNotification(message, description);
+        }}
+        onOk={() => closeLoginModal()}
+        onCancel={() => closeLoginModal()}
+      />
 
       <Router>
         <div className="App">
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
-          <Link to='/clubs'>
-            <h1>GYM TIME</h1>
-          </Link>
+          <Row>
+            <Col span={8} offset={8}>
+              <Link to='/clubs'>
+                <h2>GYM TIME</h2>
+              </Link>
+            </Col>
+            <Col span={2} offset={6}>
+              {getIcon()}
+            </Col>
+          </Row>
           <Switch>
             <Route path="/clubs">
               <Clubs fetching={fetching} clubs={clubs} markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander} />

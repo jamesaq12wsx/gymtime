@@ -6,9 +6,9 @@ const checkStatus = response => {
 
     console.log('checkStatus', response);
 
-    if(response.ok){
+    if (response.ok) {
         return response;
-    }else{
+    } else {
         let error = new Error(response.statusText);
         error.response = response;
 
@@ -26,6 +26,17 @@ export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/loc
 export const getClubDetail = (uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
 
 export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`);
+
+export const login = (values) => fetch(
+    '/login',
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+    }
+).then(checkStatus);
 
 // export const getStudentCourses = studentId => fetch(`/api/students/${studentId}/courses`).then(checkStatus);
 
