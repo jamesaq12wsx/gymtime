@@ -8,6 +8,7 @@ class Auth {
         this.jwtToken = localStorage.getItem('jwtToken');
         this.refreshToken = localStorage.getItem('refreshToken');
         this.authenticated = this.isAuthenticated();
+        this.serverCheck = false;
     }
 
     login(values, cb, errCb) {
@@ -77,6 +78,10 @@ class Auth {
 
             }else{
 
+                if(this.serverCheck && this.authenticated){
+                    return true;
+                }
+
                 let authenticated = checkToken(token);
 
                 console.log('check token from server', authenticated);
@@ -84,6 +89,8 @@ class Auth {
                 if(authenticated){
 
                    this.authenticated = true;
+
+                   this.serverCheck = true;
                    
                    return true;
 

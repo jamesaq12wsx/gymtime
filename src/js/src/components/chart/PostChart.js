@@ -72,6 +72,15 @@ const PostChart = (props) => {
                 point: {
                     radius: 1
                 }
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        max: 400,
+                        min: 0,
+                        stepSize: 10
+                    }
+                }]
             }
             // legend: {
             //     display: true,

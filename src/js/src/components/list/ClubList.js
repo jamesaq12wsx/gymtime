@@ -40,15 +40,15 @@ const ClubList = ({ clubs, markOnClick, detailOnClick }) => {
                 <List.Item>
                     <Card title={item.name}
                         actions={[
-                            <DownCircleTwoTone onClick={(e) => markOnClick(e, item)} twoToneColor="#eb2f96" key="check" />,
+                            // <DownCircleTwoTone onClick={(e) => markOnClick(e, item)} twoToneColor="#eb2f96" key="check" />,
                             <MoreOutlined onClick={(e) => detailOnClick(e, item)} key="more" />
                         ]}>
-                        <img width="100" src="https://www.lafitness.com/Pages/Images/LAF_logo_2C_H.gif" style={{marginBottom: '15px'}} />
+                            {item.icon ? <img width="100" src="https://www.lafitness.com/Pages/Images/LAF_logo_2C_H.gif" style={{marginBottom: '15px'}} /> : <React.Fragment />}
                         <Row>
                             <Col span={4}>
                                 <EnvironmentFilled />
                             </Col>
-                            <Col span={20}>{`${item.address} ${item.city}, ${item.state} ${item.zipCode}`}</Col>
+                            <Col span={20}>{`${item.address} ${item.city}${item.state ? ' ,'+ item.state : ''} ${item.zipCode ? ' ' + item.zipCode : ''}`}</Col>
                         </Row>
                         <Row>
                             <Col span={4}>

@@ -11,17 +11,17 @@ import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
 import AppContextProvider from './context/AppContextProvider';
-import { Modal, Row, Col } from 'antd';
-import {
-  LoginOutlined,
-  UserOutlined,
-  SettingOutlined
-} from '@ant-design/icons';
+import { Modal, Row, Col, Drawer, Button } from 'antd';
+import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
 import Login from './page/Login';
 import auth from './components/Auth';
 import LogoutPage from './page/Logout.page';
+import { FaRunning, FaUserFriends } from "react-icons/fa";
+import { IoIosFitness } from "react-icons/io";
+import NavBarIcon from './components/NavBarIcon';
+
 
 const AuthRoute = ({ component: Component, ...rest }) => {
 
@@ -53,9 +53,13 @@ const App = (props) => {
   const [location, setLocation] = useState({ lat: null, lon: null });
   const [selectClub, setSelectClub] = useState(null);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
+  const [settingSideBarVisible, setSettingSideBarVisible] = useState(false);
 
   const openLoginModal = () => setLoginModalVisible(true);
   const closeLoginModal = () => setLoginModalVisible(false);
+
+  const openSideBar = () => setSettingSideBarVisible(true);
+  const closeSideBar = () => setSettingSideBarVisible(false);
 
   const positionHandler = (position) => {
 
@@ -71,6 +75,14 @@ const App = (props) => {
   }
 
   const getHeader = () => {
+    return (
+      <div className="header" style={{ margin: '5px' }}>
+        {getHeaderItems()}
+      </div>
+    )
+  }
+
+  const getHeaderItems = () => {
 
     if (auth.isAuthenticated()) {
       return (
@@ -80,8 +92,38 @@ const App = (props) => {
               <h3>GYM TIME</h3>
             </Link>
           </Col>
-          <Col span={1} offset={6}>
-            <SettingOutlined style={{ fontSize: '16px', marginTop: '7px' }} />
+          <Col
+            span={2}
+            offset={4}
+          >
+            <NavBarIcon>
+              <IoIosFitness size='2rem' />
+            </NavBarIcon>
+          </Col>
+          <Col
+            span={2}
+            offset={1}
+          >
+            <NavBarIcon>
+              <FaRunning size='2rem' />
+            </NavBarIcon>
+          </Col>
+          <Col
+            span={2}
+            offset={1}
+          >
+            <NavBarIcon>
+              <FaUserFriends size='2rem' />
+            </NavBarIcon>
+          </Col>
+          <Col span={1} offset={6} >
+            <SettingOutlined
+              onClick={() => {
+                console.log('setting clicked');
+                openSideBar();
+              }}
+              style={{ fontSize: '20px', marginTop: '7px' }}
+            />
           </Col>
         </Row>
       );
@@ -167,6 +209,20 @@ const App = (props) => {
         <h1>GYM TIME</h1>
         {getClubList()}
       </div> */}
+
+      <Drawer
+        title="Setting"
+        placement="right"
+        closable={false}
+        onClose={() => closeSideBar()}
+        visible={settingSideBarVisible}
+      >
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Gym Time V 1.0.0</p>
+        <Button danger >Logout</Button>
+      </Drawer>
+
       <LoginModal
         visible={loginModalVisible}
         onSuccess={() => {
