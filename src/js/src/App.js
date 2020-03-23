@@ -14,7 +14,8 @@ import AppContextProvider from './context/AppContextProvider';
 import { Modal, Row, Col } from 'antd';
 import {
   LoginOutlined,
-  UserOutlined
+  UserOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
@@ -24,17 +25,10 @@ import LogoutPage from './page/Logout.page';
 
 const AuthRoute = ({ component: Component, ...rest }) => {
 
-  const appContext = useContext(AppContext);
-  const { state, dispatch: appContextDispatch } = appContext;
-
-  useEffect(() => {
-
-    // appContextDispatch({ type: 'CHECK_AUTH' });
-
-  }, []);
+  const authenticated = auth.isAuthenticated();
 
   return <Route {...rest} render={props => (
-    auth.isAuthenticated() ?
+    authenticated ?
       (
         <Component {...props} />
       ) : (
@@ -76,16 +70,34 @@ const App = (props) => {
       });
   }
 
-  const getIcon = () => {
+  const getHeader = () => {
 
     if (auth.isAuthenticated()) {
       return (
-        <Link to="/user">
-          <UserOutlined style={{ fontSize: '16px', marginTop: '7px' }} />
-        </Link>
+        <Row>
+          <Col span={4}>
+            <Link to='/clubs'>
+              <h3>GYM TIME</h3>
+            </Link>
+          </Col>
+          <Col span={1} offset={6}>
+            <SettingOutlined style={{ fontSize: '16px', marginTop: '7px' }} />
+          </Col>
+        </Row>
       );
     } else {
-      return <LoginOutlined onClick={() => openLoginModal()} style={{ fontSize: '16px', marginTop: '7px' }} />;
+      return (
+        <Row>
+          <Col span={8} offset={9}>
+            <Link to='/clubs'>
+              <h3>GYM TIME</h3>
+            </Link>
+          </Col>
+          <Col span={1} offset={6}>
+            <LoginOutlined onClick={() => openLoginModal()} style={{ fontSize: '16px', marginTop: '7px' }} />
+          </Col>
+        </Row>
+      );
     }
   }
 
@@ -123,7 +135,7 @@ const App = (props) => {
 
   useEffect(() => {
 
-    if(!state.nearClubs || state.nearClubs.length === 0){
+    if (!state.nearClubs || state.nearClubs.length === 0) {
       fetchingClubs();
     }
 
@@ -158,7 +170,7 @@ const App = (props) => {
       <LoginModal
         visible={loginModalVisible}
         onSuccess={() => {
-        
+
           closeLoginModal();
 
         }}
@@ -179,16 +191,7 @@ const App = (props) => {
         <div className="App">
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
-          <Row>
-            <Col span={8} offset={8}>
-              <Link to='/clubs'>
-                <h2>GYM TIME</h2>
-              </Link>
-            </Col>
-            <Col span={2} offset={6}>
-              {getIcon()}
-            </Col>
-          </Row>
+          {getHeader()}
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path={['', "/clubs"]}>

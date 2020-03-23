@@ -55,8 +55,6 @@ export const appContextReducer = (state, action) => {
             //     console.log(`Decode token ${token} error` , e);
             // }
 
-            break;
-
         case 'LOGIN':
             state = { ...state, isAuthenticated: true, jwt: action.payload };
 

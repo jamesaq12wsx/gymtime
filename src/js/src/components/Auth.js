@@ -1,5 +1,6 @@
 import { login, checkToken } from '../api/client';
 import decode from 'jwt-decode';
+import { wait } from '@testing-library/react';
 
 class Auth {
 
@@ -21,7 +22,9 @@ class Auth {
 
                 localStorage.setItem('jwtToken', token);
 
-                cb();
+                if(cb){
+                    cb();
+                }
 
             })
             .catch(err => {
@@ -35,6 +38,8 @@ class Auth {
 
     logout(cb) {
 
+        console.log('logout');
+
         localStorage.setItem('jwtToken', '');
 
         if(cb){
@@ -43,45 +48,67 @@ class Auth {
 
     }
 
+    getToken() {
+        return localStorage.getItem('jwtToken');
+    }
+
     isAuthenticated() {
 
-        console.log('IsAuthenticated');
+        const token = localStorage.getItem('jwtToken') || '';
 
-        const token = localStorage.getItem('jwtToken');
+        if(token === ''){
+            localStorage.setItem('jwtToken', '');
+
+            return false;
+        }
 
         try {
             const payload = decode(token);
 
             if (payload.exp < new Date().getTime() / 1000) {
 
+                console.log('token expire', payload);
+
                 this.authenticated = false;
 
                 this.jwtToken = '';
 
                 localStorage.setItem('jwtToken', '');
+
             }else{
 
                 let authenticated = checkToken(token);
 
+                console.log('check token from server', authenticated);
+
                 if(authenticated){
+
                    this.authenticated = true;
                    
                    return true;
+
                 }else{
+                    
                     localStorage.setItem('jwtToken', '');
 
                     this.authenticated = false;
+
+                    return false;
 
                 }
 
             }
 
-            return this.authenticated;
-
         }catch(e) {
+            
             localStorage.setItem('jwtToken', '');
+
+            this.authenticated = false;
+
             return false;
+
         }
+        
     }
 
 }

@@ -1,4 +1,5 @@
 import fetch from 'unfetch';
+import { wait } from '@testing-library/react';
 
 const apiRoot = '/api/v1';
 
@@ -25,7 +26,7 @@ export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/loc
 
 export const getClubDetail = (uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
 
-export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`);
+export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`).then(checkStatus);
 
 export const login = (values) => fetch(
     '/login',
@@ -39,14 +40,16 @@ export const login = (values) => fetch(
 ).then(checkStatus);
 
 export const checkToken = async (token) => {
-    let response = await fetch(apiRoot+'/auth/check', {
+    let response = await fetch(apiRoot + '/auth/check', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
     });
 
-    return response.status === 200;
-};
+    console.log('checkToken', response);
+
+    return response.status === 200 ? true : false;
+}
 
 // export const getStudentCourses = studentId => fetch(`/api/students/${studentId}/courses`).then(checkStatus);
 
