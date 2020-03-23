@@ -38,6 +38,16 @@ export const login = (values) => fetch(
     }
 ).then(checkStatus);
 
+export const checkToken = async (token) => {
+    let response = await fetch(apiRoot+'/auth/check', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    return response.status === 200;
+};
+
 // export const getStudentCourses = studentId => fetch(`/api/students/${studentId}/courses`).then(checkStatus);
 
 // export const addNewStudent = student => 

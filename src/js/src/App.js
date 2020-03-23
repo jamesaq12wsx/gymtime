@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, Component, useCallback } from 'react';
 import './App.css';
 import Container from './components/Container';
 import { getAllClubs, getAllClubsWithLocation } from './api/client';
@@ -6,7 +6,7 @@ import ClubList from './components/list/ClubList';
 import LoadingList from './components/list/LoadingList';
 import 'antd/dist/antd.css';
 import { successNotification, errorNotification } from './components/Notification';
-import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Link, useHistory, Redirect } from "react-router-dom";
 import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
@@ -18,6 +18,36 @@ import {
 } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
+import Login from './page/Login';
+import auth from './components/Auth';
+import LogoutPage from './page/Logout.page';
+
+const AuthRoute = ({ component: Component, ...rest }) => {
+
+  const appContext = useContext(AppContext);
+  const { state, dispatch: appContextDispatch } = appContext;
+
+  useEffect(() => {
+
+    // appContextDispatch({ type: 'CHECK_AUTH' });
+
+  }, []);
+
+  return <Route {...rest} render={props => (
+    auth.isAuthenticated() ?
+      (
+        <Component {...props} />
+      ) : (
+        <Redirect
+          to={{
+            pathname: '/login',
+            state: {
+              from: props.location
+            }
+          }} />)
+  )}
+  />;
+}
 
 const App = (props) => {
 
@@ -48,12 +78,10 @@ const App = (props) => {
 
   const getIcon = () => {
 
-    const {login} = state;
-
-    if (login) {
+    if (auth.isAuthenticated()) {
       return (
         <Link to="/user">
-          <UserOutlined style={{ fontSize: '16px', marginTop: '7px', color: '#FFF' }} />
+          <UserOutlined style={{ fontSize: '16px', marginTop: '7px' }} />
         </Link>
       );
     } else {
@@ -94,10 +122,12 @@ const App = (props) => {
   }
 
   useEffect(() => {
-    console.log('useEffect');
 
-    fetchingClubs();
-  }, []);
+    if(!state.nearClubs || state.nearClubs.length === 0){
+      fetchingClubs();
+    }
+
+  }, [state.nearClubs]);
 
   const listMarkOnClickHandler = (e, club) => {
     // console.log(`打卡 ${clubUuid}`);
@@ -127,11 +157,8 @@ const App = (props) => {
       </div> */}
       <LoginModal
         visible={loginModalVisible}
-        onSuccess={(res) => {
-          const token = res.headers.get('Authorization').slice(7);
-
-          dispatch({ type: 'LOGIN', value: token });
-
+        onSuccess={() => {
+        
           closeLoginModal();
 
         }}
@@ -163,13 +190,14 @@ const App = (props) => {
             </Col>
           </Row>
           <Switch>
-            <Route path="/clubs">
+            <Route exact path="/login" component={Login} />
+            <Route exact path={['', "/clubs"]}>
               <Clubs fetching={fetching} clubs={clubs} markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander} />
             </Route>
-            <Route path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
-            <Route path={`/user`}>
-              <User />
-            </Route>
+            <Route exact path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
+            <AuthRoute path='/user' component={User} />
+            <AuthRoute exact path='/logout' component={LogoutPage} />
+            <Route path="*" component={() => "404 NOT FOUND"} />
           </Switch>
         </div>
       </Router>

@@ -2,6 +2,7 @@ import React, {useContext} from 'react';
 import { Button, Input, Tag, Row, Col } from 'antd';
 import { Formik } from 'formik';
 import { login } from '../../api/client';
+import auth from '../Auth';
 
 const inputBottomStyle = { marginBottom: '5px' };
 
@@ -30,30 +31,36 @@ const LoginForm = (props) => {
 
                 console.log("Login", values);
 
-                login(values)
-                    .then(res => {
-                        // console.log(res.headers);
+                auth.login(values, () => {
+                    setSubmitting(false);
+                    props.onSuccess()
+                }, (err) => {
+                    setSubmitting(false);
+                    props.onFailure(err)
+                })
+                    // .then(res => {
+                    //     // console.log(res.headers);
 
-                        // console.log(res.headers.get("Authorization"));
+                    //     // console.log(res.headers.get("Authorization"));
 
-                        // dispatch({
-                        //     type: 'LOGIN',
-                        //     {
-                        //         jwt: res.headers.get("Authorization")
-                        //     }
-                        // })
+                    //     // dispatch({
+                    //     //     type: 'LOGIN',
+                    //     //     {
+                    //     //         jwt: res.headers.get("Authorization")
+                    //     //     }
+                    //     // })
 
-                        props.onSuccess(res);
+                    //     props.onSuccess(res);
 
-                    })
-                    .catch((err) => {
-                        console.error(err);
+                    // })
+                    // .catch((err) => {
+                    //     console.error(err);
 
-                        props.onFailure(err);
-                    })
-                    .finally(() => {
-                        setSubmitting(false);
-                    });
+                    //     props.onFailure(err);
+                    // })
+                    // .finally(() => {
+                    //     setSubmitting(false);
+                    // });
 
                 // TODO:
                 // login(values)
