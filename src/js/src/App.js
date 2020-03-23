@@ -16,19 +16,21 @@ import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons'
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
 import Login from './page/Login';
-import auth from './components/Auth';
 import LogoutPage from './page/Logout.page';
 import { FaRunning, FaUserFriends } from "react-icons/fa";
 import { IoIosFitness } from "react-icons/io";
 import NavBarIcon from './components/NavBarIcon';
+import { appContextReducer } from './reducer/appContextReducer';
 
 
 const AuthRoute = ({ component: Component, ...rest }) => {
 
-  const authenticated = auth.isAuthenticated();
+  const appContext = useContext(AppContext);
+
+  const {state} = appContext;
 
   return <Route {...rest} render={props => (
-    authenticated ?
+    state.authenticated ?
       (
         <Component {...props} />
       ) : (
@@ -48,6 +50,8 @@ const App = (props) => {
   const appContext = useContext(AppContext);
   const { state, dispatch } = appContext;
 
+  const {auth, authenticated} = state;
+
   const [fetching, setFetching] = useState(false);
   const [clubs, setClubs] = useState([]);
   const [location, setLocation] = useState({ lat: null, lon: null });
@@ -60,6 +64,14 @@ const App = (props) => {
 
   const openSideBar = () => setSettingSideBarVisible(true);
   const closeSideBar = () => setSettingSideBarVisible(false);
+
+  useEffect(() => {
+
+    if(auth.isAuthenticated()){
+      dispatch({type:'LOGIN', payload: auth.getToken()});
+    }
+
+  }, []);
 
   const positionHandler = (position) => {
 
@@ -84,7 +96,7 @@ const App = (props) => {
 
   const getHeaderItems = () => {
 
-    if (auth.isAuthenticated()) {
+    if (authenticated) {
       return (
         <Row>
           <Col span={4}>
@@ -220,15 +232,19 @@ const App = (props) => {
         <p>Some contents...</p>
         <p>Some contents...</p>
         <p>Gym Time V 1.0.0</p>
-        <Button danger >Logout</Button>
+        <Button danger onClick={() => {
+          auth.logout(() => {
+            dispatch({type:'LOGOUT'});
+            closeSideBar();
+          });
+        }} >Logout</Button>
       </Drawer>
 
       <LoginModal
         visible={loginModalVisible}
         onSuccess={() => {
-
           closeLoginModal();
-
+          successNotification('Login Success');
         }}
         onFailure={(err) => {
 

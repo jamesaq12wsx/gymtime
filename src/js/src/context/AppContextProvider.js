@@ -9,10 +9,10 @@ export const AppContext = React.createContext();
 
 const AppContextProvider = (props) => {
 
-    const authenticated = auth.isAuthenticated();
-
     const initAppState = {
-        authenticated: authenticated,
+        auth: auth,
+        authenticated: false,
+        jwtToken: '',
         user: {}
     };
 

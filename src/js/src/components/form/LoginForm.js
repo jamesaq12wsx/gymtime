@@ -1,14 +1,16 @@
 import React, {useContext} from 'react';
 import { Button, Input, Tag, Row, Col } from 'antd';
 import { Formik } from 'formik';
-import { login } from '../../api/client';
-import auth from '../Auth';
+import { AppContext } from '../../context/AppContextProvider';
 
 const inputBottomStyle = { marginBottom: '5px' };
 
 const errorTagStyle = { backgroundColor: '#fc88a1', color: 'white', ...inputBottomStyle };
 
 const LoginForm = (props) => {
+
+    const appContext = useContext(AppContext);
+    const {state, dispatch} = appContext;
 
     return (
         <Formik
@@ -31,51 +33,19 @@ const LoginForm = (props) => {
 
                 console.log("Login", values);
 
-                auth.login(values, () => {
+                const {auth} = state;
+
+                auth.login(values, (token) => {
                     setSubmitting(false);
+
+                    dispatch({type:'LOGIN', payload: token});
+
                     props.onSuccess()
                 }, (err) => {
                     setSubmitting(false);
                     props.onFailure(err)
-                })
-                    // .then(res => {
-                    //     // console.log(res.headers);
+                });
 
-                    //     // console.log(res.headers.get("Authorization"));
-
-                    //     // dispatch({
-                    //     //     type: 'LOGIN',
-                    //     //     {
-                    //     //         jwt: res.headers.get("Authorization")
-                    //     //     }
-                    //     // })
-
-                    //     props.onSuccess(res);
-
-                    // })
-                    // .catch((err) => {
-                    //     console.error(err);
-
-                    //     props.onFailure(err);
-                    // })
-                    // .finally(() => {
-                    //     setSubmitting(false);
-                    // });
-
-                // TODO:
-                // login(values)
-                //     .then((res) => {
-                //         console.log(res);
-
-                //         props.onSuccess();
-
-                //     })
-                //     .catch((err) => {
-                //         props.onFailure(err);
-                //     })
-                //     .finally(() => {
-                //         setSubmitting(false);
-                //     });
             }}
         >
             {({

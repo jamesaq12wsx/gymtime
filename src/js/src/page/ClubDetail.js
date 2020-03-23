@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import EmptyBar from '../components/chart/EmptyBar';
 import SimpleMap from '../components/SimpleMap';
 import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button } from 'antd';
-import { getClubDetail, getClubPosts } from '../api/client';
+import { getClubDetail, getClubDetailWithToken, getClubPosts } from '../api/client';
 import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined } from '@ant-design/icons';
 import PostChart from '../components/chart/PostChart';
+import { AppContext } from '../context/AppContextProvider';
+import { appContextReducer } from '../reducer/appContextReducer';
 
 const { Meta } = Card;
 
@@ -35,9 +37,9 @@ const getDate = (number, add) => {
 
     if (add) {
         d = new Date(new Date().setDate(today.getDate() + number));
-      } else {
+    } else {
         d = new Date(new Date().setDate(today.getDate() - number));
-      }
+    }
 
     let year = appendFront(4, d.getFullYear());
     let month = appendFront(2, d.getMonth() + 1);
@@ -59,6 +61,10 @@ const appendFront = (len, val) => {
 
 const ClubDetail = (props) => {
 
+    const appContext = useContext(AppContext);
+    const {state, dispatch} = appContext;
+    const {authenticated} = state; 
+
     const { clubUuid } = props.match.params
     const { currentPosition } = props;
 
@@ -76,6 +82,12 @@ const ClubDetail = (props) => {
         if (clubUuid) {
 
             setFetchingChartData(true);
+
+            // if(auth.isAuthenticated()){
+            //     getClubDetailWithToken(auth.getToken(), clubUuid).then(r => r.json()).then(club => setClub(club));
+            // }else{
+                
+            // }
 
             getClubDetail(clubUuid).then(r => r.json()).then(club => setClub(club));
 
@@ -105,7 +117,7 @@ const ClubDetail = (props) => {
             <List.Item>
                 <PostChart today={posts} lastWeek={lastWeekPosts} />
 
-                <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>Exercise</Button>
+                {getPostExerciseButton()}
 
             </List.Item>
         )
@@ -114,6 +126,14 @@ const ClubDetail = (props) => {
 
     const markOnClick = () => {
         console.log(`mark ${clubUuid}`);
+    }
+
+    const getPostExerciseButton = () => {
+        return (
+            authenticated ?
+                <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>Exercise</Button> :
+                <React.Fragment />
+        );
     }
 
     const getLocationListItem = () => {

@@ -1,5 +1,4 @@
 import fetch from 'unfetch';
-import { wait } from '@testing-library/react';
 
 const apiRoot = '/api/v1';
 
@@ -25,6 +24,8 @@ export const getAllClubs = () => fetch(apiRoot + '/clubs').then(checkStatus);
 export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/location?lat=${lat}&lon=${lon}`).then(checkStatus);
 
 export const getClubDetail = (uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
+
+export const getClubDetailWithToken = (token, uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
 
 export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`).then(checkStatus);
 

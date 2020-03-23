@@ -24,7 +24,7 @@ class Auth {
                 localStorage.setItem('jwtToken', token);
 
                 if(cb){
-                    cb();
+                    cb(token);
                 }
 
             })
