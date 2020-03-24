@@ -2,17 +2,15 @@ package com.jamesaq12wsx.gymtime.database;
 
 import com.jamesaq12wsx.gymtime.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.sql.Array;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Repository
 public class FitnessClubDaoImpl implements FitnessClubDao {
@@ -94,8 +92,38 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
 
         return jdbcTemplate.queryForObject(
                 sql,
-                new Object[] {clubUuid.toString()},
+                new Object[]{clubUuid.toString()},
                 Boolean.class);
+    }
+
+    @Override
+    public Optional<FitnessClub> getClubWithUserPost(UUID clubUuid, String username) throws SQLException {
+        String getClubDetailSql = "select *, fb.name as brand_name, c.name as country_name\n" +
+                "from fitness_club\n" +
+                "join fitness_brand as fb on fitness_club.club_brand = fb.id\n" +
+                "join country as c on c.id = fb.country\n" +
+                "where club_uid = ?::uuid";
+
+        FitnessClub result = jdbcTemplate.queryForObject(getClubDetailSql,
+                new Object[]{clubUuid.toString()},
+                mapFitnessClubsFromDb());
+
+        String getUserPostTimeSql = "select ep.post_time from fitness_club\n" +
+                "         join exercise_post ep on fitness_club.club_uid = ep.location\n" +
+                "where club_uid = ?::uuid and ep.username = ?\n" +
+                "    order by post_time desc\n" +
+                "limit 5;";
+
+        List<LocalDateTime> postTimes = jdbcTemplate.query(getUserPostTimeSql, new Object[]{clubUuid.toString(), username},
+                ((resultSet, i) -> {
+
+                    return resultSet.getTimestamp("post_time").toLocalDateTime();
+
+                }));
+
+        ((SimpleFitnessClubWithUserPost) result).setPostDataTimeList(postTimes);
+
+        return Optional.ofNullable(result);
     }
 
     public Optional<FitnessClub> getFitnessByUuid(UUID uuid) {
@@ -137,7 +165,7 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
 
             Map<String, String> openHours = (Map<String, String>) resultSet.getObject("open_hours");
 
-            return new SimpleFitnessClub(clubUid, brandId, brandName, name, id, latitude, longitude, address, city, state, zipCode, countryName, homeUrl, openHours);
+            return new SimpleFitnessClubWithUserPost(clubUid, brandId, brandName, name, id, latitude, longitude, address, city, state, zipCode, countryName, homeUrl, openHours, null);
         };
     }
 

@@ -47,7 +47,7 @@ public class FitnessClubController {
 
     @GetMapping("/club/{uuid}")
     public FitnessClub getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
-        return fitnessClubService.getFitnessDetail(uuid);
+        return fitnessClubService.getFitnessDetail(uuid, principal);
     }
 
     @GetMapping("/club/{clubUuid}/posts")
