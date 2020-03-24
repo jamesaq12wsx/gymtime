@@ -36,6 +36,7 @@ const LoginForm = (props) => {
                 const {auth} = state;
 
                 auth.login(values, (token) => {
+                    
                     setSubmitting(false);
 
                     dispatch({type:'LOGIN', payload: token});

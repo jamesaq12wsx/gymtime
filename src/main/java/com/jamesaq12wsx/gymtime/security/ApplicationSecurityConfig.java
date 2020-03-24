@@ -52,13 +52,12 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
                 .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig), JwtAuthenticationFilter.class)
-                .antMatcher("/**")
-                .authorizeRequests()
+                .antMatcher("/**").authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/v1/clubs/**").permitAll()
                 .antMatchers("/api/v1/auth/check").hasAuthority("user:read")
                 .antMatchers("/api/v1/auth/signup").permitAll()
-                .antMatchers("/api/**").hasRole(USER.name())
+//                .antMatchers("/api/**").hasRole(USER.name())
                 .anyRequest()
                 .authenticated();
     }

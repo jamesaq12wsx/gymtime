@@ -11,14 +11,14 @@ const PostChart = (props) => {
 
     const { today, lastWeek } = props;
 
-    console.log(today.sort((a,b) => {
-        if(new Date(a.dateTime) < new Date(b.dateTime)){
-            return -1;
-        }else if(new Date(a.dateTime) > new Date(b.dateTime)){
-            return 1;
-        }
-        return 0;
-    }));
+    // console.log(today.sort((a,b) => {
+    //     if(new Date(a.dateTime) < new Date(b.dateTime)){
+    //         return -1;
+    //     }else if(new Date(a.dateTime) > new Date(b.dateTime)){
+    //         return 1;
+    //     }
+    //     return 0;
+    // }));
 
     const chartSet = {
         labels: hours,
@@ -66,7 +66,7 @@ const PostChart = (props) => {
             title: {
                 display: true,
                 text: `People Workout Today`,
-                fontSize: 20
+                fontSize: 16
             },
             elements: {
                 point: {
@@ -76,9 +76,9 @@ const PostChart = (props) => {
             scales: {
                 yAxes: [{
                     ticks: {
-                        max: 400,
+                        max: 200,
                         min: 0,
-                        stepSize: 10
+                        // stepSize: 10
                     }
                 }]
             }

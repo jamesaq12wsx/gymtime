@@ -6,7 +6,7 @@ export const appContextReducer = (state, action) => {
 
         case 'LOGIN':
             
-            const {jwtToken} = action.payload;
+            const jwtToken = action.payload;
 
             state = {...state, authenticated: true, jwtToken: jwtToken};
 
@@ -17,6 +17,13 @@ export const appContextReducer = (state, action) => {
             state = {...state, authenticated: false, jwtToken: ''};
             
             break;
+
+        case 'SET_LOCATION':
+
+            state = {...state, ...action.payload};
+
+            break;
+
     }
 
     return state;

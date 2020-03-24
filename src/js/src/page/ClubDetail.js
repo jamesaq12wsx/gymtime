@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import EmptyBar from '../components/chart/EmptyBar';
 import SimpleMap from '../components/SimpleMap';
 import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button } from 'antd';
-import { getClubDetail, getClubDetailWithToken, getClubPosts } from '../api/client';
+import { getClubDetailWithToken, getClubPosts } from '../api/client';
 import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined } from '@ant-design/icons';
 import PostChart from '../components/chart/PostChart';
 import { AppContext } from '../context/AppContextProvider';
 import { appContextReducer } from '../reducer/appContextReducer';
+import {quickPost} from '../api/client';
+import { successNotification, errorNotification } from '../components/Notification';
 
 const { Meta } = Card;
 
@@ -29,16 +31,14 @@ const weekday = {
 //     return `${year}-${month}-${date}`;
 // }
 
-const getDate = (number, add) => {
-
-    let today = new Date();
+const getDate = (originalD, number, add) => {
 
     let d;
 
     if (add) {
-        d = new Date(new Date().setDate(today.getDate() + number));
+        d = new Date(new Date().setDate(originalD.getDate() + number));
     } else {
-        d = new Date(new Date().setDate(today.getDate() - number));
+        d = new Date(new Date().setDate(originalD.getDate() - number));
     }
 
     let year = appendFront(4, d.getFullYear());
@@ -62,8 +62,8 @@ const appendFront = (len, val) => {
 const ClubDetail = (props) => {
 
     const appContext = useContext(AppContext);
-    const {state, dispatch} = appContext;
-    const {authenticated} = state; 
+    const { state, dispatch } = appContext;
+    const { authenticated, jwtToken } = state;
 
     const { clubUuid } = props.match.params
     const { currentPosition } = props;
@@ -73,32 +73,59 @@ const ClubDetail = (props) => {
     const [posts, setPosts] = useState([]);
     const [lastWeekPosts, setLastWeekPosts] = useState([]);
 
-    console.log('Club Detail', clubUuid);
-
-    console.log('current position', currentPosition);
-
-    useEffect(() => {
-
+    const fetchClub =() => {
         if (clubUuid) {
 
             setFetchingChartData(true);
 
-            // if(auth.isAuthenticated()){
-            //     getClubDetailWithToken(auth.getToken(), clubUuid).then(r => r.json()).then(club => setClub(club));
-            // }else{
-                
-            // }
+            console.log('club detail auth', authenticated);
 
-            getClubDetail(clubUuid).then(r => r.json()).then(club => setClub(club));
+            if (authenticated) {
+                getClubDetailWithToken(clubUuid, jwtToken).then(r => r.json()).then(club => setClub(club));
+            } else {
+                getClubDetailWithToken(clubUuid).then(r => r.json()).then(club => setClub(club));
+            }
 
-            getClubPosts(clubUuid, getDate(0, false)).then(r => r.json()).then(posts => setPosts(posts));
+            getClubPosts(clubUuid, getDate(new Date(), 0, false)).then(r => r.json()).then(posts => setPosts(posts));
 
-            getClubPosts(clubUuid, getDate(7, false)).then(r => r.json()).then(posts => setLastWeekPosts(posts));
+            getClubPosts(clubUuid, getDate(new Date(), 7, false)).then(r => r.json()).then(posts => setLastWeekPosts(posts));
 
             setFetchingChartData(false);
         }
+    }
 
-    }, []);
+    useEffect(() => {
+
+        fetchClub();
+
+    }, [authenticated]);
+
+    const getQuickPostButton = () => {
+        const { postDateTimeList } = club;
+
+        if (postDateTimeList && postDateTimeList.length != 0) {
+            const lastDay = new Date(postDateTimeList[0]);
+            const today = new Date();
+
+            if (getDate(lastDay,0,null) === getDate(today,0,null)) {
+                return (
+                    <Button shape="round" size="medium" disabled>Exercise(Posted Today)</Button>
+                );
+            }else{
+                return (
+                    <Button onClick={markOnClick} type="primary" shape="round" size="medium">
+                Exercise
+            </Button>
+                );
+            }
+        }else{
+            return (
+                <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>
+                    Exercise
+                </Button>
+            );
+        }
+    }
 
     const getMarksChart = () => {
         if (posts.length == 0) {
@@ -106,9 +133,7 @@ const ClubDetail = (props) => {
                 <List.Item>
                     <EmptyBar />
 
-                    <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>
-                        Exercise
-                    </Button>
+                    {getQuickPostButton()}
                 </List.Item>
             );
         }
@@ -117,7 +142,7 @@ const ClubDetail = (props) => {
             <List.Item>
                 <PostChart today={posts} lastWeek={lastWeekPosts} />
 
-                {getPostExerciseButton()}
+                {getQuickPostButton()}
 
             </List.Item>
         )
@@ -126,14 +151,15 @@ const ClubDetail = (props) => {
 
     const markOnClick = () => {
         console.log(`mark ${clubUuid}`);
-    }
 
-    const getPostExerciseButton = () => {
-        return (
-            authenticated ?
-                <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>Exercise</Button> :
-                <React.Fragment />
-        );
+        quickPost(clubUuid, jwtToken)
+            .then(res => {
+                successNotification('Post Success','You have post an exercise');
+                fetchClub();
+            })
+            .catch(err => {
+                errorNotification('Post Fail', err.message);
+            });
     }
 
     const getLocationListItem = () => {

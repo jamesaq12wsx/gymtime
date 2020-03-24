@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Array;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -108,20 +107,21 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
                 new Object[]{clubUuid.toString()},
                 mapFitnessClubsFromDb());
 
-        String getUserPostTimeSql = "select ep.post_time from fitness_club\n" +
+        String getUserPostTimeSql = "select date(post_time) as date from fitness_club\n" +
                 "         join exercise_post ep on fitness_club.club_uid = ep.location\n" +
-                "where club_uid = ?::uuid and ep.username = ?\n" +
-                "    order by post_time desc\n" +
-                "limit 5;";
+                "where club_uid = ?::uuid and ep.username = ?" +
+                "group by date\n" +
+                "    order by date desc\n" +
+                "limit 5";
 
         List<LocalDateTime> postTimes = jdbcTemplate.query(getUserPostTimeSql, new Object[]{clubUuid.toString(), username},
                 ((resultSet, i) -> {
 
-                    return resultSet.getTimestamp("post_time").toLocalDateTime();
+                    return resultSet.getTimestamp("date").toLocalDateTime();
 
                 }));
 
-        ((SimpleFitnessClubWithUserPost) result).setPostDataTimeList(postTimes);
+        ((SimpleFitnessClubWithUserPost) result).setPostDateTimeList(postTimes);
 
         return Optional.ofNullable(result);
     }

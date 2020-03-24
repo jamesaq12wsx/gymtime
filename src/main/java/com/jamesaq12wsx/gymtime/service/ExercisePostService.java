@@ -40,6 +40,10 @@ public class ExercisePostService {
 
     public void newPost(PostRequest mark, Principal principal) {
 
+        if (!fitnessClubDao.exist(mark.getClubUuid())){
+            throw new ApiRequestException(String.format("This club id %s is not exist", mark.getClubUuid()));
+        }
+
         exercisePostDao.save(new ExercisePost(null, principal.getName(), LocalDateTime.now(), mark.getPrivacy() == null ? PostPrivacy.PRIVATE : mark.getPrivacy(), mark.getClubUuid(), mark.getExercises()));
     }
 

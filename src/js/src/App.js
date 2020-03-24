@@ -20,7 +20,7 @@ import LogoutPage from './page/Logout.page';
 import { FaRunning, FaUserFriends } from "react-icons/fa";
 import { IoIosFitness } from "react-icons/io";
 import NavBarIcon from './components/NavBarIcon';
-import { appContextReducer } from './reducer/appContextReducer';
+import {ClubContext} from './context/ClubContextProvider';
 
 
 const AuthRoute = ({ component: Component, ...rest }) => {
@@ -48,9 +48,12 @@ const AuthRoute = ({ component: Component, ...rest }) => {
 const App = (props) => {
 
   const appContext = useContext(AppContext);
-  const { state, dispatch } = appContext;
+  const clubContext = useContext(ClubContext);
 
-  const {auth, authenticated} = state;
+  const { state: appState, dispatch: appDispatch } = appContext;
+  const { state: clubState, dispatch: clubDispatch } = clubContext;
+
+  const {auth, authenticated} = appState;
 
   const [fetching, setFetching] = useState(false);
   const [clubs, setClubs] = useState([]);
@@ -68,19 +71,31 @@ const App = (props) => {
   useEffect(() => {
 
     if(auth.isAuthenticated()){
-      dispatch({type:'LOGIN', payload: auth.getToken()});
+      appDispatch({type:'LOGIN', payload: auth.getToken()});
     }
 
   }, []);
+
+  useEffect(() => {
+
+    if (!clubState.nearClubs || clubState.nearClubs.length === 0) {
+      fetchingClubs();
+    }
+
+  }, [clubState.nearClubs]);
 
   const positionHandler = (position) => {
 
     setLocation({ ...location, lat: position.coords.latitude, lon: position.coords.longitude });
 
+    appDispatch({type:'NEW_LOCATION', payload: {lat: position.coords.latitude, lng: position.coords.longitude}});
+
     getAllClubsWithLocation(position.coords.latitude, position.coords.longitude)
       .then(r => r.json())
       .then(clubs => {
         setClubs(clubs);
+
+        clubDispatch({type: 'FETCHED_NEAR_CLUBS', payload: clubs});
       }).finally(() => {
         setFetching(false);
       });
@@ -101,7 +116,7 @@ const App = (props) => {
         <Row>
           <Col span={4}>
             <Link to='/clubs'>
-              <h3>GYM TIME</h3>
+              <h4>GymTime</h4>
             </Link>
           </Col>
           <Col
@@ -179,21 +194,15 @@ const App = (props) => {
 
   const fetchingClubs = () => {
 
-    setFetching(true);
+    // setFetching(true);
+
+    clubDispatch({type:'FETCHING_NEAR_CLUBS'});
 
     getLocation(positionHandler, positionErrorHandler);
 
     setFetching(false);
 
   }
-
-  useEffect(() => {
-
-    if (!state.nearClubs || state.nearClubs.length === 0) {
-      fetchingClubs();
-    }
-
-  }, [state.nearClubs]);
 
   const listMarkOnClickHandler = (e, club) => {
     // console.log(`打卡 ${clubUuid}`);
@@ -234,7 +243,7 @@ const App = (props) => {
         <p>Gym Time V 1.0.0</p>
         <Button danger onClick={() => {
           auth.logout(() => {
-            dispatch({type:'LOGOUT'});
+            appDispatch({type:'LOGOUT'});
             closeSideBar();
           });
         }} >Logout</Button>

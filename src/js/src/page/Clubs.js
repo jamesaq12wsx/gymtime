@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
 import LoadingList from '../components/list/LoadingList';
 import ClubList from '../components/list/ClubList';
 import { useHistory } from 'react-router-dom';
+import { ClubContext } from '../context/ClubContextProvider';
 
-const Clubs = ({ fetching, clubs, markOnClick, detailOnClick }) => {
+const Clubs = ({ markOnClick, detailOnClick }) => {
 
     let history = useHistory();
+
+    const clubContext = useContext(ClubContext);
+    const {state, dispatch} = clubContext;
+
+    const {fetching, nearClubs} = state;
 
     const markOnClickHander =(e, club) => {
         console.log(e);
@@ -28,7 +34,7 @@ const Clubs = ({ fetching, clubs, markOnClick, detailOnClick }) => {
         };
 
         return (
-            <ClubList clubs={clubs} markOnClick={markOnClick} detailOnClick={detailOnClickHandler} />
+            <ClubList clubs={nearClubs} markOnClick={markOnClick} detailOnClick={detailOnClickHandler} />
         );
     }
 

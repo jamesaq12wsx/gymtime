@@ -1,6 +1,7 @@
 package com.jamesaq12wsx.gymtime.jwt;
 
 import com.google.common.base.Strings;
+import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -39,6 +40,15 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 //        String secretKey = jwtConfig.getSecretKey();
 
         if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(jwtConfig.getTokenPrefix())){
+
+//            Authentication authentication = new UsernamePasswordAuthenticationToken(
+//                    "anonymous",
+//                    null,
+//                    ApplicationUserRole.ANONYMOUS.getGrantedAuthorities()
+//
+//            );
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+
             filterChain.doFilter(request, response);
             return;
         }

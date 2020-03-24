@@ -4,10 +4,13 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import AppContextProvider from './context/AppContextProvider';
+import ClubContextProvider from './context/ClubContextProvider';
 
 ReactDOM.render(
     <AppContextProvider>
-        <App />
+        <ClubContextProvider>
+            <App />
+        </ClubContextProvider>
     </AppContextProvider>
     , document.getElementById('root'));
 
