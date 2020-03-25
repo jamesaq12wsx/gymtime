@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Badge, Select, Radio, Col, Row, Button } from 'antd';
+import { Calendar, Badge, Select, Radio, Col, Row, Button, Card, Descriptions } from 'antd';
 import moment from 'moment';
 import { getUserYearPost } from '../api/client';
 import { errorNotification } from '../components/Notification';
+import { EditOutlined, DeleteOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
+import './UserPost.page.css';
+import CardList from '../components/CardList';
 
 const { Group, Button: RadioButton } = Radio;
+const { Meta } = Card;
+
 
 function onPanelChange(value, mode) {
     console.log(value, mode);
@@ -15,21 +20,36 @@ const UserPost = () => {
     const [today, setToday] = useState(moment())
     const [selectedDate, setSelectedDate] = useState(moment());
     const [posts, setPosts] = useState([]);
+    const [selectedDatePosts, setSelectedDatePosts] = useState([]);
 
     useEffect(() => {
         getUserYearPost(moment().format('YYYY'))
             .then(res => res.json())
-            .then(posts => setPosts(posts))
+            .then(posts => {
+                setPosts(posts);
+                setSelectedDateHandler(selectedDate);
+            })
             .catch(err => {
                 errorNotification('Fetch Posts Error', err.message);
             });
     }, []);
 
+    // useEffect(() => {
+    //     setSelectedDatePosts(posts.filter(p => moment(p.postDate).format('YYYY-MM-dd') === selectedDate.format('YYYY-MM-dd')));
+    // }, [selectedDate]);
+
+    const setSelectedDateHandler = (date) => {
+        setSelectedDate(date);
+        const datePosts = posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === date.format('YYYY-MM-DD'));
+
+        setSelectedDatePosts(datePosts);
+    }
+
     const dateCellRender = (date) => {
 
         return (
             <React.Fragment>
-                {posts.filter(p => moment(p.postDate).format('YYYY-MM-dd') === date.format('YYYY-MM-dd')).length > 0 ?
+                {posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === date.format('YYYY-MM-DD')).length > 0 ?
                     <Badge status="warning" /> :
                     <Badge />}
             </React.Fragment>
@@ -41,9 +61,8 @@ const UserPost = () => {
         setToday(value);
     };
 
-    return (
-        <div className="user-post">
-            <h3>Daily Workout</h3>
+    const getCalendar = () => {
+        return (
             <div className="site-calendar-demo-card">
                 <Calendar
                     headerRender={({ value, type, onChange, onTypeChange }) => {
@@ -81,13 +100,17 @@ const UserPost = () => {
                             <div style={{ padding: 10 }}>
                                 {/* <div style={{ marginBottom: '10px' }}>Custom header </div> */}
                                 <Row style={{ flexWrap: 'nowrap' }} gutter={8}>
-                                    <Col style={{ flex: 'none' }}>
+                                    <Col
+                                    // style={{ flex: 'none' }}
+                                    >
                                         <Group size="small" onChange={e => onTypeChange(e.target.value)} value={type}>
                                             <RadioButton value="month">Month</RadioButton>
                                             <RadioButton value="year">Year</RadioButton>
                                         </Group>
                                     </Col>
-                                    <Col style={{ flex: 'auto' }}>
+                                    <Col
+                                    // style={{ flex: 'auto' }}
+                                    >
                                         <Select
                                             size="small"
                                             dropdownMatchSelectWidth={false}
@@ -102,7 +125,7 @@ const UserPost = () => {
                                         </Select>
                                     </Col>
                                     <Col
-                                        style={{ flex: 'auto' }}
+                                    // style={{ flex: 'auto' }}
                                     >
                                         <Select
                                             size="small"
@@ -117,7 +140,9 @@ const UserPost = () => {
                                             {monthOptions}
                                         </Select>
                                     </Col>
-                                    <Col>
+                                    <Col
+                                        style={{ flex: 'auto' }}
+                                    >
                                         <Button
                                             onClick={() => {
                                                 const newDate = selectedDate.clone().add(-1, 'month');
@@ -128,7 +153,7 @@ const UserPost = () => {
                                         >-</Button>
                                         <Button
                                             onClick={() => {
-                                                const newDate = selectedDate.clone.add(1, 'month');
+                                                const newDate = selectedDate.clone().add(1, 'month');
                                                 setToday(newDate);
                                                 setSelectedDate(newDate);
                                             }}
@@ -141,8 +166,7 @@ const UserPost = () => {
                     value={today}
                     selectedDate={selectedDate}
                     onSelect={(date) => {
-                        setSelectedDate(date);
-                        setToday(date);
+                        setSelectedDateHandler(date);
                     }}
                     onPanelChange={onPanelChange}
                     dateCellRender={dateCellRender}
@@ -150,8 +174,49 @@ const UserPost = () => {
                     onPanelChange={onPanelChange}
                 />
             </div>
+        );
+    }
+
+    const getExercises = (p) => {
+        if(p.exercises && Object.keys(p.exercises).length != 0){
+
+        const exercises = Object.keys(p.exercises).map(key => <Descriptions.Item label={key}>{p.exercises[key]}</Descriptions.Item>)
+
+            return (
+                <Descriptions title="Exercises">
+                    {exercises}
+                </Descriptions>
+            )
+        }else{
+            return(
+                <Descriptions title="No Exercises" />
+            );
+        }
+    }
+
+    const getPostCards = () => {
+        return selectedDatePosts.map(p => {
+            return (
+                <Card
+                    actions={[
+                        <DeleteOutlined key="delete" />,
+                        <EditOutlined key="edit" />,
+                    ]}
+                >
+                    <Meta title={p.clubName} description={moment(p.postTime).format('LT')} />
+                    <br />
+                    {getExercises(p)}
+                </Card>
+            )
+        })
+    }
+
+    return (
+        <div className="user-post">
+            <h3>Daily Workout</h3>
+            {getCalendar()}
             <div className="day-post">
-                {`Selected Date ${selectedDate.format()}`}
+                <CardList className="daily-post-list" cards={getPostCards()} />
             </div>
         </div>
     );

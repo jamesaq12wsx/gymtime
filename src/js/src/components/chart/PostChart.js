@@ -75,12 +75,22 @@ const PostChart = (props) => {
             },
             scales: {
                 yAxes: [{
+                    gridLines: {
+                        drawBorder: false
+                    },
                     ticks: {
                         max: 200,
                         min: 0,
                         // stepSize: 10
                     }
-                }]
+                }],
+                xAxes: [
+                    {
+                        gridLines: {
+                            display: false
+                        }
+                    }
+                ]
             }
             // legend: {
             //     display: true,
