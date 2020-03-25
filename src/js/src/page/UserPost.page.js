@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Badge, Select, Radio, Col, Row, Button } from 'antd';
 import moment from 'moment';
+import { getUserYearPost } from '../api/client';
+import { errorNotification } from '../components/Notification';
 
 const { Group, Button: RadioButton } = Radio;
 
@@ -14,10 +16,25 @@ const UserPost = () => {
     const [selectedDate, setSelectedDate] = useState(moment());
     const [posts, setPosts] = useState([]);
 
+    useEffect(() => {
+        getUserYearPost(moment().format('YYYY'))
+            .then(res => res.json())
+            .then(posts => setPosts(posts))
+            .catch(err => {
+                errorNotification('Fetch Posts Error', err.message);
+            });
+    }, []);
+
     const dateCellRender = (date) => {
+
         return (
-            <Badge status={'warning'} />
+            <React.Fragment>
+                {posts.filter(p => moment(p.postDate).format('YYYY-MM-dd') === date.format('YYYY-MM-dd')).length > 0 ?
+                    <Badge status="warning" /> :
+                    <Badge />}
+            </React.Fragment>
         );
+
     }
 
     const onPanelChange = (value) => {

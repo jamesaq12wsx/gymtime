@@ -4,7 +4,7 @@ const apiRoot = '/api/v1';
 
 const checkStatus = response => {
 
-    // console.log('checkStatus', response);
+    console.log('checkStatus', response);
 
     if (response.ok) {
         return response;
@@ -38,6 +38,12 @@ export const getClubDetailWithToken = (uuid, token) => {
 }
 
 export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`).then(checkStatus);
+
+export const getUserYearPost = (year) => fetch(apiRoot + `/post/${year}`, {
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+    }
+}).then(checkStatus);
 
 export const login = (values) => fetch(
     '/login',
