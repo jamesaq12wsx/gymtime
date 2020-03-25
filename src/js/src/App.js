@@ -20,14 +20,14 @@ import LogoutPage from './page/Logout.page';
 import { FaRunning, FaUserFriends } from "react-icons/fa";
 import { IoIosFitness } from "react-icons/io";
 import NavBarIcon from './components/NavBarIcon';
-import {ClubContext} from './context/ClubContextProvider';
+import { ClubContext } from './context/ClubContextProvider';
 
 
 const AuthRoute = ({ component: Component, ...rest }) => {
 
   const appContext = useContext(AppContext);
 
-  const {state} = appContext;
+  const { state } = appContext;
 
   return <Route {...rest} render={props => (
     state.authenticated ?
@@ -53,7 +53,7 @@ const App = (props) => {
   const { state: appState, dispatch: appDispatch } = appContext;
   const { state: clubState, dispatch: clubDispatch } = clubContext;
 
-  const {auth, authenticated} = appState;
+  const { auth, authenticated } = appState;
 
   const [fetching, setFetching] = useState(false);
   const [clubs, setClubs] = useState([]);
@@ -70,8 +70,8 @@ const App = (props) => {
 
   useEffect(() => {
 
-    if(auth.isAuthenticated()){
-      appDispatch({type:'LOGIN', payload: auth.getToken()});
+    if (auth.isAuthenticated()) {
+      appDispatch({ type: 'LOGIN', payload: auth.getToken() });
     }
 
   }, []);
@@ -88,14 +88,14 @@ const App = (props) => {
 
     setLocation({ ...location, lat: position.coords.latitude, lon: position.coords.longitude });
 
-    appDispatch({type:'NEW_LOCATION', payload: {lat: position.coords.latitude, lng: position.coords.longitude}});
+    appDispatch({ type: 'NEW_LOCATION', payload: { lat: position.coords.latitude, lng: position.coords.longitude } });
 
     getAllClubsWithLocation(position.coords.latitude, position.coords.longitude)
       .then(r => r.json())
       .then(clubs => {
         setClubs(clubs);
 
-        clubDispatch({type: 'FETCHED_NEAR_CLUBS', payload: clubs});
+        clubDispatch({ type: 'FETCHED_NEAR_CLUBS', payload: clubs });
       }).finally(() => {
         setFetching(false);
       });
@@ -109,48 +109,62 @@ const App = (props) => {
     )
   }
 
+  const getLogo = () => {
+    return (
+      <Link to='/clubs'>
+        <h4>GymTime</h4>
+      </Link>
+    )
+  }
+
   const getHeaderItems = () => {
 
     if (authenticated) {
       return (
         <Row>
           <Col span={4}>
-            <Link to='/clubs'>
-              <h4>GymTime</h4>
-            </Link>
+            {getLogo()}
           </Col>
           <Col
             span={2}
             offset={4}
           >
-            <NavBarIcon>
-              <IoIosFitness size='2rem' />
-            </NavBarIcon>
+            <Link style={{ color: 'rgba(89,89,89)' }} to='/clubs'>
+              <NavBarIcon>
+                <IoIosFitness size='2rem' />
+              </NavBarIcon>
+            </Link>
           </Col>
           <Col
             span={2}
             offset={1}
           >
-            <NavBarIcon>
-              <FaRunning size='2rem' />
-            </NavBarIcon>
+            <Link style={{ color: 'rgba(89,89,89)' }} to='/user/post'>
+              <NavBarIcon>
+                <FaRunning size='2rem' />
+              </NavBarIcon>
+            </Link>
           </Col>
           <Col
             span={2}
             offset={1}
           >
-            <NavBarIcon>
-              <FaUserFriends size='2rem' />
-            </NavBarIcon>
+            <Link style={{ color: 'rgba(89,89,89)' }} to='/posts'>
+              <NavBarIcon>
+                <FaUserFriends size='2rem' />
+              </NavBarIcon>
+            </Link>
           </Col>
-          <Col span={1} offset={6} >
-            <SettingOutlined
-              onClick={() => {
-                console.log('setting clicked');
-                openSideBar();
-              }}
-              style={{ fontSize: '20px', marginTop: '7px' }}
-            />
+          <Col span={2} offset={5} >
+            <NavBarIcon>
+              <SettingOutlined
+                onClick={() => {
+                  console.log('setting clicked');
+                  openSideBar();
+                }}
+                style={{ fontSize: '20px', marginTop: '7px' }}
+              />
+            </NavBarIcon>
           </Col>
         </Row>
       );
@@ -158,9 +172,7 @@ const App = (props) => {
       return (
         <Row>
           <Col span={8} offset={9}>
-            <Link to='/clubs'>
-              <h3>GYM TIME</h3>
-            </Link>
+            {getLogo()}
           </Col>
           <Col span={1} offset={6}>
             <LoginOutlined onClick={() => openLoginModal()} style={{ fontSize: '16px', marginTop: '7px' }} />
@@ -196,7 +208,7 @@ const App = (props) => {
 
     // setFetching(true);
 
-    clubDispatch({type:'FETCHING_NEAR_CLUBS'});
+    clubDispatch({ type: 'FETCHING_NEAR_CLUBS' });
 
     getLocation(positionHandler, positionErrorHandler);
 
@@ -243,7 +255,7 @@ const App = (props) => {
         <p>Gym Time V 1.0.0</p>
         <Button danger onClick={() => {
           auth.logout(() => {
-            appDispatch({type:'LOGOUT'});
+            appDispatch({ type: 'LOGOUT' });
             closeSideBar();
           });
         }} >Logout</Button>
