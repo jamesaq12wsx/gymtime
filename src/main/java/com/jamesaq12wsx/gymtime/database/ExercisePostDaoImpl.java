@@ -1,9 +1,9 @@
 package com.jamesaq12wsx.gymtime.database;
 
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
+import com.jamesaq12wsx.gymtime.model.ExercisePostDetail;
 import com.jamesaq12wsx.gymtime.model.PostCount;
 import com.jamesaq12wsx.gymtime.model.PostPrivacy;
-import com.jamesaq12wsx.gymtime.model.payload.ClubPostHourCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -48,17 +48,18 @@ public class ExercisePostDaoImpl implements ExercisePostDao {
     }
 
     @Override
-    public List<ExercisePost> getAllPostsByUserWithYear(String year, String username) {
+    public List<ExercisePostDetail> getAllPostsByUserWithYear(String year, String username) {
 
-        String sql = "select *\n" +
+        String sql = "select *, fb.name as brand_name\n" +
                 "from exercise_post as ep\n" +
-                "left join fitness_club as fb on fb.club_uid = ep.location\n" +
+                "join fitness_club as fc on fc.club_uid = ep.location\n" +
+                "join fitness_brand as fb on fc.club_brand = fb.id \n" +
                 "where username = ? and (select extract(year from date(ep.post_time) ))::varchar = ?";
 
         return jdbcTemplate.query(
                 sql,
                 new Object[]{username, year},
-                mapExerciseFromDb()
+                mapExercisePostDetailFromDb()
         );
 
     }
@@ -115,6 +116,35 @@ public class ExercisePostDaoImpl implements ExercisePostDao {
         };
     }
 
+    private RowMapper<ExercisePostDetail> mapExercisePostDetailFromDb() {
+        return (resultSet, i) -> {
+            try {
+                String uuidStr = resultSet.getString("post_uuid");
+                UUID uuid = UUID.fromString(uuidStr);
+
+                String username = resultSet.getString("username");
+
+                String clubName = resultSet.getString("club_name");
+
+                String brandName = resultSet.getString("brand_name");
+
+                String locationUuidStr = resultSet.getString("location");
+                UUID locationUuid = locationUuidStr == null ? null : UUID.fromString(locationUuidStr);
+
+                String privacy = resultSet.getString("privacy");
+
+                LocalDateTime markTime = resultSet.getTimestamp("post_time").toLocalDateTime();
+
+                Map<String, String> exercises = (Map<String, String>) resultSet.getObject("exercises");
+
+                return new ExercisePostDetail(uuid, username, markTime, PostPrivacy.valueOf(privacy), locationUuid, exercises, clubName, brandName);
+
+            } catch (Exception e) {
+                throw e;
+            }
+        };
+    }
+
     @Override
     public List<ExercisePost> getAll() {
         return null;
@@ -145,7 +175,7 @@ public class ExercisePostDaoImpl implements ExercisePostDao {
                 insertMarkSql,
                 new Object[]{
                         exercisePost.getUsername(),
-                        exercisePost.getMarkTime(),
+                        exercisePost.getPostTime(),
                         exercisePost.getClubUuid(),
                         exercisePost.getExercises(),
                         exercisePost.getPrivacy().toString()});

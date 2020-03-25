@@ -2,6 +2,7 @@ package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
+import com.jamesaq12wsx.gymtime.model.ExercisePostDetail;
 import com.jamesaq12wsx.gymtime.model.payload.ClubPostHourCount;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
 import com.jamesaq12wsx.gymtime.service.ExercisePostService;
@@ -31,7 +32,7 @@ public class ExercisePostController {
 
     @GetMapping("/{year}")
     @PreAuthorize("hasAuthority('post:read')")
-    public List<ExercisePost> getUserMarks(@PathVariable("year") String year, Principal principal){
+    public List<ExercisePostDetail> getUserMarks(@PathVariable("year") String year, Principal principal){
         return exercisePostService.getAllPostByUserWithYear(year, principal);
     }
 
