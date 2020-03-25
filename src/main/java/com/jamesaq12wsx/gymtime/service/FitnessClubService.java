@@ -4,6 +4,7 @@ import com.jamesaq12wsx.gymtime.auth.ApplicationUserDao;
 import com.jamesaq12wsx.gymtime.database.FitnessClubDao;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.FitnessClub;
+import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,17 @@ public class FitnessClubService {
 
     public List<FitnessClub> getAllFitnessClubs(){
         return fitnessClubDao.getAll();
+    }
+
+    /**
+     *
+     * @param country alpha two code
+     * @return
+     */
+    public List<FitnessClubSelectItem> getFitnessSelectItems(String country){
+
+        return fitnessClubDao.getClubItemsByCountryCode(country);
+
     }
 
     public List<FitnessClub> getAllFitnessClubsWithLocation(double lat, double lon){

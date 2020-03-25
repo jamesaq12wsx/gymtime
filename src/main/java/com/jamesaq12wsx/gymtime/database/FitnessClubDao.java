@@ -2,6 +2,7 @@ package com.jamesaq12wsx.gymtime.database;
 
 import com.jamesaq12wsx.gymtime.model.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.FitnessClubDetail;
+import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -15,5 +16,7 @@ public interface FitnessClubDao extends Dao<FitnessClub> {
     boolean exist(UUID clubUuid);
 
     Optional<FitnessClub> getClubWithUserPost(UUID clubUuid, String username) throws SQLException;
+
+    List<FitnessClubSelectItem> getClubItemsByCountryCode(String countryCode);
 
 }

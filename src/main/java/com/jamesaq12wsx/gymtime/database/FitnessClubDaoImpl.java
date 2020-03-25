@@ -126,6 +126,48 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
         return Optional.ofNullable(result);
     }
 
+    /**
+     * coutry
+     * @param country
+     * @return
+     */
+    @Override
+    public List<FitnessClubSelectItem> getClubItemsByCountryCode(String country) {
+
+        String sql = "select *, fb.name as brand_name, c.name as country_name\n" +
+                "from fitness_club\n" +
+                "join fitness_brand fb on fitness_club.club_brand = fb.id\n" +
+                "join country c on fb.country = c.id\n" +
+                "where alpha_two_code = ?";
+
+        return jdbcTemplate.query(sql,
+                new Object[]{country},
+                mapFitnessClubItemFromDb());
+
+    }
+
+    public RowMapper<FitnessClubSelectItem> mapFitnessClubItemFromDb(){
+        return (resultSet, i) -> {
+            String clubUuidStr = resultSet.getString("club_uid");
+            UUID clubUuid = UUID.fromString(clubUuidStr);
+
+            String name = resultSet.getString("club_name");
+
+            String countryName = resultSet.getString("country_name");
+
+            String brandName = resultSet.getString("brand_name");
+
+            String city = resultSet.getString("city");
+
+            String state = resultSet.getString("state");
+
+            return new SimpleFitnessClubSelectItem(clubUuid, name, brandName, countryName, state, city);
+
+        };
+    }
+
+
+
     public Optional<FitnessClub> getFitnessByUuid(UUID uuid) {
 
         String sql = "select *, sqrt( power(? - latitude, 2) + power(? - longitude, 2)) * 111 as distance, fb.name as brand_name, c.name as country_name\n" +
