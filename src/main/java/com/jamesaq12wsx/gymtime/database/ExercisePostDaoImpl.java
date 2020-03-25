@@ -48,6 +48,22 @@ public class ExercisePostDaoImpl implements ExercisePostDao {
     }
 
     @Override
+    public List<ExercisePost> getAllPostsByUserWithYear(String year, String username) {
+
+        String sql = "select *\n" +
+                "from exercise_post as ep\n" +
+                "left join fitness_club as fb on fb.club_uid = ep.location\n" +
+                "where username = ? and (select extract(year from date(ep.post_time) ))::varchar = ?";
+
+        return jdbcTemplate.query(
+                sql,
+                new Object[]{username, year},
+                mapExerciseFromDb()
+        );
+
+    }
+
+    @Override
     public List<PostCount> getGymHourPost(UUID clubUuid, LocalDate date) {
 
         String sql = "select date_trunc('hour', post_time + interval '1 hour') as date_time, count(*)\n" +

@@ -7,7 +7,6 @@ import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
 import com.jamesaq12wsx.gymtime.model.PostCount;
 import com.jamesaq12wsx.gymtime.model.PostPrivacy;
-import com.jamesaq12wsx.gymtime.model.payload.ClubPostHourCount;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,10 @@ public class ExercisePostService {
 
     public List<ExercisePost> getAllPostByUser(Principal principal) {
         return exercisePostDao.getAllMarksByUser(principal.getName());
+    }
+
+    public List<ExercisePost> getAllPostByUserWithYear(String year, Principal principal) {
+        return exercisePostDao.getAllPostsByUserWithYear(year, principal.getName());
     }
 
     public void newPost(PostRequest mark, Principal principal) {

@@ -13,6 +13,8 @@ public interface ExercisePostDao extends Dao<ExercisePost> {
 
     List<ExercisePost> getAllMarksByUser(String username);
 
+    List<ExercisePost> getAllPostsByUserWithYear(String year, String username);
+
     List<PostCount> getGymHourPost(UUID clubUuid, LocalDate date);
 
 }

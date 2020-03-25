@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nullable;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
@@ -28,11 +29,17 @@ public class ExercisePostController {
     }
 
 
-    @GetMapping
-    @PreAuthorize("hasAuthority('mark:read')")
-    public List<ExercisePost> getUserMarks(Principal principal){
-        return exercisePostService.getAllPostByUser(principal);
+    @GetMapping("/{year}")
+    @PreAuthorize("hasAuthority('post:read')")
+    public List<ExercisePost> getUserMarks(@PathVariable("year") String year, Principal principal){
+        return exercisePostService.getAllPostByUserWithYear(year, principal);
     }
+
+//    @GetMapping("/{yearMonth}")
+//    @PreAuthorize("hasAuthority('post:read')")
+//    public List<ExercisePost> getUserPostsByMonth(@PathVariable("yearMonth") LocalDate date, Principal principal){
+//        return exercisePostService.getPostByUserMonthly;
+//    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_USER')")
