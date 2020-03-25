@@ -19,7 +19,7 @@ public class ExercisePost {
 
     private String username;
 
-    private LocalDateTime markTime;
+    private LocalDateTime postTime;
 
     private PostPrivacy privacy;
 

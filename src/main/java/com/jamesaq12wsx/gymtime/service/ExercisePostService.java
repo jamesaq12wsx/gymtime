@@ -5,6 +5,7 @@ import com.jamesaq12wsx.gymtime.database.ExercisePostDaoImpl;
 import com.jamesaq12wsx.gymtime.database.FitnessClubDao;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
+import com.jamesaq12wsx.gymtime.model.ExercisePostDetail;
 import com.jamesaq12wsx.gymtime.model.PostCount;
 import com.jamesaq12wsx.gymtime.model.PostPrivacy;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
@@ -37,7 +38,7 @@ public class ExercisePostService {
         return exercisePostDao.getAllMarksByUser(principal.getName());
     }
 
-    public List<ExercisePost> getAllPostByUserWithYear(String year, Principal principal) {
+    public List<ExercisePostDetail> getAllPostByUserWithYear(String year, Principal principal) {
         return exercisePostDao.getAllPostsByUserWithYear(year, principal.getName());
     }
 
