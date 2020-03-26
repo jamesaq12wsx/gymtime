@@ -1,30 +1,25 @@
 package com.jamesaq12wsx.gymtime.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class Country {
+public class SimpleExercise implements Exercise {
 
     private int id;
 
     private String name;
 
-    private String alphaTwoCode;
+    private String description;
 
-    private String alphaThreeCode;
-
-    private String region;
-
-    private String numericCode;
-
-    private String flagUrl;
+    private String category;
 
 }
