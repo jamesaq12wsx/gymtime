@@ -54,7 +54,7 @@ const ClubList = ({ clubs, markOnClick, detailOnClick }) => {
                             <Col span={4}>
                                 <ClockCircleFilled />
                             </Col>
-                            <Col span={20}>{item.openHours[weekday[today.getDay()]]}</Col>
+                            <Col span={20}>{item.openHours ? item.openHours[weekday[today.getDay()]] : 'No Provide Data'}</Col>
                         </Row>
                         <Row>
                             <Col span={4}>

@@ -5,11 +5,17 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import AppContextProvider from './context/AppContextProvider';
 import ClubContextProvider from './context/ClubContextProvider';
+import InfoContextProvider, { InfoContext } from './context/InfoContextProvider';
+import PostContextProvider from './context/PostContextProvider';
 
 ReactDOM.render(
     <AppContextProvider>
         <ClubContextProvider>
-            <App />
+            <InfoContextProvider>
+                <PostContextProvider>
+                    <App />
+                </PostContextProvider>
+            </InfoContextProvider>
         </ClubContextProvider>
     </AppContextProvider>
     , document.getElementById('root'));

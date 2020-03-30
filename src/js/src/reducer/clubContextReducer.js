@@ -2,18 +2,24 @@ export const clubContextReducer = (state, action) => {
 
     switch (action.type) {
 
-        case 'FETCHING_NEAR_CLUBS':
+        case clubContextReducerType.FETCHING:
 
             state = {...state, fetching: true};
             
             break;
 
-        case 'FETCHED_NEAR_CLUBS':
+        case clubContextReducerType.FETCHED:
 
-            state = {...state, nearClubs: action.payload, fetching: false};
+            state = {...state, fetching: false};
 
             break;
+        
     }
 
     return state;
+}
+
+export const clubContextReducerType = {
+    FETCHING: 'FETCHING',
+    FETCHED: 'FETCHED'
 }

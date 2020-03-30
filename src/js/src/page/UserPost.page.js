@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Badge, Select, Radio, Col, Row, Button, Card, Descriptions } from 'antd';
+import React, { useState, useEffect, useContext } from 'react';
+import { Calendar, Badge, Select, Radio, Col, Row, Button, Card, Descriptions, Modal, List } from 'antd';
 import moment from 'moment';
-import { getUserYearPost } from '../api/client';
+import { getUserYearPost, deletePost, updatePost } from '../api/client';
 import { errorNotification } from '../components/Notification';
 import { EditOutlined, DeleteOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
-import './UserPost.page.css';
 import CardList from '../components/CardList';
+import './UserPost.page.css';
+import { useHistory } from 'react-router-dom';
+import { PostContext } from '../context/PostContextProvider';
+import PostEdit from './PostEdit.page';
+var _ = require('lodash');
 
 const { Group, Button: RadioButton } = Radio;
 const { Meta } = Card;
@@ -15,37 +19,71 @@ function onPanelChange(value, mode) {
     console.log(value, mode);
 }
 
-const UserPost = () => {
+const UserPost = (props) => {
 
     const [today, setToday] = useState(moment())
     const [selectedDate, setSelectedDate] = useState(moment());
-    const [posts, setPosts] = useState([]);
+    // const [posts, setPosts] = useState([]);
     const [selectedDatePosts, setSelectedDatePosts] = useState([]);
+    const [deleteModalVisible, setDeletedModalVisible] = useState(false);
+    const [selectDeletePost, setSelectDeletePost] = useState(null);
+
+    const history = useHistory();
+
+    const postContext = useContext(PostContext);
+    const { state, dispatch } = postContext;
+
+    const { posts, editing, editingPost, editingPostChanged } = state;
 
     useEffect(() => {
-        getUserYearPost(moment().format('YYYY'))
+
+        getYearPost(moment().format('YYYY'));
+
+    }, []);
+
+    useEffect(() => {
+
+        const datePosts = posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD'));
+
+        setSelectedDatePosts(datePosts);
+
+    }, [selectedDate]);
+
+    const setPosts = (posts) => {
+        dispatch({ type: 'SET_POSTS', payload: posts });
+    }
+
+    const getYearPost = (year) => {
+        getUserYearPost(year)
             .then(res => res.json())
             .then(posts => {
                 setPosts(posts);
-                setSelectedDateHandler(selectedDate);
+
+                const datePosts = posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD'));
+
+                setSelectedDatePosts(datePosts);
             })
             .catch(err => {
                 errorNotification('Fetch Posts Error', err.message);
             });
-    }, []);
+    }
 
     // useEffect(() => {
     //     setSelectedDatePosts(posts.filter(p => moment(p.postDate).format('YYYY-MM-dd') === selectedDate.format('YYYY-MM-dd')));
     // }, [selectedDate]);
 
+    const openDeleteModal = () => setDeletedModalVisible(true);
+    const closeDeleteModal = () => setDeletedModalVisible(false);
+
     const setSelectedDateHandler = (date) => {
         setSelectedDate(date);
-        const datePosts = posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === date.format('YYYY-MM-DD'));
-
-        setSelectedDatePosts(datePosts);
     }
 
     const dateCellRender = (date) => {
+
+        if (!posts) {
+            return <React.Fragment />
+        }
 
         return (
             <React.Fragment>
@@ -178,17 +216,17 @@ const UserPost = () => {
     }
 
     const getExercises = (p) => {
-        if(p.exercises && Object.keys(p.exercises).length != 0){
+        if (p.exercises && getExercises.length != 0) {
 
-        const exercises = Object.keys(p.exercises).map(key => <Descriptions.Item label={key}>{p.exercises[key]}</Descriptions.Item>)
+            const exercises = p.exercises.map((ex, i) => <Descriptions.Item key={i}>{`${ex.name} - ${ex.description}`}</Descriptions.Item>)
 
             return (
                 <Descriptions title="Exercises">
                     {exercises}
                 </Descriptions>
             )
-        }else{
-            return(
+        } else {
+            return (
                 <Descriptions title="No Exercises" />
             );
         }
@@ -198,9 +236,18 @@ const UserPost = () => {
         return selectedDatePosts.map(p => {
             return (
                 <Card
+                    id={p.uuid}
                     actions={[
-                        <DeleteOutlined key="delete" />,
-                        <EditOutlined key="edit" />,
+                        <DeleteOutlined onClick={() => {
+                            setSelectDeletePost(p);
+                            openDeleteModal();
+                        }} key="delete" />,
+                        <EditOutlined
+                            key="edit"
+                            onClick={() => {
+                                dispatch({ type: 'EDITING', payload: Object.assign({}, p) });
+                            }}
+                        />,
                     ]}
                 >
                     <Meta title={p.clubName} description={moment(p.postTime).format('LT')} />
@@ -211,13 +258,111 @@ const UserPost = () => {
         })
     }
 
+    const couldSave = () => {
+        if(editing){
+            return _.isEqual(editingPostChanged, editingPost);
+        }else{
+            return false;
+        }
+    }
+
+    const cards = getPostCards();
+
     return (
         <div className="user-post">
             <h3>Daily Workout</h3>
             {getCalendar()}
             <div className="day-post">
-                <CardList className="daily-post-list" cards={getPostCards()} />
+                <CardList className="daily-post-list" cards={cards} />
+                {/* <List
+                    grid={{
+                        gutter: 16,
+                        xs: 1,
+                        sm: 1,
+                        md: 2,
+                        lg: 2,
+                        xl: 4,
+                        xxl: 3,
+                    }}
+                    dataSource={getPostCards()}
+                    renderItem={item => <List.Item>{item}</List.Item>}
+                > */}
+                {/* </List> */}
             </div>
+
+            <Modal
+                title="DELETE POST"
+                visible={deleteModalVisible}
+                onOk={() => closeDeleteModal()}
+                onCancel={() => {
+                    closeDeleteModal();
+                    setSelectDeletePost(null);
+                }}
+                footer={[
+                    <Button key="cancel" shape='round' onClick={() => {
+                        setSelectDeletePost(null);
+                        closeDeleteModal();
+                    }}>
+                        Cancel
+                    </Button>,
+                    <Button key="delete" shape='round' type='danger' onClick={() => {
+                        // TODO: DELETE POST
+                        deletePost(selectDeletePost.uuid)
+                            .then(res => {
+                                closeDeleteModal();
+                                getYearPost(selectedDate.format('YYYY'));
+                            })
+                            .catch(err => {
+                                errorNotification('Delete Fail', 'Cannot delete post');
+                                console.error(err);
+                            });
+
+                    }}>
+                        DELETE
+                    </Button>,
+                ]}
+            >
+                <p>Are you sure you want to delete this post?</p>
+                <p>{selectDeletePost ? selectDeletePost.clubName : ''}</p>
+                <p>{selectDeletePost ? moment(selectDeletePost.postTime).format('YYYY-MM-DD HH:mm') : ''}</p>
+            </Modal>
+
+            <Modal
+                title="EDIT POST"
+                visible={editing}
+                onOk={() => closeDeleteModal()}
+                onCancel={() => {
+                    dispatch({ type: 'FINISH_EDIT' });
+                }}
+                footer={[
+                    <Button key="cancel" shape='round' onClick={() => {
+                        dispatch({ type: 'FINISH_EDIT' });
+                    }}>
+                        CANCEL
+                    </Button>,
+                    <Button
+                        key="save"
+                        shape='round'
+                        type='primary'
+                        onClick={() => {
+                            // TODO: SAVE POST
+                            updatePost(editingPostChanged)
+                                .then(res => {
+                                    dispatch({ type: 'FINISH_EDIT' });
+                                    getYearPost(selectedDate.format('YYYY'));
+                                })
+                                .catch(err => {
+                                    errorNotification('Update Fail', err.message);
+                                });
+                        }}
+                        disabled={couldSave()}
+                    >
+                        SAVE
+                    </Button>,
+                ]}
+            >
+                {editing ? <PostEdit /> : <React.Fragment />}
+            </Modal>
         </div>
     );
 }

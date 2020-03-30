@@ -1,4 +1,4 @@
-import { login, checkToken } from '../api/client';
+import { login, signUp, checkToken } from '../api/client';
 import decode from 'jwt-decode';
 import { wait } from '@testing-library/react';
 
@@ -9,6 +9,21 @@ class Auth {
         this.refreshToken = localStorage.getItem('refreshToken');
         this.authenticated = this.isAuthenticated();
         this.serverCheck = false;
+    }
+
+    signUp(values, cb, errCb){
+        signUp(values)
+            .then(res => {
+                if(cb){
+                    cb();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if(errCb){
+                    errCb(err);
+                }
+            });
     }
 
     login(values, cb, errCb) {

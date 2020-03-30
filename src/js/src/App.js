@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, Component, useCallback } from 'react';
 import './App.css';
 import Container from './components/Container';
-import { getAllClubs, getAllClubsWithLocation } from './api/client';
+import { getAllClubsWithLocation, getUserIpInfo, getCountryItems, getAllExercise, getAllClubs, signUp } from './api/client';
 import ClubList from './components/list/ClubList';
 import LoadingList from './components/list/LoadingList';
 import 'antd/dist/antd.css';
@@ -15,12 +15,16 @@ import { Modal, Row, Col, Drawer, Button } from 'antd';
 import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
+import { InfoContext } from './context/InfoContextProvider';
 import Login from './page/Login';
+import SignUp from './page/SignUp.page';
 import LogoutPage from './page/Logout.page';
-import { FaRunning, FaUserFriends } from "react-icons/fa";
+import ExercisePage from './page/Exercise.page';
+import { FaRunning, FaUserFriends, FaCalendarCheck } from "react-icons/fa";
 import { IoIosFitness } from "react-icons/io";
 import NavBarIcon from './components/NavBarIcon';
 import { ClubContext } from './context/ClubContextProvider';
+import { clubContextReducerType } from './reducer/clubContextReducer';
 
 
 const AuthRoute = ({ component: Component, ...rest }) => {
@@ -49,16 +53,14 @@ const App = (props) => {
 
   const appContext = useContext(AppContext);
   const clubContext = useContext(ClubContext);
+  const infoContext = useContext(InfoContext);
 
   const { state: appState, dispatch: appDispatch } = appContext;
   const { state: clubState, dispatch: clubDispatch } = clubContext;
+  const { state: infoState, dispatch: infoDispatch } = infoContext;
 
-  const { auth, authenticated } = appState;
+  const { auth, authenticated, location } = appState;
 
-  const [fetching, setFetching] = useState(false);
-  const [clubs, setClubs] = useState([]);
-  const [location, setLocation] = useState({ lat: null, lon: null });
-  const [selectClub, setSelectClub] = useState(null);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [settingSideBarVisible, setSettingSideBarVisible] = useState(false);
 
@@ -74,31 +76,114 @@ const App = (props) => {
       appDispatch({ type: 'LOGIN', payload: auth.getToken() });
     }
 
+    getLocation(positionHandler, positionErrorHandler);
+
+    getCountryItems()
+      .then(res => res.json())
+      .then(countries => {
+        infoDispatch({ type: 'SET_COUNTRIES', payload: countries })
+      })
+      .catch(err => console.error('Cannot get countries', err));
+
+    getAllExercise()
+      .then(res => res.json())
+      .then(exercises => {
+        infoDispatch({ type: 'SET_EXERCISES', payload: groupBy(exercises, 'category') });
+      })
+      .catch(err => console.error('Cannot get exercises', err));
+
+    clubDispatch({ type: clubContextReducerType.FETCHING });
+
+    getAllClubs()
+      .then(res => res.json())
+      .then(clubs => {
+        infoDispatch({ type: 'SET_CLUBS', payload: clubs });
+        clubDispatch({ type: clubContextReducerType.FETCHED });
+      })
+      .catch(err => {
+        console.error("Cannot get clubs", err);
+        errorNotification(err.message, err.message);
+        clubDispatch({ type: clubContextReducerType.FETCHED });
+      })
+
   }, []);
 
-  useEffect(() => {
+  const groupBy = (xs, key) => {
+    return xs.reduce((rv, x) => {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
+  };
 
-    if (!clubState.nearClubs || clubState.nearClubs.length === 0) {
-      fetchingClubs();
-    }
+  // useEffect(() => {
 
-  }, [clubState.nearClubs]);
+  //   fetchingClubs();
+
+  // }, [location]);
+
+  // useEffect(() => {
+  //   getUserIpInfo()
+  //     .then(res => res.json())
+  //     .then(info => appDispatch({type:'SET_IP_INFO', payload: info}))
+  //     .catch(err => console.error(err));
+  // }, []);
 
   const positionHandler = (position) => {
 
-    setLocation({ ...location, lat: position.coords.latitude, lon: position.coords.longitude });
+    // setLocation({ ...location, lat: position.coords.latitude, lon: position.coords.longitude });
 
-    appDispatch({ type: 'NEW_LOCATION', payload: { lat: position.coords.latitude, lng: position.coords.longitude } });
+    appDispatch({ type: 'SET_LOCATION', payload: { lat: position.coords.latitude, lng: position.coords.longitude } });
 
-    getAllClubsWithLocation(position.coords.latitude, position.coords.longitude)
-      .then(r => r.json())
-      .then(clubs => {
-        setClubs(clubs);
+  }
 
-        clubDispatch({ type: 'FETCHED_NEAR_CLUBS', payload: clubs });
-      }).finally(() => {
-        setFetching(false);
-      });
+  /**
+   * Cannot get browser geoloaction
+   * use ip info to get geolocation
+   */
+  const positionErrorHandler = () => {
+
+    getUserIpInfo()
+      .then(res => res.json())
+      .then(info => {
+        appDispatch({ type: 'SET_LOCATION', payload: { lat: info.latitude, lng: info.longitude } })
+        // appDispatch({type:'SET_IP_INFO', payload: info})
+      })
+      .catch(err => console.error(err));
+
+  };
+
+  const getLocation = (successHandler, errorHandler) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(successHandler);
+    } else {
+      errorHandler();
+    }
+  }
+
+  // getLocation();
+
+  const fetchingClubs = () => {
+
+    // setFetching(true);
+
+    console.log('fetching clubs', location);
+
+    if (location.lat && location.lng) {
+      clubDispatch({ type: 'FETCHING_NEAR_CLUBS' });
+
+      getAllClubsWithLocation(location.lat, location.lng)
+        .then(r => r.json())
+        .then(clubs => {
+          // setClubs(clubs);
+
+          clubDispatch({ type: 'FETCHED_NEAR_CLUBS', payload: clubs });
+
+        }).catch(err => {
+          errorNotification('CANNOT GET CLUBS', err.message);
+          clubDispatch({ type: 'FETCHED_NEAR_CLUBS', payload: [] });
+        })
+    }
+
   }
 
   const getHeader = () => {
@@ -141,7 +226,7 @@ const App = (props) => {
           >
             <Link style={{ color: 'rgba(89,89,89)' }} to='/user/post'>
               <NavBarIcon>
-                <FaRunning size='2rem' />
+                <FaCalendarCheck size='2rem' />
               </NavBarIcon>
             </Link>
           </Col>
@@ -182,40 +267,6 @@ const App = (props) => {
     }
   }
 
-  const positionErrorHandler = () => {
-
-    getAllClubs()
-      .then(r => r.json())
-      .then(clubs => {
-        // console.log(clubs);
-        setClubs(clubs);
-      }).finally(() => {
-        setFetching(false);
-      });
-  };
-
-  const getLocation = (successHandler, errorHandler) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(successHandler);
-    } else {
-      errorHandler();
-    }
-  }
-
-  // getLocation();
-
-  const fetchingClubs = () => {
-
-    // setFetching(true);
-
-    clubDispatch({ type: 'FETCHING_NEAR_CLUBS' });
-
-    getLocation(positionHandler, positionErrorHandler);
-
-    setFetching(false);
-
-  }
-
   const listMarkOnClickHandler = (e, club) => {
     // console.log(`打卡 ${clubUuid}`);
   }
@@ -224,7 +275,8 @@ const App = (props) => {
     // console.log(`詳細資料 ${clubUuid}`);
 
     if (club) {
-      setSelectClub(club);
+      // setSelectClub(club);
+      clubDispatch({ type: 'SELECT_CLUB', payload: club })
     }
   }
 
@@ -261,35 +313,40 @@ const App = (props) => {
         }} >Logout</Button>
       </Drawer>
 
-      <LoginModal
-        visible={loginModalVisible}
-        onSuccess={() => {
-          closeLoginModal();
-          successNotification('Login Success');
-        }}
-        onFailure={(err) => {
-
-          console.error(err);
-
-          const message = err.error.message;
-          const description = err.error.httpStatus;
-          console.log(JSON.stringify(err));
-          errorNotification(message, description);
-        }}
-        onOk={() => closeLoginModal()}
-        onCancel={() => closeLoginModal()}
-      />
-
       <Router>
         <div className="App">
+
+          <LoginModal
+            visible={loginModalVisible}
+            onSuccess={() => {
+              closeLoginModal();
+              successNotification('Login Success');
+            }}
+            onFailure={(err) => {
+
+              console.error(err);
+
+              const message = err.error.message;
+              const description = err.error.httpStatus;
+              console.log(JSON.stringify(err));
+              errorNotification(message, description);
+            }}
+            onOk={() => closeLoginModal()}
+            onCancel={() => closeLoginModal()}
+            toSignUp={() => {
+              closeLoginModal();
+            }}
+          />
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
           {getHeader()}
           <Switch>
             <Route exact path="/login" component={Login} />
+            <Route exact path='/signup' component={SignUp} />
             <Route exact path={['', "/clubs"]}>
-              <Clubs fetching={fetching} clubs={clubs} markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander} />
+              <Clubs markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander} />
             </Route>
+            <Route exact path="/exercise" component={ExercisePage} />
             <Route exact path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
             <AuthRoute path='/user' component={User} />
             <AuthRoute exact path='/logout' component={LogoutPage} />

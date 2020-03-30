@@ -1,6 +1,7 @@
 import React, {useContext} from 'react';
 import { Button, Input, Tag, Row, Col } from 'antd';
 import { Formik } from 'formik';
+import {Link, useHistory} from 'react-router-dom';
 import { AppContext } from '../../context/AppContextProvider';
 
 const inputBottomStyle = { marginBottom: '5px' };
@@ -8,6 +9,8 @@ const inputBottomStyle = { marginBottom: '5px' };
 const errorTagStyle = { backgroundColor: '#fc88a1', color: 'white', ...inputBottomStyle };
 
 const LoginForm = (props) => {
+
+    const history = useHistory();
 
     const appContext = useContext(AppContext);
     const {state, dispatch} = appContext;
@@ -92,6 +95,15 @@ const LoginForm = (props) => {
                                     disabled={isSubmitting | (touched && !isValid)}>
                                     Login
                                 </Button>
+                            </Col>
+                        </Row>
+
+                        <Row>
+                            <Col>
+                                Haven't have an account? <Link onClick={() => {
+                                    props.toSignUp();
+                                    history.push('/signup');
+                                }} to={`/signup`} >Sign Up</Link>
                             </Col>
                         </Row>
                     </form>

@@ -3,7 +3,7 @@ import { List, Card, Row, Col, Avatar } from 'antd';
 import { EnvironmentFilled, ClockCircleFilled, MehFilled, SettingOutlined, EditOutlined, DownCircleTwoTone, MoreOutlined } from '@ant-design/icons';
 const { Meta } = Card;
 
-const loadingData = [{},{},{}];
+const loadingData = [{},{},{},{},{},{},{},{},{},{},{},{}];
 
 const loadingList = () => {
 

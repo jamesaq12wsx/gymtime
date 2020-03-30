@@ -13,7 +13,9 @@ const AppContextProvider = (props) => {
         auth: auth,
         authenticated: false,
         jwtToken: '',
-        user: {}
+        user: {},
+        location: {},
+        fetchedLocation: false
     };
 
     const [state, dispatch] = useReducer(appContextReducer,initAppState);
