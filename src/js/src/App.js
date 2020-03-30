@@ -11,7 +11,7 @@ import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
 import AppContextProvider from './context/AppContextProvider';
-import { Modal, Row, Col, Drawer, Button } from 'antd';
+import { Modal, Row, Col, Drawer, Button, Layout, Menu } from 'antd';
 import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
@@ -20,11 +20,14 @@ import Login from './page/Login';
 import SignUp from './page/SignUp.page';
 import LogoutPage from './page/Logout.page';
 import ExercisePage from './page/Exercise.page';
-import { FaRunning, FaUserFriends, FaCalendarCheck } from "react-icons/fa";
-import { IoIosFitness } from "react-icons/io";
 import NavBarIcon from './components/NavBarIcon';
 import { ClubContext } from './context/ClubContextProvider';
 import { clubContextReducerType } from './reducer/clubContextReducer';
+import { FaRunning, FaUserFriends, FaCalendarCheck } from "react-icons/fa";
+import { IoIosFitness } from "react-icons/io";
+import { GiJumpAcross } from "react-icons/gi";
+
+const { Header, Content, Footer } = Layout;
 
 
 const AuthRoute = ({ component: Component, ...rest }) => {
@@ -197,7 +200,7 @@ const App = (props) => {
   const getLogo = () => {
     return (
       <Link to='/clubs'>
-        <h4>GymTime</h4>
+        <h3>GymTime</h3>
       </Link>
     )
   }
@@ -234,13 +237,23 @@ const App = (props) => {
             span={2}
             offset={1}
           >
+            <Link style={{ color: 'rgba(89,89,89)' }} to='/exercise'>
+              <NavBarIcon>
+                <GiJumpAcross size='2rem' />
+              </NavBarIcon>
+            </Link>
+          </Col>
+          {/* <Col
+            span={2}
+            offset={1}
+          >
             <Link style={{ color: 'rgba(89,89,89)' }} to='/posts'>
               <NavBarIcon>
                 <FaUserFriends size='2rem' />
               </NavBarIcon>
             </Link>
-          </Col>
-          <Col span={2} offset={5} >
+          </Col> */}
+          <Col span={2} offset={6} >
             <NavBarIcon>
               <SettingOutlined
                 onClick={() => {
@@ -260,7 +273,10 @@ const App = (props) => {
             {getLogo()}
           </Col>
           <Col span={1} offset={6}>
-            <LoginOutlined onClick={() => openLoginModal()} style={{ fontSize: '16px', marginTop: '7px' }} />
+            <LoginOutlined
+              onClick={() => openLoginModal()}
+              style={{ fontSize: '20px', marginTop: '7px' }}
+            />
           </Col>
         </Row>
       );
