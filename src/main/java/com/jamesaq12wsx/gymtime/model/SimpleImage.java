@@ -1,18 +1,20 @@
-package com.jamesaq12wsx.gymtime.model.payload;
+package com.jamesaq12wsx.gymtime.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.imageio.ImageIO;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class LaFitnessClubsRequest {
+public class SimpleImage implements Image {
 
-    String zipCode;
+    private int id;
 
-    String state;
+    private String name;
 
 }

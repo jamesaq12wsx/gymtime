@@ -63,12 +63,12 @@ public class CountryDaoImpl implements CountryDao {
     }
 
     @Override
-    public void update(Country country, String[] params) {
+    public void update(Country country) {
 
     }
 
     @Override
-    public void delete(Country country) {
+    public void delete(Integer countryId) {
 
     }
 }

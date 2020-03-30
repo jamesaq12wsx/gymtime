@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,14 +14,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ExercisePostDetail extends ExercisePost {
+public class SimpleExercisePostWithClubInfo extends SimpleExercisePost implements ExercisePost {
 
     private String clubName;
 
     private String brandName;
 
-    public ExercisePostDetail(UUID uuid, String username, LocalDateTime markTime, PostPrivacy privacy, UUID clubUuid, Map<String, String> exercises, String clubName, String brandName) {
-        super(uuid, username, markTime, privacy, clubUuid, exercises);
+    public SimpleExercisePostWithClubInfo(UUID uuid, LocalDateTime postTime, PostPrivacy privacy, UUID clubUuid, List<PostExercise> exercises, String clubName, String brandName) {
+        super(uuid, postTime, privacy, clubUuid, exercises);
         this.brandName = brandName;
         this.clubName = clubName;
     }

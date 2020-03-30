@@ -11,7 +11,7 @@ public class ParseLocalDateTimeTest {
 
     @Test
     public void parseTime(){
-        LocalDateTime dateTime = LocalDateTime.parse("2020-03-19T16:18:36.361782");
+        LocalDateTime dateTime = LocalDateTime.parse("2020-03-27T16:33:21-07:00");
         assertThat(dateTime.getYear()).isEqualTo(2020);
     }
 

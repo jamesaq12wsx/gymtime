@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface Dao<T> {
+public interface Dao<T, K> {
 
     Optional<T> get(UUID id);
 
@@ -14,7 +14,7 @@ public interface Dao<T> {
 
     void saveAll(List<? extends T> tList);
 
-    void update(T t, String[] params);
+    void update(T t);
 
-    void delete(T t);
+    void delete(K id);
 }

@@ -1,33 +1,26 @@
 package com.jamesaq12wsx.gymtime.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.jamesaq12wsx.gymtime.model.PostPrivacy;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class ExercisePost {
+@JsonSubTypes({ @JsonSubTypes.Type(SimpleExercisePost.class),
+                @JsonSubTypes.Type(SimpleExercisePostAudit.class),
+                @JsonSubTypes.Type(SimpleExercisePostWithClubInfo.class)})
+public interface ExercisePost {
 
-    private UUID uuid;
+    UUID getUuid();
 
-    private String username;
+    LocalDateTime getPostTime();
 
-    private LocalDateTime postTime;
+    PostPrivacy getPrivacy();
 
-    private PostPrivacy privacy;
+    UUID getClubUuid();
 
-    /**
-     * may be club uuid or null
-     */
-    private UUID clubUuid;
-
-    private Map<String,String> exercises;
+    List<PostExercise> getExercises();
 
 }

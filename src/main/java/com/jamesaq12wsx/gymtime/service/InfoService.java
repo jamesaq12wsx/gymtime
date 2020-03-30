@@ -4,6 +4,7 @@ import com.jamesaq12wsx.gymtime.database.CountryDao;
 import com.jamesaq12wsx.gymtime.database.ExerciseDao;
 import com.jamesaq12wsx.gymtime.model.Country;
 import com.jamesaq12wsx.gymtime.model.Exercise;
+import com.jamesaq12wsx.gymtime.model.ExerciseAudit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

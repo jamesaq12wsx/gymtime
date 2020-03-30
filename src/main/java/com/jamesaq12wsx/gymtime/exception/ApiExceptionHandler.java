@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @ControllerAdvice
@@ -19,6 +20,19 @@ public class ApiExceptionHandler {
         );
 
         return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException e){
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                HttpStatus.FORBIDDEN,
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, HttpStatus.FORBIDDEN);
+
     }
 
     @ExceptionHandler(value = Exception.class)

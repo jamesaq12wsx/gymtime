@@ -45,11 +45,10 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
     @Override
     public List<FitnessClub> getAll() {
 
-        String sql = "select *, sqrt( power(34.134267 - latitude, 2) + power(-118.106107 - longitude, 2)) * 111 as distance, fb.name as brand_name, c.name as country_name\n" +
+        String sql = "select *, fb.name as brand_name, c.name as country_name\n" +
                 "from fitness_club as fc\n" +
                 "join fitness_brand as fb on fc.club_brand = fb.id\n" +
-                "join country as c on c.id = fb.country\n" +
-                "limit 50;";
+                "join country as c on c.id = fb.country\n";
 
         return jdbcTemplate.query(sql, mapFitnessClubsFromDb());
 
@@ -128,6 +127,7 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
 
     /**
      * coutry
+     *
      * @param country
      * @return
      */
@@ -140,13 +140,25 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
                 "join country c on fb.country = c.id\n" +
                 "where alpha_two_code = ?";
 
-        return jdbcTemplate.query(sql,
-                new Object[]{country},
-                mapFitnessClubItemFromDb());
+        String allSql = "select *, fb.name as brand_name, c.name as country_name\n" +
+                "from fitness_club\n" +
+                "join fitness_brand fb on fitness_club.club_brand = fb.id\n" +
+                "join country c on fb.country = c.id\n";
+
+        if (country.toLowerCase().equals("all")) {
+            return jdbcTemplate.query(
+                    allSql,
+                    new Object[]{country},
+                    mapFitnessClubItemFromDb());
+        } else {
+            return jdbcTemplate.query(sql,
+                    new Object[]{country},
+                    mapFitnessClubItemFromDb());
+        }
 
     }
 
-    public RowMapper<FitnessClubSelectItem> mapFitnessClubItemFromDb(){
+    public RowMapper<FitnessClubSelectItem> mapFitnessClubItemFromDb() {
         return (resultSet, i) -> {
             String clubUuidStr = resultSet.getString("club_uid");
             UUID clubUuid = UUID.fromString(clubUuidStr);
@@ -165,7 +177,6 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
 
         };
     }
-
 
 
     public Optional<FitnessClub> getFitnessByUuid(UUID uuid) {
@@ -222,12 +233,12 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
     }
 
     @Override
-    public void update(FitnessClub fitnessClub, String[] params) {
+    public void update(FitnessClub fitnessClub) {
 
     }
 
     @Override
-    public void delete(FitnessClub fitnessClub) {
+    public void delete(UUID fitnessClubId) {
 
     }
 }

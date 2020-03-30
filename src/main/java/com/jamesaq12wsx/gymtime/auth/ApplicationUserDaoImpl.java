@@ -121,12 +121,12 @@ public class ApplicationUserDaoImpl implements ApplicationUserDao {
     }
 
     @Override
-    public void update(ApplicationUser applicationUser, String[] params) {
+    public void update(ApplicationUser applicationUser) {
 
     }
 
     @Override
-    public void delete(ApplicationUser applicationUser) {
+    public void delete(UUID applicationUserUuid) {
 
     }
 }

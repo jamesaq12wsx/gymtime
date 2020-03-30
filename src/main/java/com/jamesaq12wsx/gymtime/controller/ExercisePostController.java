@@ -2,19 +2,16 @@ package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
-import com.jamesaq12wsx.gymtime.model.ExercisePostDetail;
-import com.jamesaq12wsx.gymtime.model.payload.ClubPostHourCount;
+import com.jamesaq12wsx.gymtime.model.SimpleExercisePostWithClubInfo;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
+import com.jamesaq12wsx.gymtime.model.payload.UpdatePostRequest;
 import com.jamesaq12wsx.gymtime.service.ExercisePostService;
+import javafx.geometry.Pos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Nullable;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +29,7 @@ public class ExercisePostController {
 
     @GetMapping("/{year}")
     @PreAuthorize("hasAuthority('post:read')")
-    public List<ExercisePostDetail> getUserMarks(@PathVariable("year") String year, Principal principal){
+    public List<ExercisePost> getUserMarks(@PathVariable("year") String year, Principal principal){
         return exercisePostService.getAllPostByUserWithYear(year, principal);
     }
 
@@ -44,8 +41,32 @@ public class ExercisePostController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public void exerciseMark(@RequestBody PostRequest mark, Principal principal){
-        exercisePostService.newPost(mark, principal);
+    public void exerciseMark(@RequestBody PostRequest post, Principal principal){
+        exercisePostService.newPost(post, principal);
+    }
+
+    @PutMapping
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    public void updateExercisePost(@RequestBody UpdatePostRequest post, Principal principal){
+        exercisePostService.update(post, principal);
+    }
+
+    @DeleteMapping("/{postUuid}")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    public void deleteExercisePost(@PathVariable("postUuid") String postUuidStr, Principal principal){
+
+        UUID postUuid = null;
+
+        try{
+            postUuid = UUID.fromString(postUuidStr);
+        }catch (IllegalStateException e){
+            e.printStackTrace();
+
+            throw new ApiRequestException(String.format("Post uuid %s not valid", postUuidStr));
+
+        }
+
+        exercisePostService.delete(postUuid, principal);
     }
 
 //    @PostMapping
