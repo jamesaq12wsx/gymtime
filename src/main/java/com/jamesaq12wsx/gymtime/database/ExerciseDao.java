@@ -4,7 +4,7 @@ import com.jamesaq12wsx.gymtime.model.Exercise;
 
 import java.util.List;
 
-public interface ExerciseDao extends Dao<Exercise> {
+public interface ExerciseDao extends Dao<Exercise, Integer> {
 
     List<Exercise> getSimpleAll();
 

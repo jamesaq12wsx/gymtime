@@ -19,3 +19,5 @@ application:
     number: true
     min: 8
     max: 30
+  filepath:
+    image: filepath

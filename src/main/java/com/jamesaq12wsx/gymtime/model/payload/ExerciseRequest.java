@@ -1,19 +1,19 @@
-package com.jamesaq12wsx.gymtime.model;
+package com.jamesaq12wsx.gymtime.model.payload;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class SimpleExercise implements Exercise {
+public class ExerciseRequest {
 
     private int id;
 
@@ -23,6 +23,6 @@ public class SimpleExercise implements Exercise {
 
     private String category;
 
-    private List<String> images;
+    private MultipartFile[] images;
 
 }

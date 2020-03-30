@@ -7,6 +7,7 @@ import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
 import com.jamesaq12wsx.gymtime.service.InfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,11 +34,13 @@ public class InfoController {
     }
 
     @GetMapping("/select/country")
+    @PreAuthorize("hasAuthority('info:read')")
     public List<Country> getAllCountry(){
         return infoService.getAllCountry();
     }
 
-    @GetMapping("/select/clubs")
+    @GetMapping("/select/club")
+    @PreAuthorize("hasAuthority('info:read')")
     public List<FitnessClubSelectItem> getAllFitnessClubSelectItems(
             @RequestParam(name = "country", required = false) String alphaTwoCode
     ){
@@ -50,6 +53,7 @@ public class InfoController {
     }
 
     @GetMapping("/select/exercise")
+    @PreAuthorize("hasAuthority('info:read')")
     public List<Exercise> getAllExercise(){
         return infoService.getAllSimpleExercise();
     }

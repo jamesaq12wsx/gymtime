@@ -41,13 +41,13 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         if (Strings.isNullOrEmpty(authorizationHeader) || !authorizationHeader.startsWith(jwtConfig.getTokenPrefix())){
 
-//            Authentication authentication = new UsernamePasswordAuthenticationToken(
-//                    "anonymous",
-//                    null,
-//                    ApplicationUserRole.ANONYMOUS.getGrantedAuthorities()
-//
-//            );
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    request.getSession(),
+                    null,
+                    ApplicationUserRole.ANONYMOUS.getGrantedAuthorities()
+
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             filterChain.doFilter(request, response);
             return;

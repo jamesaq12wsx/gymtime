@@ -10,10 +10,10 @@ import static com.jamesaq12wsx.gymtime.security.ApplicationUserPermission.*;
 
 
 public enum ApplicationUserRole {
-    ANONYMOUS(Sets.newHashSet(CLUB_READ)),
-    USER(Sets.newHashSet(USER_READ, USER_WRITE, CLUB_READ, POST_READ, POST_WRITE)),
-    ADMIN(Sets.newHashSet(USER_READ, USER_WRITE, CLUB_READ, CLUB_WRITE, POST_READ, POST_WRITE)),
-    ADMINTRAINEE(Sets.newHashSet(USER_READ, CLUB_READ, POST_READ));
+    ANONYMOUS(Sets.newHashSet(CLUB_READ, INFO_READ,EXERCISE_READ)),
+    USER(Sets.newHashSet(USER_READ, USER_WRITE, CLUB_READ, INFO_READ, POST_READ, POST_WRITE,EXERCISE_READ, EXERCISE_WRITE)),
+    ADMIN(Sets.newHashSet(USER_READ, USER_WRITE, CLUB_READ, CLUB_WRITE, POST_READ, POST_WRITE, INFO_READ, INFO_WRITE,EXERCISE_READ,EXERCISE_WRITE)),
+    ADMINTRAINEE(Sets.newHashSet(USER_READ, CLUB_READ, POST_READ, INFO_READ,EXERCISE_READ));
 
     private final Set<ApplicationUserPermission> permissions;
 

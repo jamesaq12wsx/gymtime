@@ -7,24 +7,22 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Setter
-public class SimpleExerciseAudit extends SimpleExercise implements ExerciseAudit {
+@Getter
+public class SimpleExercisePostAudit extends SimpleExercisePost implements ExercisePost {
 
-    /**
-     * Username
-     */
     private String createdBy;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    public SimpleExerciseAudit(int id, String name, String description, String category, List<String> images, String createdBy, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        super(id, name, description, category, images);
+    public SimpleExercisePostAudit(UUID uuid, LocalDateTime postTime, PostPrivacy privacy, UUID clubUuid, List<PostExercise> exercises, String createdBy, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        super(uuid, postTime, privacy, clubUuid, exercises);
         this.createdBy = createdBy;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

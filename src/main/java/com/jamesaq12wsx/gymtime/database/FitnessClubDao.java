@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface FitnessClubDao extends Dao<FitnessClub> {
+public interface FitnessClubDao extends Dao<FitnessClub, UUID> {
 
     List<FitnessClub> getClubsWithLatAndLon(double latitude, double longitude);
 
