@@ -1,30 +1,19 @@
 package com.jamesaq12wsx.gymtime.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+public interface Country {
 
-import java.util.UUID;
+    int getCountryId();
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class Country {
+    String getCountryName();
 
-    private int id;
+    String getAlphaTwoCode();
 
-    private String name;
+    String getAlphaThreeCode();
 
-    private String alphaTwoCode;
+    String getRegion();
 
-    private String alphaThreeCode;
+    String getNumericCode();
 
-    private String region;
-
-    private String numericCode;
-
-    private String flagUrl;
+    String getFlagUrl();
 
 }

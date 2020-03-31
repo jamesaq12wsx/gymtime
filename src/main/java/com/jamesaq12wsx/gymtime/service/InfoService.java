@@ -1,10 +1,11 @@
 package com.jamesaq12wsx.gymtime.service;
 
+import com.jamesaq12wsx.gymtime.database.BrandDao;
 import com.jamesaq12wsx.gymtime.database.CountryDao;
 import com.jamesaq12wsx.gymtime.database.ExerciseDao;
-import com.jamesaq12wsx.gymtime.model.Country;
+import com.jamesaq12wsx.gymtime.model.BrandWithCountry;
+import com.jamesaq12wsx.gymtime.model.SimpleCountry;
 import com.jamesaq12wsx.gymtime.model.Exercise;
-import com.jamesaq12wsx.gymtime.model.ExerciseAudit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +18,16 @@ public class InfoService {
 
     private final ExerciseDao exerciseDao;
 
+    private final BrandDao brandDao;
+
     @Autowired
-    public InfoService(CountryDao countryDao, ExerciseDao exerciseDao) {
+    public InfoService(CountryDao countryDao, ExerciseDao exerciseDao, BrandDao brandDao) {
         this.countryDao = countryDao;
         this.exerciseDao = exerciseDao;
+        this.brandDao = brandDao;
     }
 
-    public List<Country> getAllCountry(){
+    public List<SimpleCountry> getAllCountry(){
         return countryDao.getAll();
     }
 
@@ -33,5 +37,9 @@ public class InfoService {
 
     public List<Exercise> getAllSimpleExercise(){
         return exerciseDao.getSimpleAll();
+    }
+
+    public List<BrandWithCountry> getAllBrand(){
+        return brandDao.getAllWithCountry();
     }
 }

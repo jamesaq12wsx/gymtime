@@ -1,7 +1,8 @@
 package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.Country;
+import com.jamesaq12wsx.gymtime.model.BrandWithCountry;
+import com.jamesaq12wsx.gymtime.model.SimpleCountry;
 import com.jamesaq12wsx.gymtime.model.Exercise;
 import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
@@ -33,9 +34,15 @@ public class InfoController {
         this.infoService = infoService;
     }
 
+    @GetMapping("/select/brand")
+    @PreAuthorize("hasAuthority('info:read')")
+    public List<BrandWithCountry> getAllBrand(){
+        return infoService.getAllBrand();
+    }
+
     @GetMapping("/select/country")
     @PreAuthorize("hasAuthority('info:read')")
-    public List<Country> getAllCountry(){
+    public List<SimpleCountry> getAllCountry(){
         return infoService.getAllCountry();
     }
 

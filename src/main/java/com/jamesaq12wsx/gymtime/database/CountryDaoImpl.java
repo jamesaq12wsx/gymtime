@@ -1,6 +1,6 @@
 package com.jamesaq12wsx.gymtime.database;
 
-import com.jamesaq12wsx.gymtime.model.Country;
+import com.jamesaq12wsx.gymtime.model.SimpleCountry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -20,12 +20,12 @@ public class CountryDaoImpl implements CountryDao {
     }
 
     @Override
-    public Optional<Country> get(UUID id) {
+    public Optional<SimpleCountry> get(UUID id) {
         return Optional.empty();
     }
 
     @Override
-    public List<Country> getAll() {
+    public List<SimpleCountry> getAll() {
 
         String sql = "select *\n" +
                 " from country";
@@ -46,24 +46,24 @@ public class CountryDaoImpl implements CountryDao {
 
             String flagUrl = resultSet.getString("flag_url");
 
-            return new Country(id, name, alphaTwo, alphaThree, region, numericCode, flagUrl);
+            return new SimpleCountry(id, name, alphaTwo, alphaThree, region, numericCode, flagUrl);
 
         });
 
     }
 
     @Override
-    public void save(Country country) {
+    public void save(SimpleCountry simpleCountry) {
 
     }
 
     @Override
-    public void saveAll(List<? extends Country> tList) {
+    public void saveAll(List<? extends SimpleCountry> tList) {
 
     }
 
     @Override
-    public void update(Country country) {
+    public void update(SimpleCountry simpleCountry) {
 
     }
 
