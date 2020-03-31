@@ -1,20 +1,17 @@
 package com.jamesaq12wsx.gymtime.model;
 
+import javax.persistence.Entity;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public interface FitnessClub {
 
-    UUID getUuid();
+    UUID getClubUuid();
 
-    int getId();
+    int getClubId();
 
-    int getBrandId();
-
-    String getBrandName();
-
-    String getName();
+    String getClubName();
 
     double getLatitude();
 

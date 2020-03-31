@@ -28,7 +28,7 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
     @Override
     public Optional<FitnessClub> get(UUID id) {
 
-        String sql = "select *, fb.name as brand_name, c.name as country_name\n" +
+        String sql = "select *, fb.name as brand_name, fb.id brand_id, c.id country_id, c.name as country_name\n" +
                 "from fitness_club\n" +
                 "join fitness_brand as fb on fitness_club.club_brand = fb.id\n" +
                 "join country as c on c.id = fb.country\n" +
@@ -45,7 +45,7 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
     @Override
     public List<FitnessClub> getAll() {
 
-        String sql = "select *, fb.name as brand_name, c.name as country_name\n" +
+        String sql = "select *, fb.id brand_id, fb.name as brand_name, c.id country_id, c.name as country_name\n" +
                 "from fitness_club as fc\n" +
                 "join fitness_brand as fb on fc.club_brand = fb.id\n" +
                 "join country as c on c.id = fb.country\n";
@@ -200,9 +200,6 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
             String uuidStr = resultSet.getString("club_uid");
             UUID clubUid = UUID.fromString(uuidStr);
 
-            int brandId = resultSet.getInt("club_brand");
-            String brandName = resultSet.getString("brand_name");
-
             int id = resultSet.getInt("club_id");
             String name = resultSet.getString("club_name");
 
@@ -214,11 +211,22 @@ public class FitnessClubDaoImpl implements FitnessClubDao {
             String address = resultSet.getString("address");
             String city = resultSet.getString("city");
             String state = resultSet.getString("state");
+
+            int brandId = resultSet.getInt("brand_id");
+            String brandName = resultSet.getString("brand_name");
+            String icon = resultSet.getString("icon");
+
+            int countryId = resultSet.getInt("country_id");
             String countryName = resultSet.getString("country_name");
+            String alphaTwoCode = resultSet.getString("alpha_two_code");
+            String alphaThreeCode = resultSet.getString("alpha_three_code");
+            String region = resultSet.getString("region");
+            String numericCode = resultSet.getString("numeric_code");
+            String flagUrl = resultSet.getString("flag_url");
 
             Map<String, String> openHours = (Map<String, String>) resultSet.getObject("open_hours");
 
-            return new SimpleFitnessClubWithUserPost(clubUid, brandId, brandName, name, id, latitude, longitude, address, city, state, zipCode, countryName, homeUrl, openHours, null);
+            return new SimpleFitnessClubWithBrandAndCountry(clubUid, name, id, latitude, longitude, address, city, state, zipCode, homeUrl, openHours, brandId, brandName, icon, countryId, countryName, alphaTwoCode, alphaThreeCode, region, numericCode, flagUrl);
         };
     }
 

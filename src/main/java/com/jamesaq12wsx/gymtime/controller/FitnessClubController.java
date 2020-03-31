@@ -32,7 +32,7 @@ public class FitnessClubController {
     }
 
     @GetMapping
-    public List<FitnessClub> getAllFitnessClubs(Principal principal){
+    public List<? extends FitnessClub> getAllFitnessClubs(Principal principal){
         return fitnessClubService.getAllFitnessClubs();
     }
 

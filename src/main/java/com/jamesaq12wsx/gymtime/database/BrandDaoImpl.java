@@ -60,7 +60,7 @@ public class BrandDaoImpl implements BrandDao {
 
         jdbcTemplate.update(
                 insertSql,
-                new Object[]{brandAudit.getName(), brandAudit.getCountryId(), brandAudit.getIcon(), brandAudit.getCreatedBy()});
+                new Object[]{brandAudit.getBrandName(), brandAudit.getCountryId(), brandAudit.getIcon(), brandAudit.getCreatedBy()});
 
     }
 
@@ -80,7 +80,7 @@ public class BrandDaoImpl implements BrandDao {
 
         jdbcTemplate.update(
                 updateSql,
-                new Object[]{brandAudit.getName(), brandAudit.getCountryId(), brandAudit.getIcon(), brandAudit.getId()});
+                new Object[]{brandAudit.getBrandName(), brandAudit.getCountryId(), brandAudit.getIcon(), brandAudit.getBrandId()});
 
     }
 

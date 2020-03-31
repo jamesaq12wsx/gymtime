@@ -1,10 +1,7 @@
 package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.BrandWithCountry;
-import com.jamesaq12wsx.gymtime.model.SimpleCountry;
-import com.jamesaq12wsx.gymtime.model.Exercise;
-import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
+import com.jamesaq12wsx.gymtime.model.*;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
 import com.jamesaq12wsx.gymtime.service.InfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +33,7 @@ public class InfoController {
 
     @GetMapping("/select/brand")
     @PreAuthorize("hasAuthority('info:read')")
-    public List<BrandWithCountry> getAllBrand(){
+    public List<? extends Brand> getAllBrand(){
         return infoService.getAllBrand();
     }
 

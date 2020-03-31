@@ -26,7 +26,7 @@ public class FitnessClubService {
         this.applicationUserDao = applicationUserDao;
     }
 
-    public List<FitnessClub> getAllFitnessClubs(){
+    public List<? extends FitnessClub> getAllFitnessClubs(){
         return fitnessClubDao.getAll();
     }
 

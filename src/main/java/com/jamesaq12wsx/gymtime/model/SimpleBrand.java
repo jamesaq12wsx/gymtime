@@ -5,15 +5,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 public class SimpleBrand implements Brand {
 
-    private int id;
+    private int brandId;
 
-    private String name;
+    private String brandName;
 
     private int countryId;
 

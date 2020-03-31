@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
@@ -15,15 +16,11 @@ import java.util.UUID;
 @Setter
 public class SimpleFitnessClub implements FitnessClub, Serializable {
 
-    private UUID uuid;
+    private UUID clubUuid;
 
-    private int brandId;
+    private String clubName;
 
-    private String brandName;
-
-    private String name;
-
-    private int id;
+    private int clubId;
 
     private double latitude;
 
@@ -36,8 +33,6 @@ public class SimpleFitnessClub implements FitnessClub, Serializable {
     private String state;
 
     private String zipCode;
-
-    private String country;
 
     private String homeUrl;
 
