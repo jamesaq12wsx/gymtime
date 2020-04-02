@@ -1,7 +1,8 @@
 package com.jamesaq12wsx.gymtime.service;
 
-import com.jamesaq12wsx.gymtime.auth.ApplicationUserDao;
-import com.jamesaq12wsx.gymtime.database.FitnessClubDao;
+import com.jamesaq12wsx.gymtime.database.BrandRepository;
+import com.jamesaq12wsx.gymtime.database.CountryRepository;
+import com.jamesaq12wsx.gymtime.database.FitnessClubRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
@@ -9,25 +10,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class FitnessClubService {
 
-    private final FitnessClubDao fitnessClubDao;
+    private final FitnessClubRepository fitnessClubRepository;
 
-    private final ApplicationUserDao applicationUserDao;
+    private final CountryRepository countryRepository;
+
+    private final BrandRepository brandRepository;
 
     @Autowired
-    public FitnessClubService(FitnessClubDao fitnessClubDao, ApplicationUserDao applicationUserDao) {
-        this.fitnessClubDao = fitnessClubDao;
-        this.applicationUserDao = applicationUserDao;
+    public FitnessClubService(FitnessClubRepository fitnessClubRepository, CountryRepository countryRepository, BrandRepository brandRepository) {
+        this.fitnessClubRepository = fitnessClubRepository;
+//        this.applicationUserDao = applicationUserDao;
+        this.countryRepository = countryRepository;
+        this.brandRepository = brandRepository;
     }
 
     public List<? extends FitnessClub> getAllFitnessClubs(){
-        return fitnessClubDao.getAll();
+//        return fitnessClubDao.getAll();
+        return fitnessClubRepository.findAll();
+    }
+
+    public List<? extends FitnessClub> getAllClubsByBrandId(Integer brandId){
+
+        if (!brandRepository.existsById(brandId)){
+            throw new ApiRequestException(String.format("Brand id %s is not existed", brandId));
+        }
+
+        return fitnessClubRepository.findAllByBrand_BrandId(brandId);
     }
 
     /**
@@ -37,30 +51,24 @@ public class FitnessClubService {
      */
     public List<FitnessClubSelectItem> getFitnessSelectItems(String country){
 
-        return fitnessClubDao.getClubItemsByCountryCode(country);
+        return null;
+
+//        return fitnessClubDao.getClubItemsByCountryCode(country);
 
     }
 
-    public List<FitnessClub> getAllFitnessClubsWithLocation(double lat, double lon){
-        return fitnessClubDao.getClubsWithLatAndLon(lat, lon);
+    public FitnessClub getFitnessById(UUID uuid, Principal principal) {
+
+        return fitnessClubRepository.findById(uuid).orElseThrow(() -> new ApiRequestException(String.format("Cannot get club, club id %s is not existed", uuid)));
+
     }
 
-    public FitnessClub getFitnessDetail(UUID uuid, Principal principal) {
+    public List<? extends FitnessClub> getAllFitnessByCountry(String countryCode){
 
-        if (!fitnessClubDao.exist(uuid)){
-            throw new ApiRequestException(String.format("Club id %s is not existed", uuid));
+        if (!countryRepository.existsByAlphaTwoCode(countryCode)){
+            throw new ApiRequestException(String.format("Country code %s is not valid", countryCode));
         }
 
-        if (principal == null || !applicationUserDao.usernameExisted(principal.getName())){
-            return fitnessClubDao.get(uuid).orElseThrow(() -> new ApiRequestException(String.format("The club %s is not existed", uuid.toString())));
-        }else{
-            try {
-                return fitnessClubDao.getClubWithUserPost(uuid, principal.getName()).orElseThrow(() -> new ApiRequestException(String.format("The club %s is not existed", uuid.toString())));
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                throw new ApiRequestException(String.format("Sql statement error"));
-            }
-        }
+        return fitnessClubRepository.findAllByBrand_Country_AlphaTwoCode(countryCode);
     }
 }

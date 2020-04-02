@@ -28,9 +28,9 @@ public class PostRequest {
 
     private PostPrivacy privacy;
 
-    private List<PostExercise> exercises;
+    private List<SimplePostExercise> exercises;
 
-    public List<PostExercise> getExercises() {
+    public List<SimplePostExercise> getExercises() {
 
         if (exercises == null){
             return Collections.EMPTY_LIST;

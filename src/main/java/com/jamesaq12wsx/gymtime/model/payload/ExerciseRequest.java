@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model.payload;
 
+import com.jamesaq12wsx.gymtime.model.ExerciseCategory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class ExerciseRequest {
 
     private String description;
 
-    private String category;
+    private ExerciseCategory category;
 
     private MultipartFile[] images;
 

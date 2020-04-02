@@ -1,8 +1,8 @@
 package com.jamesaq12wsx.gymtime.service;
 
-import com.jamesaq12wsx.gymtime.database.ExercisePostDao;
-import com.jamesaq12wsx.gymtime.database.ExercisePostDaoImpl;
-import com.jamesaq12wsx.gymtime.database.FitnessClubDao;
+import com.jamesaq12wsx.gymtime.database.ExercisePostRepository;
+import com.jamesaq12wsx.gymtime.database.FitnessClubRepository;
+import com.jamesaq12wsx.gymtime.database.PostCountRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.*;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
@@ -22,40 +22,52 @@ import java.util.UUID;
 @Service
 public class ExercisePostService {
 
-    private final ExercisePostDao exercisePostDao;
+    private final ExercisePostRepository exercisePostRepository;
 
-    private final FitnessClubDao fitnessClubDao;
+    private final PostCountRepository postCountRepository;
+
+    private final FitnessClubRepository fitnessClubRepository;
 
     @Autowired
-    public ExercisePostService(ExercisePostDaoImpl exerciseMarkDao, FitnessClubDao fitnessClubDao) {
-        this.exercisePostDao = exerciseMarkDao;
-        this.fitnessClubDao = fitnessClubDao;
+    public ExercisePostService(ExercisePostRepository exercisePostRepository, PostCountRepository postCountRepository, FitnessClubRepository fitnessClubRepository) {
+        this.exercisePostRepository = exercisePostRepository;
+        this.postCountRepository = postCountRepository;
+        this.fitnessClubRepository = fitnessClubRepository;
     }
 
     public List<ExercisePost> getAllPostByUser(Principal principal) {
-        return exercisePostDao.getAllMarksByUser(principal.getName());
+        return exercisePostRepository.findAllByAudit_CreatedBy(principal.getName());
     }
 
     public List<ExercisePost> getAllPostByUserWithYear(String year, Principal principal) {
-        return exercisePostDao.getAllPostsByUserWithYear(year, principal.getName());
+        return exercisePostRepository.findAllByAudit_CreatedByAndYear(principal.getName(), year);
     }
 
-    public void newPost(PostRequest mark, Principal principal) {
+    public ExercisePost newPost(PostRequest mark, Principal principal) {
 
-        if (!fitnessClubDao.exist(mark.getClubUuid())) {
+        if (!fitnessClubRepository.existsById(mark.getClubUuid())) {
             throw new ApiRequestException(String.format("This club id %s is not exist", mark.getClubUuid()));
         }
 
-        exercisePostDao.save(new SimpleExercisePostAudit(null, LocalDateTime.now(), mark.getPrivacy() == null ? PostPrivacy.PRIVATE : mark.getPrivacy(), mark.getClubUuid(), mark.getExercises(), principal.getName(), LocalDateTime.now(), LocalDateTime.now()));
+        SimpleExercisePost newPost = exercisePostRepository.save(
+                new SimpleExercisePost(
+                        null,
+                        LocalDateTime.now(),
+                        mark.getPrivacy() == null ? PostPrivacy.PRIVATE : mark.getPrivacy(),
+                        mark.getClubUuid(),
+                        mark.getExercises(),
+                        new Audit(LocalDateTime.now(), principal.getName(), LocalDateTime.now())));
+
+        return newPost;
     }
 
     public List<PostCount> dailyPost(UUID clubUuid, LocalDate date) {
 
-        if (!fitnessClubDao.exist(clubUuid)) {
+        if (!fitnessClubRepository.existsById(clubUuid)) {
             throw new ApiRequestException(String.format("Club %s not exist", clubUuid.toString()));
         }
 
-        List<PostCount> result = exercisePostDao.getGymHourPost(clubUuid, date == null ? LocalDate.now() : date);
+        List<PostCount> result = postCountRepository.findAllByClub(clubUuid, date == null ? LocalDate.now() : date);
 
         LocalDateTime startOfDay = date.atStartOfDay();
 
@@ -75,24 +87,31 @@ public class ExercisePostService {
         return result;
     }
 
-    public void update(UpdatePostRequest updatePostRequest, Principal principal) {
+    public ExercisePost update(UpdatePostRequest updatePostRequest, Principal principal) {
 
         //  TODO: check username with post
 
-        exercisePostDao.update(
+        SimpleExercisePost updatePost = exercisePostRepository.findById(updatePostRequest.getUuid()).orElse(null);
+
+        if (updatePost == null){
+            throw new ApiRequestException(String.format("Post %s not existed", updatePostRequest.getUuid()));
+        }
+
+        return exercisePostRepository.save(
                 new SimpleExercisePost(
                         updatePostRequest.getUuid(),
                         updatePostRequest.getPostTime(),
                         updatePostRequest.getPrivacy(),
                         updatePostRequest.getClubUuid(),
-                        updatePostRequest.getExercises())
+                        updatePostRequest.getExercises(),
+                        updatePost.getAudit())
         );
 
     }
 
     public void delete(UUID uuid, Principal principal) {
 
-        exercisePostDao.delete(uuid);
+        exercisePostRepository.deleteById(uuid);
 
     }
 }

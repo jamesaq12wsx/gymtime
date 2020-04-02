@@ -7,12 +7,16 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-public interface AuditData {
+public interface Auditable {
 
-    String getCreatedBy();
+    Audit getAudit();
 
-    LocalDateTime getCreatedAt();
+    void setAudit(Audit audit);
 
-    LocalDateTime getUpdatedAt();
+//    String getCreatedBy();
+//
+//    LocalDateTime getCreatedAt();
+//
+//    LocalDateTime getUpdatedAt();
 
 }

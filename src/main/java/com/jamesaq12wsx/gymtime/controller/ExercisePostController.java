@@ -2,11 +2,9 @@ package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
-import com.jamesaq12wsx.gymtime.model.SimpleExercisePostWithClubInfo;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
 import com.jamesaq12wsx.gymtime.model.payload.UpdatePostRequest;
 import com.jamesaq12wsx.gymtime.service.ExercisePostService;
-import javafx.geometry.Pos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +25,11 @@ public class ExercisePostController {
     }
 
 
-    @GetMapping("/{year}")
+    @GetMapping
     @PreAuthorize("hasAuthority('post:read')")
-    public List<ExercisePost> getUserMarks(@PathVariable("year") String year, Principal principal){
-        return exercisePostService.getAllPostByUserWithYear(year, principal);
+    public List<ExercisePost> getUserMarks(Principal principal){
+        return exercisePostService.getAllPostByUser(principal);
+//        return exercisePostService.getAllPostByUserWithYear(year, principal);
     }
 
 //    @GetMapping("/{yearMonth}")

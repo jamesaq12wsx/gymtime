@@ -3,10 +3,33 @@ app:
     jdbc-url: jdbc:postgresql://localhost:5432/gymtime
     username: postgres
     password: password
+  oauth2:
+    # After successfully authenticating with the OAuth2 Provider,
+    # we'll be generating an auth token for the user and sending the token to the
+    # redirectUri mentioned by the frontend client in the /oauth2/authorize request.
+    # We're not using cookies because they won't work well in mobile clients.
+    authorizedRedirectUris:
+      - http://localhost:3000/oauth2/redirect
+#      - myandroidapp://oauth2/redirect
+#      - myiosapp://oauth2/redirect
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+#            clientId: 121189305185277
+#            clientSecret: 42ffe5aa7379e8326387e0fe16f34132
+#              # Note that facebook now mandates the use of https redirect URIs, so make sure your app supports https in production
+#            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
+#            scope:
+#              - email
+#              - public_profile
   profiles:
     active: '@spring.profiles.active@'
+  jpa:
+    show-sql: true
 
 application:
   jwt:

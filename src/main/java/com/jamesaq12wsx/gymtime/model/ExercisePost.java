@@ -1,26 +1,23 @@
 package com.jamesaq12wsx.gymtime.model;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.jamesaq12wsx.gymtime.model.PostPrivacy;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-@JsonSubTypes({ @JsonSubTypes.Type(SimpleExercisePost.class),
-                @JsonSubTypes.Type(SimpleExercisePostAudit.class),
-                @JsonSubTypes.Type(SimpleExercisePostWithClubInfo.class)})
+@JsonDeserialize(as = SimpleExercisePost.class)
 public interface ExercisePost {
 
-    UUID getUuid();
+    UUID getPostUuid();
 
-    LocalDateTime getPostTime();
+    LocalDateTime getExerciseTime();
 
     PostPrivacy getPrivacy();
 
     UUID getClubUuid();
 
-    List<PostExercise> getExercises();
+    List<? extends PostExercise> getExercises();
 
 }

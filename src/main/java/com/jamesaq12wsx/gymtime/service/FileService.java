@@ -25,6 +25,8 @@ import java.util.UUID;
 @Service
 public class FileService {
 
+    private static String IMAGE_URL_ROOT = "http://localhost:8080/api/v1/img";
+
     private static String UPLOAD_ROOT = "upload-dir";
 
     private ResourceLoader resourceLoader;
@@ -53,7 +55,7 @@ public class FileService {
 
                 String newFilename = UUID.randomUUID().toString();
 
-                resultList.add(newFilename+"."+fileExtention);
+                resultList.add(IMAGE_URL_ROOT + "/" +newFilename+"."+fileExtention);
 
                 String filepath = FilenameUtils.concat(UPLOAD_ROOT, newFilename+"."+fileExtention);
                 String smallFilepath = FilenameUtils.concat(UPLOAD_ROOT, newFilename+"-sm."+fileExtention);

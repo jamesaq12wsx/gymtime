@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.controller;
 
+import com.google.common.base.Strings;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.PostCount;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,22 +34,26 @@ public class FitnessClubController {
     }
 
     @GetMapping
-    public List<? extends FitnessClub> getAllFitnessClubs(Principal principal){
+    public List<? extends FitnessClub> getAllFitnessClubs(@PathParam("brand") String brandId, @PathParam("country") String country, Principal principal){
+
         return fitnessClubService.getAllFitnessClubs();
     }
 
-    @GetMapping("/location")
-    public List<FitnessClub> getAllFitnessClubsWithLocation(
-            @RequestParam("lat") double latitude,
-            @RequestParam("lon") double longitude,
-            Principal principal
-    ){
-        return fitnessClubService.getAllFitnessClubsWithLocation(latitude, longitude);
+    @GetMapping("/brand/{brandId}")
+    public List<? extends FitnessClub> getAllFitnessClubsBYBrand(@PathVariable("brandId") Integer brandId, Principal principal){
+
+        return fitnessClubService.getAllClubsByBrandId(Integer.valueOf(brandId));
+    }
+
+    @GetMapping("/country/{countryCode}")
+    public List<? extends FitnessClub> getAllFitnessClubsByCountry(@PathParam("countryCode") String country, Principal principal){
+
+        return fitnessClubService.getAllFitnessByCountry(country);
     }
 
     @GetMapping("/club/{uuid}")
     public FitnessClub getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
-        return fitnessClubService.getFitnessDetail(uuid, principal);
+        return fitnessClubService.getFitnessById(uuid, principal);
     }
 
     @GetMapping("/club/{clubUuid}/posts")

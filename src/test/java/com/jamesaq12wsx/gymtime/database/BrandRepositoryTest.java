@@ -14,15 +14,4 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class BrandRepositoryTest {
 
-    @Autowired
-    private BrandDao brandDao;
-
-    @Test
-    public void testGetAllBrand() throws JsonProcessingException {
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        System.out.println(mapper.writeValueAsString(brandDao.getAll()));
-
-    }
 }

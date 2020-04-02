@@ -45,7 +45,7 @@ public class InfoController {
 
     @GetMapping("/select/club")
     @PreAuthorize("hasAuthority('info:read')")
-    public List<FitnessClubSelectItem> getAllFitnessClubSelectItems(
+    public List<? extends FitnessClub> getAllFitnessClubSelectItems(
             @RequestParam(name = "country", required = false) String alphaTwoCode
     ){
 
@@ -53,12 +53,6 @@ public class InfoController {
             throw new ApiRequestException("No country code");
         }
 
-        return fitnessClubService.getFitnessSelectItems(alphaTwoCode);
-    }
-
-    @GetMapping("/select/exercise")
-    @PreAuthorize("hasAuthority('info:read')")
-    public List<Exercise> getAllExercise(){
-        return infoService.getAllSimpleExercise();
+        return fitnessClubService.getAllFitnessByCountry(alphaTwoCode);
     }
 }

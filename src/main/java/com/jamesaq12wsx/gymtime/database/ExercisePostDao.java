@@ -1,8 +1,6 @@
 package com.jamesaq12wsx.gymtime.database;
 
 import com.jamesaq12wsx.gymtime.model.ExercisePost;
-import com.jamesaq12wsx.gymtime.model.SimpleExercisePost;
-import com.jamesaq12wsx.gymtime.model.SimpleExercisePostWithClubInfo;
 import com.jamesaq12wsx.gymtime.model.PostCount;
 
 import java.time.LocalDate;

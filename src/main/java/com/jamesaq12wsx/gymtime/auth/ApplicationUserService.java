@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.auth;
 
+import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.jwt.SignUpRequest;
 import com.jamesaq12wsx.gymtime.security.PasswordConfig;
@@ -16,20 +17,28 @@ import static com.jamesaq12wsx.gymtime.security.ApplicationUserRole.USER;
 @Service
 public class ApplicationUserService implements SelfUserDetailsService {
 
-    private final ApplicationUserDao applicationUserDao;
+//    private final ApplicationUserDao applicationUserDao;
+
+    private final ApplicationUserRepository applicationUserRepository;
 
     private final PasswordConfig passwordConfig;
 
     @Autowired
-    public ApplicationUserService(@Qualifier("postgres") ApplicationUserDao applicationUserDao, PasswordConfig passwordConfig) {
-        this.applicationUserDao = applicationUserDao;
+    public ApplicationUserService(ApplicationUserRepository applicationUserRepository, PasswordConfig passwordConfig) {
+//        this.applicationUserDao = applicationUserDao;
+        this.applicationUserRepository = applicationUserRepository;
         this.passwordConfig = passwordConfig;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return applicationUserDao.selectApplicationUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("Username %s is not found", username)));
+        ApplicationUser user = applicationUserRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("Username % is not found", username)));
+
+        return user;
+
+//        return applicationUserDao.selectApplicationUserByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException(String.format("Username %s is not found", username)));
     }
 
     @Override
@@ -51,11 +60,30 @@ public class ApplicationUserService implements SelfUserDetailsService {
             throw new ApiRequestException("Password confirm should be same as password");
         }
 
-        if(applicationUserDao.usernameExisted(request.getUsername())){
+//        if(applicationUserDao.usernameExisted(request.getUsername())){
+//            throw new ApiRequestException(String.format("This username %s is taken", request.getUsername()));
+//        }
+
+        if (applicationUserRepository.existsByUsername(request.getUsername())){
             throw new ApiRequestException(String.format("This username %s is taken", request.getUsername()));
         }
 
-        applicationUserDao.save(new ApplicationUser(null,request.getUsername(), request.getPassword(), request.getEmail(), USER,true,true,true,true,null,null));
+        applicationUserRepository.save(
+                new ApplicationUser(
+                        null,
+                        request.getUsername(),
+                        request.getPassword(),
+                        null,
+                        request.getEmail(),
+                        USER,
+                        true,
+                        true,
+                        true,
+                        true,
+                        null,
+                        null));
+
+//        applicationUserDao.save(new ApplicationUser(null,request.getUsername(), request.getPassword(), request.getEmail(), USER,true,true,true,true,null,null));
 
     }
 }

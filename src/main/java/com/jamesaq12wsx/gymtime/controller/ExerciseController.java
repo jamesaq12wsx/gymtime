@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.controller;
 
+import com.jamesaq12wsx.gymtime.model.Exercise;
 import com.jamesaq12wsx.gymtime.model.payload.ExerciseRequest;
 import com.jamesaq12wsx.gymtime.service.ExerciseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/exercise")
@@ -17,6 +19,12 @@ public class ExerciseController {
     @Autowired
     public ExerciseController(ExerciseService exerciseService) {
         this.exerciseService = exerciseService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('exercise:read')")
+    public List<? extends Exercise> getAllExercise(Principal principal){
+        return exerciseService.getAllExercise(principal);
     }
 
     @PreAuthorize("hasAuthority('exercise:write')")

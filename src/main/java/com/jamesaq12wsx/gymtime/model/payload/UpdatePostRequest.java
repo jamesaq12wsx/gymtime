@@ -3,6 +3,7 @@ package com.jamesaq12wsx.gymtime.model.payload;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jamesaq12wsx.gymtime.model.PostExercise;
 import com.jamesaq12wsx.gymtime.model.PostPrivacy;
+import com.jamesaq12wsx.gymtime.model.SimplePostExercise;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,9 +35,9 @@ public class UpdatePostRequest {
 
     private PostPrivacy privacy;
 
-    private List<PostExercise> exercises;
+    private List<SimplePostExercise> exercises;
 
-    public List<PostExercise> getExercises() {
+    public List<SimplePostExercise> getExercises() {
 
         if (exercises == null){
             return Collections.EMPTY_LIST;

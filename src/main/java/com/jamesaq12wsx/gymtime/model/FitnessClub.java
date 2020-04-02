@@ -29,4 +29,9 @@ public interface FitnessClub {
 
     Map<String, String> getOpenHours();
 
+//    List<Mark> getMark();
+////
+////    // :TODO facilities
+////    Map<ClubAmenity, String> getAmesnities();
+
 }
