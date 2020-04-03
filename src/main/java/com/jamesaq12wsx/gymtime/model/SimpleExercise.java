@@ -15,6 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "exercise")
@@ -36,25 +37,16 @@ public class SimpleExercise implements Exercise, Auditable {
 
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "exercise_category")
-    @Type( type = "pgsql_enum" )
-    private ExerciseCategory category;
+    @ManyToMany
+    @JoinTable(
+            name = "exercise_category_exercise",
+            joinColumns = @JoinColumn(name = "exercise_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<SimpleExCategory> category;
 
     @Type(type = "jsonb")
     @Column(name = "images", columnDefinition = "jsonb")
     private List<String> images;
-
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "created_by", referencedColumnName = "username")
-//    @Column(name = "created_by")
-//    private String createdBy;
-//
-//    @Column(name = "created_at", columnDefinition = "TIMESTAMP")
-//    private LocalDateTime createdAt;
-//
-//    @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
-//    private LocalDateTime updatedAt;
 
     @Embedded
     private Audit audit;
