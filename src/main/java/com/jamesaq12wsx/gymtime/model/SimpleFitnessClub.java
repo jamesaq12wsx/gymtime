@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,7 +53,8 @@ public class SimpleFitnessClub implements FitnessClub, Serializable {
     @Column(name = "open_hours", columnDefinition = "hstore")
     private Map<String,String> openHours;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_brand")
     private SimpleBrand brand;
 

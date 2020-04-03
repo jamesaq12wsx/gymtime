@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,7 +42,8 @@ public class SimpleBrand implements Brand, Auditable {
     @Embedded
     private Audit audit;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="country")
     private SimpleCountry country;
 

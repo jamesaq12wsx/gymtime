@@ -26,12 +26,12 @@ import java.util.UUID;
 public class UpdatePostRequest {
 
     @NotNull
-    private UUID uuid;
+    private UUID postUuid;
 
     private UUID clubUuid;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private LocalDateTime postTime;
+    private LocalDateTime exerciseTime;
 
     private PostPrivacy privacy;
 

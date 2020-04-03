@@ -45,16 +45,14 @@ public class ExercisePostService {
 
     public ExercisePost newPost(PostRequest mark, Principal principal) {
 
-        if (!fitnessClubRepository.existsById(mark.getClubUuid())) {
-            throw new ApiRequestException(String.format("This club id %s is not exist", mark.getClubUuid()));
-        }
+        SimpleFitnessClub postClub = fitnessClubRepository.findById(mark.getClubUuid()).orElseThrow(() -> new ApiRequestException(String.format("This club id %s is not exist", mark.getClubUuid())));
 
         SimpleExercisePost newPost = exercisePostRepository.save(
                 new SimpleExercisePost(
                         null,
                         LocalDateTime.now(),
                         mark.getPrivacy() == null ? PostPrivacy.PRIVATE : mark.getPrivacy(),
-                        mark.getClubUuid(),
+                        postClub,
                         mark.getExercises(),
                         new Audit(LocalDateTime.now(), principal.getName(), LocalDateTime.now())));
 
@@ -91,18 +89,20 @@ public class ExercisePostService {
 
         //  TODO: check username with post
 
-        SimpleExercisePost updatePost = exercisePostRepository.findById(updatePostRequest.getUuid()).orElse(null);
+        SimpleExercisePost updatePost = exercisePostRepository
+                .findById(updatePostRequest.getPostUuid())
+                .orElseThrow(() -> new ApiRequestException(String.format("Post %s not existed", updatePostRequest.getPostUuid())));
 
-        if (updatePost == null){
-            throw new ApiRequestException(String.format("Post %s not existed", updatePostRequest.getUuid()));
-        }
+        SimpleFitnessClub postClub = fitnessClubRepository
+                .findById(updatePostRequest.getClubUuid())
+                .orElseThrow(() -> new ApiRequestException(String.format("Club %d not existed", updatePostRequest.getClubUuid())));
 
         return exercisePostRepository.save(
                 new SimpleExercisePost(
-                        updatePostRequest.getUuid(),
-                        updatePostRequest.getPostTime(),
+                        updatePostRequest.getPostUuid(),
+                        updatePostRequest.getExerciseTime(),
                         updatePostRequest.getPrivacy(),
-                        updatePostRequest.getClubUuid(),
+                        postClub,
                         updatePostRequest.getExercises(),
                         updatePost.getAudit())
         );

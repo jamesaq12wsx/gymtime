@@ -46,7 +46,7 @@ public class FitnessClubController {
     }
 
     @GetMapping("/country/{countryCode}")
-    public List<? extends FitnessClub> getAllFitnessClubsByCountry(@PathParam("countryCode") String country, Principal principal){
+    public List<? extends FitnessClub> getAllFitnessClubsByCountry(@PathVariable("countryCode") String country, Principal principal){
 
         return fitnessClubService.getAllFitnessByCountry(country);
     }

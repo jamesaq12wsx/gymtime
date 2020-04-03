@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class SimpleExercisePost implements ExercisePost, Auditable {
 
     @Id
     @Column(name = "post_uuid")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID postUuid;
 
     @Column(name = "post_time")
@@ -38,8 +40,10 @@ public class SimpleExercisePost implements ExercisePost, Auditable {
     @Type( type = "pgsql_enum" )
     private PostPrivacy privacy;
 
-    @Column(name = "location")
-    private UUID clubUuid;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "location")
+    private SimpleFitnessClub club;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "exercise_post_exercise", joinColumns = @JoinColumn(name = "post_uuid"))
@@ -47,6 +51,14 @@ public class SimpleExercisePost implements ExercisePost, Auditable {
 
     @Embedded
     private Audit audit;
+
+    @Override
+    public UUID getClubUuid() {
+        if (club == null){
+            return null;
+        }
+        return club.getClubUuid();
+    }
 
     @PrePersist
     protected void onCreate() {
