@@ -40,7 +40,7 @@ const ExercisePage = (props) => {
             return categories.map((cat, i) => {
                 return (
                     <Panel
-                        header={cat}
+                        header={cat.toUpperCase()}
                         key={i}
                     >
                         <CardList
@@ -54,7 +54,7 @@ const ExercisePage = (props) => {
                                 xxl: 6,
                             }}
                             key={cat}
-                            header={<h1>{cat}</h1>}
+                            // header={<h1>{cat.toUpperCase()}</h1>}
                             cards={getExerciseCards(exercises[cat])} />
                     </Panel>
                 );
@@ -108,13 +108,6 @@ const ExercisePage = (props) => {
                 accordion>
                 {getCategoryList()}
             </Collapse>
-            {/* <Card
-                hoverable
-                style={{ width: 240 }}
-                cover={carousel}
-            >
-                <Meta title="Europe Street beat" description="www.instagram.com" />
-            </Card> */}
         </div>
     )
 }

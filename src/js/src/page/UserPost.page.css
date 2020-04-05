@@ -1,11 +1,10 @@
-.site-calendar-demo-card {
-    width: 80%;
-    margin-left: 10%;
+.post-calendar {
+    /* width: 80%; */
+    /* margin-left: 10%; */
     border: 1px solid #f0f0f0;
     border-radius: 20px;
   }
 
   .day-post{
-      width: 80%;
-      margin-left: 10%;
+      
   }

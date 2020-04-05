@@ -44,13 +44,20 @@ const LoginForm = (props) => {
 
                     dispatch({type:'LOGIN', payload: token});
 
-                    props.onSuccess()
+                    if(props.onSuccess){
+                        props.onSuccess()
+                    }
+
                 }, (err) => {
                     setSubmitting(false);
-                    props.onFailure(err)
+
+                    if(props.onFailure){
+                        props.onFailure(err)
+                    }   
                 });
 
             }}
+
         >
             {({
                 values,

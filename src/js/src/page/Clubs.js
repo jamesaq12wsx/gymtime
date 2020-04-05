@@ -34,7 +34,7 @@ const Clubs = ({ markOnClick, detailOnClick }) => {
         console.log(e);
 
         if (club) {
-            history.push(`/club/${club.uuid.toLowerCase()}`);
+            history.push(`/club/${club.clubUuid.toLowerCase()}`);
             detailOnClick(e, club);
         }
 

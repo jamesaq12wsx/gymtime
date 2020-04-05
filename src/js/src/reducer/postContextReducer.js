@@ -11,14 +11,16 @@ export const postContextReducer = (state, action) => {
             break;
 
         case 'EDITING':
+            
+            // console.log('set editing post', JSON.stringify(action, null, 4));
 
-            state = { ...state, editing: true, editingPost: _.clone(action.payload, true), editingPostChanged: _.clone(action.payload, true) };
+            state = { ...state, editing: true, editingPost: action.post, editingPostChanged: action.payload };
 
             break;
 
         case 'FINISH_EDIT':
 
-            state = { ...state, editing: false, editingPost: null, editingPostChanged: null };
+            state = { ...state, editing: false, editingPost: {}, editingPostChanged: {} };
 
             break;
 

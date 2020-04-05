@@ -7,7 +7,7 @@ import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined }
 import PostChart from '../components/chart/PostChart';
 import { AppContext } from '../context/AppContextProvider';
 import { appContextReducer } from '../reducer/appContextReducer';
-import {quickPost} from '../api/client';
+import { quickPost } from '../api/client';
 import { successNotification, errorNotification } from '../components/Notification';
 
 const { Meta } = Card;
@@ -73,18 +73,19 @@ const ClubDetail = (props) => {
     const [posts, setPosts] = useState([]);
     const [lastWeekPosts, setLastWeekPosts] = useState([]);
 
-    const fetchClub =() => {
+    const fetchClub = () => {
         if (clubUuid) {
 
             setFetchingChartData(true);
 
             console.log('club detail auth', authenticated);
 
-            if (authenticated) {
-                getClubDetailWithToken(clubUuid, jwtToken).then(r => r.json()).then(club => setClub(club));
-            } else {
-                getClubDetailWithToken(clubUuid).then(r => r.json()).then(club => setClub(club));
-            }
+            getClubDetailWithToken(clubUuid)
+                .then(r => r.json())
+                .then(club => {
+                    console.log('get club by id', club);
+                    setClub(club);
+                });
 
             getClubPosts(clubUuid, getDate(new Date(), 0, false)).then(r => r.json()).then(posts => setPosts(posts));
 
@@ -107,18 +108,18 @@ const ClubDetail = (props) => {
             const lastDay = new Date(postDateTimeList[0]);
             const today = new Date();
 
-            if (getDate(lastDay,0,null) === getDate(today,0,null)) {
+            if (getDate(lastDay, 0, null) === getDate(today, 0, null)) {
                 return (
                     <Button shape="round" size="medium" disabled>Exercise(Posted Today)</Button>
                 );
-            }else{
+            } else {
                 return (
                     <Button onClick={markOnClick} type="primary" shape="round" size="medium">
-                Exercise
-            </Button>
+                        Exercise
+                    </Button>
                 );
             }
-        }else{
+        } else {
             return (
                 <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>
                     Exercise
@@ -154,7 +155,7 @@ const ClubDetail = (props) => {
 
         quickPost(clubUuid, jwtToken)
             .then(res => {
-                successNotification('Post Success','You have post an exercise');
+                successNotification('Post Success', 'You have post an exercise');
                 fetchClub();
             })
             .catch(err => {
@@ -295,7 +296,7 @@ const ClubDetail = (props) => {
     return (
         <div>
             <h2>{club.name}</h2>
-            <p>{club.brand}</p>
+            <p>{club.brand.brandName}</p>
             {getDetailList()}
 
             {/* <EmptyBar />

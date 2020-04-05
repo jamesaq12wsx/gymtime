@@ -38,7 +38,7 @@ const ClubList = ({ clubs, markOnClick, detailOnClick }) => {
             dataSource={clubs.slice(0,50)}
             renderItem={item => (
                 <List.Item>
-                    <Card title={item.name}
+                    <Card title={item.clubName}
                         actions={[
                             // <DownCircleTwoTone onClick={(e) => markOnClick(e, item)} twoToneColor="#eb2f96" key="check" />,
                             <MoreOutlined onClick={(e) => detailOnClick(e, item)} key="more" />

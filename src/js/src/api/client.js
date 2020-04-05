@@ -38,7 +38,10 @@ export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/loc
 
 // export const getClubDetail = (uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
 
-export const getClubDetailWithToken = (uuid, token) => {
+export const getClubDetailWithToken = (uuid) => {
+
+    const token = localStorage.getItem('jwtToken');
+
     if(token){
         return fetch(apiRoot + `/clubs/club/${uuid}`,{
             headers: {
@@ -52,7 +55,7 @@ export const getClubDetailWithToken = (uuid, token) => {
 
 export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`).then(checkStatus);
 
-export const getUserYearPost = (year) => fetch(apiRoot + `/post/${year}`, {
+export const getUserPost = (year) => fetch(apiRoot + `/post`, {
     headers: {
         'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
     }
@@ -126,7 +129,7 @@ export const deletePost = (postUuid) => fetch(apiRoot+`/post/${postUuid}`, {
 
 export const getCountryItems = () => fetch(apiRoot + '/info/select/country').then(checkStatus);
 
-export const getAllExercise = () => fetch(apiRoot+'/info/select/exercise').then(checkStatus);
+export const getAllExercise = () => fetch(apiRoot+'/exercise').then(checkStatus);
 
 export const getAllFitness = (country) => fetch(apiRoot + `/select/club?country=${country}`).then(checkStatus); 
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, Badge, Select, Radio, Col, Row, Button, Card, Descriptions, Modal, List } from 'antd';
 import moment from 'moment';
-import { getUserYearPost, deletePost, updatePost } from '../api/client';
+import { getUserPost, deletePost, updatePost } from '../api/client';
 import { errorNotification } from '../components/Notification';
 import { EditOutlined, DeleteOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
 import CardList from '../components/CardList';
@@ -31,9 +31,9 @@ const UserPost = (props) => {
     const history = useHistory();
 
     const postContext = useContext(PostContext);
-    const { state, dispatch } = postContext;
+    const { state: postState, dispatch } = postContext;
 
-    const { posts, editing, editingPost, editingPostChanged } = state;
+    const { posts, editing, editingPost, editingPostChanged } = postState;
 
     useEffect(() => {
 
@@ -43,7 +43,9 @@ const UserPost = (props) => {
 
     useEffect(() => {
 
-        const datePosts = posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD'));
+        const datePosts = posts.filter(p => moment(p.exerciseTime).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD'));
+
+        // console.log('datePosts', datePosts);
 
         setSelectedDatePosts(datePosts);
 
@@ -54,12 +56,12 @@ const UserPost = (props) => {
     }
 
     const getYearPost = (year) => {
-        getUserYearPost(year)
+        getUserPost(year)
             .then(res => res.json())
             .then(posts => {
                 setPosts(posts);
 
-                const datePosts = posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD'));
+                const datePosts = posts.filter(p => moment(p.exerciseTime).format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD'));
 
                 setSelectedDatePosts(datePosts);
             })
@@ -87,7 +89,7 @@ const UserPost = (props) => {
 
         return (
             <React.Fragment>
-                {posts.filter(p => moment(p.postTime).format('YYYY-MM-DD') === date.format('YYYY-MM-DD')).length > 0 ?
+                {posts.filter(p => moment(p.exerciseTime).format('YYYY-MM-DD') === date.format('YYYY-MM-DD')).length > 0 ?
                     <Badge status="warning" /> :
                     <Badge />}
             </React.Fragment>
@@ -101,7 +103,7 @@ const UserPost = (props) => {
 
     const getCalendar = () => {
         return (
-            <div className="site-calendar-demo-card">
+            <div className="post-calendar">
                 <Calendar
                     headerRender={({ value, type, onChange, onTypeChange }) => {
                         const start = 0;
@@ -137,8 +139,12 @@ const UserPost = (props) => {
                         return (
                             <div style={{ padding: 10 }}>
                                 {/* <div style={{ marginBottom: '10px' }}>Custom header </div> */}
-                                <Row style={{ flexWrap: 'nowrap' }} gutter={8}>
+                                <Row
+                                    justify="space-between"
+                                    style={{ flexWrap: 'nowrap' }}
+                                    gutter={8}>
                                     <Col
+                                        span={6}
                                     // style={{ flex: 'none' }}
                                     >
                                         <Group size="small" onChange={e => onTypeChange(e.target.value)} value={type}>
@@ -147,6 +153,7 @@ const UserPost = (props) => {
                                         </Group>
                                     </Col>
                                     <Col
+                                        span={4}
                                     // style={{ flex: 'auto' }}
                                     >
                                         <Select
@@ -163,6 +170,7 @@ const UserPost = (props) => {
                                         </Select>
                                     </Col>
                                     <Col
+                                        span={4}
                                     // style={{ flex: 'auto' }}
                                     >
                                         <Select
@@ -179,9 +187,10 @@ const UserPost = (props) => {
                                         </Select>
                                     </Col>
                                     <Col
-                                        style={{ flex: 'auto' }}
+                                        span={6}
                                     >
                                         <Button
+                                            size='small'
                                             onClick={() => {
                                                 const newDate = selectedDate.clone().add(-1, 'month');
                                                 setToday(newDate);
@@ -190,13 +199,28 @@ const UserPost = (props) => {
                                             }}
                                         >-</Button>
                                         <Button
+                                            size='small'
                                             onClick={() => {
                                                 const newDate = selectedDate.clone().add(1, 'month');
                                                 setToday(newDate);
                                                 setSelectedDate(newDate);
                                             }}
                                         >+</Button>
+
                                     </Col>
+                                    {/* <Col
+                                        span={2}
+                                    >
+                                        <Button
+                                            size='small'
+                                            onClick={() => {
+                                                const newDate = selectedDate.clone().add(1, 'month');
+                                                setToday(newDate);
+                                                setSelectedDate(newDate);
+                                            }}
+                                        >+</Button>
+
+                                    </Col> */}
                                 </Row>
                             </div>
                         );
@@ -233,10 +257,12 @@ const UserPost = (props) => {
     }
 
     const getPostCards = () => {
+
         return selectedDatePosts.map(p => {
+
             return (
                 <Card
-                    id={p.uuid}
+                    id={p.postUuid}
                     actions={[
                         <DeleteOutlined onClick={() => {
                             setSelectDeletePost(p);
@@ -245,12 +271,20 @@ const UserPost = (props) => {
                         <EditOutlined
                             key="edit"
                             onClick={() => {
-                                dispatch({ type: 'EDITING', payload: Object.assign({}, p) });
+                                console.log('edit post on click', p);
+                                dispatch({ type: 'EDITING', post: p});
                             }}
                         />,
                     ]}
                 >
-                    <Meta title={p.clubName} description={moment(p.postTime).format('LT')} />
+                    <Meta
+                        title={
+                            <div className="post-card-title">
+                                <h4 className="post-card-title-club-name">{p.club.clubName}</h4>
+                                <p className="post-card-title-club-brand">{ _.get(p, 'club.brand.brandName', '')}</p>
+                            </div>
+                        }
+                        description={moment(p.exerciseTime).format('YYYY/MM/DD HH:mm')} />
                     <br />
                     {getExercises(p)}
                 </Card>
@@ -259,9 +293,9 @@ const UserPost = (props) => {
     }
 
     const couldSave = () => {
-        if(editing){
+        if (editing) {
             return _.isEqual(editingPostChanged, editingPost);
-        }else{
+        } else {
             return false;
         }
     }
@@ -272,22 +306,11 @@ const UserPost = (props) => {
         <div className="user-post">
             <h3>Daily Workout</h3>
             {getCalendar()}
+
+            <br />
+
             <div className="day-post">
                 <CardList className="daily-post-list" cards={cards} />
-                {/* <List
-                    grid={{
-                        gutter: 16,
-                        xs: 1,
-                        sm: 1,
-                        md: 2,
-                        lg: 2,
-                        xl: 4,
-                        xxl: 3,
-                    }}
-                    dataSource={getPostCards()}
-                    renderItem={item => <List.Item>{item}</List.Item>}
-                > */}
-                {/* </List> */}
             </div>
 
             <Modal
@@ -307,7 +330,7 @@ const UserPost = (props) => {
                     </Button>,
                     <Button key="delete" shape='round' type='danger' onClick={() => {
                         // TODO: DELETE POST
-                        deletePost(selectDeletePost.uuid)
+                        deletePost(selectDeletePost.postUuid)
                             .then(res => {
                                 closeDeleteModal();
                                 getYearPost(selectedDate.format('YYYY'));
@@ -323,7 +346,7 @@ const UserPost = (props) => {
                 ]}
             >
                 <p>Are you sure you want to delete this post?</p>
-                <p>{selectDeletePost ? selectDeletePost.clubName : ''}</p>
+                <p>{selectDeletePost ? `${selectDeletePost.club.clubName}-${selectDeletePost.club.brand.brandName}` : ''}</p>
                 <p>{selectDeletePost ? moment(selectDeletePost.postTime).format('YYYY-MM-DD HH:mm') : ''}</p>
             </Modal>
 
@@ -333,6 +356,10 @@ const UserPost = (props) => {
                 onOk={() => closeDeleteModal()}
                 onCancel={() => {
                     dispatch({ type: 'FINISH_EDIT' });
+                }}
+                style={{
+                    width: '80%',
+                    height: '80%'
                 }}
                 footer={[
                     <Button key="cancel" shape='round' onClick={() => {

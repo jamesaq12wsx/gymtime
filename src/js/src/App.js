@@ -26,6 +26,8 @@ import { clubContextReducerType } from './reducer/clubContextReducer';
 import { FaRunning, FaUserFriends, FaCalendarCheck } from "react-icons/fa";
 import { IoIosFitness } from "react-icons/io";
 import { GiJumpAcross } from "react-icons/gi";
+var _ = require('lodash');
+
 
 const { Header, Content, Footer } = Layout;
 
@@ -91,7 +93,8 @@ const App = (props) => {
     getAllExercise()
       .then(res => res.json())
       .then(exercises => {
-        infoDispatch({ type: 'SET_EXERCISES', payload: groupBy(exercises, 'category') });
+        console.log(groupByExercise(exercises));
+        infoDispatch({ type: 'SET_EXERCISES', payload: groupByExercise(exercises) });
       })
       .catch(err => console.error('Cannot get exercises', err));
 
@@ -117,6 +120,17 @@ const App = (props) => {
       return rv;
     }, {});
   };
+
+  const groupByExercise = (exs) => {
+    return exs.reduce((acc, cur) => {
+      if(cur.category){
+        cur.category.forEach(cat => {
+          (acc[cat.categoryName] = acc[cat.categoryName] || []).push(cur);
+        });
+      }
+      return acc;
+    }, {});
+  }
 
   // useEffect(() => {
 
