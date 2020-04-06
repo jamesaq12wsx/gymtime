@@ -304,7 +304,6 @@ const UserPost = (props) => {
 
     return (
         <div className="user-post">
-            <h3>Daily Workout</h3>
             {getCalendar()}
 
             <br />

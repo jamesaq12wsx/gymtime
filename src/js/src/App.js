@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, Component, useCallback } from '
 import './App.css';
 import Container from './components/Container';
 import { getAllClubsWithLocation, getUserIpInfo, getCountryItems, getAllExercise, getAllClubs, signUp } from './api/client';
+import UserPost from './page/UserPost.page';
 import ClubList from './components/list/ClubList';
 import LoadingList from './components/list/LoadingList';
 import 'antd/dist/antd.css';
@@ -11,7 +12,7 @@ import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
 import AppContextProvider from './context/AppContextProvider';
-import { Modal, Row, Col, Drawer, Button, Layout, Menu } from 'antd';
+import { Modal, Row, Col, Drawer, Button, Layout, Menu, Tooltip } from 'antd';
 import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
@@ -265,7 +266,7 @@ const App = (props) => {
   // }
 
   return (
-    <React.Fragment>
+    <div className="App">
       {/* <div className="App">
         <h1>GYM TIME</h1>
         {getClubList()}
@@ -290,32 +291,32 @@ const App = (props) => {
       </Drawer>
 
       <Router>
-        <div className="App">
 
-          <LoginModal
-            visible={loginModalVisible}
-            onSuccess={() => {
-              closeLoginModal();
-              successNotification('Login Success');
-            }}
-            onFailure={(err) => {
+        <LoginModal
+          visible={loginModalVisible}
+          onSuccess={() => {
+            closeLoginModal();
+            successNotification('Login Success');
+          }}
+          onFailure={(err) => {
 
-              console.error(err);
+            console.error(err);
 
-              const message = err.error.message;
-              const description = err.error.httpStatus;
-              console.log(JSON.stringify(err));
-              errorNotification(message, description);
-            }}
-            onOk={() => closeLoginModal()}
-            onCancel={() => closeLoginModal()}
-            toSignUp={() => {
-              closeLoginModal();
-            }}
-          />
-          {/* A <Switch> looks through its children <Route>s and
+            const message = err.error.message;
+            const description = err.error.httpStatus;
+            console.log(JSON.stringify(err));
+            errorNotification(message, description);
+          }}
+          onOk={() => closeLoginModal()}
+          onCancel={() => closeLoginModal()}
+          toSignUp={() => {
+            closeLoginModal();
+          }}
+        />
+        {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
-          {getHeader()}
+        {getHeader()}
+        <Container>
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path='/signup' component={SignUp} />
@@ -324,29 +325,34 @@ const App = (props) => {
             </Route>
             <Route exact path="/exercise" component={ExercisePage} />
             <Route exact path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
+            <AuthRoute path='/post' component={UserPost} />
             <AuthRoute path='/user' component={User} />
             <AuthRoute exact path='/logout' component={LogoutPage} />
             <Route path="*" component={() => "404 NOT FOUND"} />
           </Switch>
-        </div>
+        </Container>
 
         <Footer>
-          <Row justify="space-between">
+          <Row justify="space-around">
             <Col
               span={2}
             >
               <Link style={{ color: 'rgba(89,89,89)' }} to='/clubs'>
-                <NavBarIcon>
-                  <IoIosFitness size='2rem' />
+                <NavBarIcon pathName="/clubs">
+                  <Tooltip title="Near Clubs">
+                    <IoIosFitness size='2rem' />
+                  </Tooltip>
                 </NavBarIcon>
               </Link>
             </Col>
             <Col
               span={2}
             >
-              <Link style={{ color: 'rgba(89,89,89)' }} to='/user/post'>
-                <NavBarIcon>
-                  <FaCalendarCheck size='2rem' />
+              <Link style={{ color: 'rgba(89,89,89)' }} to='/post'>
+                <NavBarIcon pathName="/post">
+                  <Tooltip title="Check your Exercise">
+                    <FaCalendarCheck size='2rem' />
+                  </Tooltip>
                 </NavBarIcon>
               </Link>
             </Col>
@@ -354,15 +360,17 @@ const App = (props) => {
               span={2}
             >
               <Link style={{ color: 'rgba(89,89,89)' }} to='/exercise'>
-                <NavBarIcon>
-                  <GiJumpAcross size='2rem' />
+                <NavBarIcon pathName="/exercise">
+                  <Tooltip title="All Recommand Exercise">
+                    <GiJumpAcross size='2rem' />
+                  </Tooltip>
                 </NavBarIcon>
               </Link>
             </Col>
           </Row>
         </Footer>
       </Router>
-    </React.Fragment>
+    </div>
   );
 }
 

@@ -1,35 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const hoverStyle = {
-    square: {
-        backgroundColor: 'rgba(163, 163, 163, 0.5)',
-        borderRadius: '5px'
-    },
-    circle: {
-        backgroundColor: 'rgba(163, 163, 163, 0.5)',
-        borderRadius: '30px'
-    }
+    backgroundColor: 'rgba(163, 163, 163, 0.5)',
+    borderRadius: '5px',
 };
 
-const NavBarIcon = (props) => {
+const iconStyle = {
+    width: '40px',
+    height: '40px',
+    padding: '4px'
+}
 
-    const {style='square'} = props;
+const selectStyle = {
+    color: 'rgb(223, 123, 46)'
+}
+
+const NavBarIcon = ({ pathName, children }) => {
+
+    const location = useLocation();
+
+    console.log('nav bar icon location', location);
 
     const [hover, setHover] = useState(false);
+
+    const [style, setStyle] = useState(iconStyle);
 
     const onHover = () => setHover(true);
 
     const hoverMove = () => setHover(false)
 
+    useEffect(() => {
+        let newStyle = iconStyle;
+        if(hover){
+            newStyle = {...newStyle, ...hoverStyle};
+        }
+        if(location.pathname === pathName){
+            newStyle = {...newStyle, ...selectStyle}
+        }
+
+        setStyle(newStyle);
+
+    },[location, hover])
+
     return (
         <div
+            className="nav-bar-icon"
             onMouseEnter={() => onHover()}
             onMouseLeave={() => hoverMove()}
-            style={hover ? hoverStyle[style] : {}}
+            style={style}
         >
-            {props.children}
+            {children}
         </div>
     )
+}
+
+NavBarIcon.defaultProps = {
+    pathName: ''
 }
 
 export default NavBarIcon;

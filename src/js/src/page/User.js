@@ -14,8 +14,8 @@ const User = () => {
     return (
         <div className="user">
             <Switch>
-                <Route exact path={`${match.path}/post`} component={UserPost}></Route>
-                <Route exact path={`${match.path}/post/:postId`} component={ExerciseEdit}></Route>
+                {/* <Route exact path={`${match.path}/post`} component={UserPost}></Route> */}
+                {/* <Route exact path={`${match.path}/post/:postId`} component={ExerciseEdit}></Route> */}
                 <Route exact path={`${match.path}/*`} component={() => <h1>User Detail</h1>}></Route>
             </Switch>
         </div>

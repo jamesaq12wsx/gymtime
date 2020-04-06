@@ -6,7 +6,7 @@ const headerStyle = {
   color: "white",
   borderBotton: "1px solid #E7E7E7",
   textAlign: "center",
-  padding: "20px",
+  padding: "10px",
   position: "fixed",
   left: "0",
   top: "0",
