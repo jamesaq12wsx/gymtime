@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import EmptyBar from '../components/chart/EmptyBar';
 import SimpleMap from '../components/SimpleMap';
-import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button } from 'antd';
+import NewPost from '../page/NewPost.page';
+import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button, Modal } from 'antd';
 import { getClubDetailWithToken, getClubPosts } from '../api/client';
 import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined } from '@ant-design/icons';
 import PostChart from '../components/chart/PostChart';
@@ -9,6 +10,7 @@ import { AppContext } from '../context/AppContextProvider';
 import { appContextReducer } from '../reducer/appContextReducer';
 import { quickPost } from '../api/client';
 import { successNotification, errorNotification } from '../components/Notification';
+import { PostContext } from '../context/PostContextProvider';
 
 const { Meta } = Card;
 
@@ -65,6 +67,10 @@ const ClubDetail = (props) => {
     const { state, dispatch } = appContext;
     const { authenticated, jwtToken } = state;
 
+    const postContext = useContext(PostContext);
+    const { state: postState, dispatch: postDispatch } = postContext;
+    const { newPost } = postState;
+
     const { clubUuid } = props.match.params
     const { currentPosition } = props;
 
@@ -114,7 +120,11 @@ const ClubDetail = (props) => {
                 );
             } else {
                 return (
-                    <Button onClick={markOnClick} type="primary" shape="round" size="medium">
+                    <Button
+                        onClick={markOnClick}
+                        type="primary"
+                        shape="round"
+                        size="medium">
                         Exercise
                     </Button>
                 );
@@ -153,14 +163,16 @@ const ClubDetail = (props) => {
     const markOnClick = () => {
         console.log(`mark ${clubUuid}`);
 
-        quickPost(clubUuid, jwtToken)
-            .then(res => {
-                successNotification('Post Success', 'You have post an exercise');
-                fetchClub();
-            })
-            .catch(err => {
-                errorNotification('Post Fail', err.message);
-            });
+        postDispatch({type: 'NEW_POST', payload: club});
+
+        // quickPost(clubUuid, jwtToken)
+        //     .then(res => {
+        //         successNotification('Post Success', 'You have post an exercise');
+        //         fetchClub();
+        //     })
+        //     .catch(err => {
+        //         errorNotification('Post Fail', err.message);
+        //     });
     }
 
     const getLocationListItem = () => {
@@ -277,6 +289,10 @@ const ClubDetail = (props) => {
         );
     }
 
+    const newPostModalOnCancelHandler = () => {
+        postDispatch({type:'FINISH_NEW_POST'});
+    }
+
     if (!club) {
         return (
             <React.Fragment>
@@ -294,32 +310,21 @@ const ClubDetail = (props) => {
     }
 
     return (
-        <div>
-            <h2>{club.name}</h2>
+        <div className="club-detail">
+            <h2>{club.clubName}</h2>
             <p>{club.brand.brandName}</p>
             {getDetailList()}
 
-            {/* <EmptyBar />
-            <SimpleMap /> */}
+            <Modal
+                visible={newPost}
+                onOk={newPostModalOnCancelHandler}
+                onCancel={newPostModalOnCancelHandler}
+                title={newPost ? `Work Out at ------ ${club.clubName}` : ''}
+            >
+                {newPost ? <NewPost /> : <React.Fragment />}
+            </Modal>
         </div>
     );
 }
-
-ClubDetail.defaultProps = {
-    // club: {
-    //     uuid: '',
-    //     brand: '',
-    //     name: 'ALHAMBRA',
-    //     latitude: 0.0,
-    //     longitude: 0.0,
-    //     address: '',
-    //     city: '',
-    //     state: '',
-    //     zipCode: '',
-    //     homeUrl: '',
-    //     openHours: {},
-    //     distance: 0.0
-    // }
-};
 
 export default ClubDetail;

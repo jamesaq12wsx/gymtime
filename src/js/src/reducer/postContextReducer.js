@@ -10,6 +10,18 @@ export const postContextReducer = (state, action) => {
 
             break;
 
+        case 'NEW_POST':
+
+            state = { ...state, newPost: true,  newPostClub: action.payload || {}};
+
+            break;
+
+        case 'FINISH_NEW_POST': 
+
+            state = {...state, newPost: false, newPostClub: null}
+
+            break;
+
         case 'EDITING':
             
             // console.log('set editing post', JSON.stringify(action, null, 4));
@@ -21,12 +33,6 @@ export const postContextReducer = (state, action) => {
         case 'FINISH_EDIT':
 
             state = { ...state, editing: false, editingPost: {}, editingPostChanged: {} };
-
-            break;
-
-        case 'SET_EDITING_CHANGE': 
-
-            state = {...state, editingPostChanged: action.payload};
 
             break;
 

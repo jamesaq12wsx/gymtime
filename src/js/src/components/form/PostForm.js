@@ -16,11 +16,9 @@ const errorTagStyle = { backgroundColor: '#fc88a1', color: 'white', ...inputBott
 
 const timeFormat = 'HH:mm';
 
-const PostForm = (props) => {
+const PostForm = ({initPost, onSubmit}) => {
 
     const history = useHistory();
-
-    const { initPost } = props;
 
     const initValues = {
         postUuid: initPost.postUuid || '',
@@ -45,8 +43,8 @@ const PostForm = (props) => {
             }}
             onSubmit={(values, { setSubmitting }) => {
 
-                if(props.onSubmit){
-                    props.onSubmit(values);
+                if(onSubmit){
+                    onSubmit(values);
                 }
 
                 setSubmitting(false);

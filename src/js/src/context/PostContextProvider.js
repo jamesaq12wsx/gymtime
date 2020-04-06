@@ -16,7 +16,6 @@ const PostContextProvider = (props) => {
     const initAppState = {
         editing: false,
         editingPost: null,
-        editingPostChanged: null,
         posts: []
     };
 

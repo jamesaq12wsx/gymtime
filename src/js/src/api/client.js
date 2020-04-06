@@ -111,6 +111,15 @@ export const quickPost = (clubUuid, token) => {
     }
 }
 
+export const newPost = (post) => fetch(apiRoot + '/post', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(post)
+}).then(checkStatus);
+
 export const updatePost = (post) => fetch(apiRoot + '/post', {
     method: 'PUT',
     headers: {
