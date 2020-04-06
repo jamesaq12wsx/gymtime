@@ -1,35 +1,34 @@
 import React from "react";
 import { render } from "react-dom";
 
-const headerStyle = {
+const footerStyle = {
   fontSize: "20px",
   color: "white",
-  borderBotton: "1px solid #E7E7E7",
+  borderTop: "1px solid #E7E7E7",
   textAlign: "center",
   padding: "20px",
   position: "fixed",
   left: "0",
-  top: "0",
+  bottom: "0",
   height: "60px",
   width: "100%",
-  backgroundColor: 'rgb(223,123,46)',
-  zIndex: 100
+  backgroundColor: 'white'
 };
 
 const phantomStyle = {
   display: "block",
   padding: "20px",
   height: "60px",
-  width: "100%",
+  width: "100%"
 };
 
-const Header = ({ children }) => {
+const Footer = ({ children }) => {
   return (
-    <div className="header">
+    <div>
       <div style={phantomStyle} />
-      <div style={headerStyle}>{children}</div>
+      <div style={footerStyle}>{children}</div>
     </div>
   );
 }
 
-export default Header
+export default Footer

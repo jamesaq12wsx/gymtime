@@ -26,10 +26,9 @@ import { clubContextReducerType } from './reducer/clubContextReducer';
 import { FaRunning, FaUserFriends, FaCalendarCheck } from "react-icons/fa";
 import { IoIosFitness } from "react-icons/io";
 import { GiJumpAcross } from "react-icons/gi";
+import Footer from './components/Footer';
+import Header from './components/Header';
 var _ = require('lodash');
-
-
-const { Header, Content, Footer } = Layout;
 
 
 const AuthRoute = ({ component: Component, ...rest }) => {
@@ -123,7 +122,7 @@ const App = (props) => {
 
   const groupByExercise = (exs) => {
     return exs.reduce((acc, cur) => {
-      if(cur.category){
+      if (cur.category) {
         cur.category.forEach(cat => {
           (acc[cat.categoryName] = acc[cat.categoryName] || []).push(cur);
         });
@@ -131,19 +130,6 @@ const App = (props) => {
       return acc;
     }, {});
   }
-
-  // useEffect(() => {
-
-  //   fetchingClubs();
-
-  // }, [location]);
-
-  // useEffect(() => {
-  //   getUserIpInfo()
-  //     .then(res => res.json())
-  //     .then(info => appDispatch({type:'SET_IP_INFO', payload: info}))
-  //     .catch(err => console.error(err));
-  // }, []);
 
   const positionHandler = (position) => {
 
@@ -205,19 +191,15 @@ const App = (props) => {
 
   const getHeader = () => {
     return (
-      <div className="header" style={{ margin: '5px' }}>
+      <Header className="header" style={{ marginBottom: '5px', top: '0', height: 50, position: 'sticky', zIndex: 100, background: 'rgb(248,211,195)' }}>
         {getHeaderItems()}
-      </div>
+      </Header>
+      // <div className="header" style={{ margin: '5px' }}>
+      //   {getHeaderItems()}
+      // </div>
     )
   }
 
-  const getLogo = () => {
-    return (
-      <Link to='/clubs'>
-        <h3>GymTime</h3>
-      </Link>
-    )
-  }
 
   const getHeaderItems = () => {
 
@@ -225,56 +207,18 @@ const App = (props) => {
       return (
         <Row>
           <Col span={4}>
-            {getLogo()}
-          </Col>
-          <Col
-            span={2}
-            offset={4}
-          >
-            <Link style={{ color: 'rgba(89,89,89)' }} to='/clubs'>
-              <NavBarIcon>
-                <IoIosFitness size='2rem' />
-              </NavBarIcon>
+            <Link to='/clubs'>
+              <h3 className="logo">GymTime</h3>
             </Link>
           </Col>
-          <Col
-            span={2}
-            offset={1}
-          >
-            <Link style={{ color: 'rgba(89,89,89)' }} to='/user/post'>
-              <NavBarIcon>
-                <FaCalendarCheck size='2rem' />
-              </NavBarIcon>
-            </Link>
-          </Col>
-          <Col
-            span={2}
-            offset={1}
-          >
-            <Link style={{ color: 'rgba(89,89,89)' }} to='/exercise'>
-              <NavBarIcon>
-                <GiJumpAcross size='2rem' />
-              </NavBarIcon>
-            </Link>
-          </Col>
-          {/* <Col
-            span={2}
-            offset={1}
-          >
-            <Link style={{ color: 'rgba(89,89,89)' }} to='/posts'>
-              <NavBarIcon>
-                <FaUserFriends size='2rem' />
-              </NavBarIcon>
-            </Link>
-          </Col> */}
-          <Col span={2} offset={6} >
+          <Col span={2} offset={18} >
             <NavBarIcon>
               <SettingOutlined
                 onClick={() => {
                   console.log('setting clicked');
                   openSideBar();
                 }}
-                style={{ fontSize: '20px', marginTop: '7px' }}
+                style={{ fontSize: '20px' }}
               />
             </NavBarIcon>
           </Col>
@@ -284,7 +228,9 @@ const App = (props) => {
       return (
         <Row>
           <Col span={8} offset={9}>
-            {getLogo()}
+            <Link to='/clubs'>
+              <h3 className="logo">GymTime</h3>
+            </Link>
           </Col>
           <Col span={1} offset={6}>
             <LoginOutlined
@@ -319,7 +265,7 @@ const App = (props) => {
   // }
 
   return (
-    <Container>
+    <React.Fragment>
       {/* <div className="App">
         <h1>GYM TIME</h1>
         {getClubList()}
@@ -383,8 +329,40 @@ const App = (props) => {
             <Route path="*" component={() => "404 NOT FOUND"} />
           </Switch>
         </div>
+
+        <Footer>
+          <Row justify="space-between">
+            <Col
+              span={2}
+            >
+              <Link style={{ color: 'rgba(89,89,89)' }} to='/clubs'>
+                <NavBarIcon>
+                  <IoIosFitness size='2rem' />
+                </NavBarIcon>
+              </Link>
+            </Col>
+            <Col
+              span={2}
+            >
+              <Link style={{ color: 'rgba(89,89,89)' }} to='/user/post'>
+                <NavBarIcon>
+                  <FaCalendarCheck size='2rem' />
+                </NavBarIcon>
+              </Link>
+            </Col>
+            <Col
+              span={2}
+            >
+              <Link style={{ color: 'rgba(89,89,89)' }} to='/exercise'>
+                <NavBarIcon>
+                  <GiJumpAcross size='2rem' />
+                </NavBarIcon>
+              </Link>
+            </Col>
+          </Row>
+        </Footer>
       </Router>
-    </Container>
+    </React.Fragment>
   );
 }
 

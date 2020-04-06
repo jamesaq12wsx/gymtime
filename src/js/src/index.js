@@ -7,6 +7,7 @@ import AppContextProvider from './context/AppContextProvider';
 import ClubContextProvider from './context/ClubContextProvider';
 import InfoContextProvider, { InfoContext } from './context/InfoContextProvider';
 import PostContextProvider from './context/PostContextProvider';
+import {Router} from 'react-router-dom'
 
 ReactDOM.render(
     <AppContextProvider>

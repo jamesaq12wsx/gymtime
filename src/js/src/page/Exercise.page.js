@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Card, Carousel, List, Collapse } from 'antd';
+import { Card, Carousel, List, Collapse, Affix } from 'antd';
 import CardList from '../components/CardList';
 import './Exercise.page.css';
 import { InfoContext } from '../context/InfoContextProvider';
@@ -103,6 +103,7 @@ const ExercisePage = (props) => {
 
     return (
         <div className="exercise-page">
+            <h2>Exercise</h2>
             <Collapse
                 defaultActiveKey={0}
                 accordion>
