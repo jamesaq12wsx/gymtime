@@ -95,7 +95,7 @@ public class ExercisePostService {
 
         SimpleFitnessClub postClub = fitnessClubRepository
                 .findById(updatePostRequest.getClubUuid())
-                .orElseThrow(() -> new ApiRequestException(String.format("Club %d not existed", updatePostRequest.getClubUuid())));
+                .orElse(null);
 
         return exercisePostRepository.save(
                 new SimpleExercisePost(

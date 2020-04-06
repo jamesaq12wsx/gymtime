@@ -37,7 +37,7 @@ public class SimpleExercise implements Exercise, Auditable {
 
     private String description;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "exercise_category_exercise",
             joinColumns = @JoinColumn(name = "exercise_id"),

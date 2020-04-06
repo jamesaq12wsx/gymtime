@@ -40,7 +40,7 @@ public class ExercisePostController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public void exerciseMark(@RequestBody PostRequest post, Principal principal){
+    public void newPost(@RequestBody PostRequest post, Principal principal){
         exercisePostService.newPost(post, principal);
     }
 
