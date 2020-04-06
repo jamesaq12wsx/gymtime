@@ -7,3 +7,11 @@
   .ant-carousel .slick-slide h3 {
     color: #fff;
   }
+
+  .ant-carousel .slick-dots li button {
+    background: chocolate;
+  }
+
+  .ant-carousel .slick-dots li.slick-active button {
+    background: coral;
+  }

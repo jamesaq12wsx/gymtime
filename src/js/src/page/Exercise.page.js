@@ -86,13 +86,13 @@ const ExercisePage = (props) => {
     const getCardCarouselCover = (images) => {
         return (
             <Carousel
-                effect="fade"
+                effect="scrollx"
             >
                 {images.map((img, i) => {
                     return (
                         <img
                             height="300"
-                            src={`/api/v1/img/${img}`}
+                            src={img}
                             style={{ width: 240 }}
                         />
                     );
@@ -103,7 +103,6 @@ const ExercisePage = (props) => {
 
     return (
         <div className="exercise-page">
-            <h2>Exercise</h2>
             <Collapse
                 defaultActiveKey={0}
                 accordion>
