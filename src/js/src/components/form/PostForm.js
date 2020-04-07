@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, Input, Tag, Row, Col, TimePicker, Tooltip } from 'antd';
+import { Button, Input, Tag, Row, Col, TimePicker, Tooltip, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { Formik } from 'formik';
 import { Link, useHistory } from 'react-router-dom';
@@ -9,6 +9,7 @@ import moment from 'moment';
 import { InfoContext } from '../../context/InfoContextProvider';
 import ExerciseSelect from '../ExerciseSelect';
 var _ = require('lodash');
+const { Title } = Typography;
 
 const inputBottomStyle = { marginBottom: '5px' };
 
@@ -16,7 +17,7 @@ const errorTagStyle = { backgroundColor: '#fc88a1', color: 'white', ...inputBott
 
 const timeFormat = 'HH:mm';
 
-const PostForm = ({initPost, onSubmit}) => {
+const PostForm = ({ initPost, onSubmit }) => {
 
     const history = useHistory();
 
@@ -43,7 +44,7 @@ const PostForm = ({initPost, onSubmit}) => {
             }}
             onSubmit={(values, { setSubmitting }) => {
 
-                if(onSubmit){
+                if (onSubmit) {
                     onSubmit(values);
                 }
 
@@ -66,6 +67,8 @@ const PostForm = ({initPost, onSubmit}) => {
                 /* and other goodies */
             }) => (
                     <form onSubmit={handleSubmit}>
+                        <Title level={4}>Club</Title>
+
                         <ClubSelect
                             clubs={infoState.clubs}
                             name="club"
@@ -76,6 +79,7 @@ const PostForm = ({initPost, onSubmit}) => {
 
                         <br />
 
+                        <Title level={4}>Time</Title>
                         <TimePicker
                             name="exerciseTime"
                             defaultValue={moment(values.exerciseTime)}
@@ -87,18 +91,23 @@ const PostForm = ({initPost, onSubmit}) => {
 
                         <br />
 
+                        
+                        <Title level={4}>Exercises</Title>
+                        <br />
                         {
                             values.exercises.map((ex, i) => {
                                 // console.log('exercise input', ex);
                                 return (
                                     <React.Fragment key={i}>
-                                        <br />
-                                        <Input.Group>
+                                        <Input.Group name={`exercise-${i}`}>
                                             <Row gutter={8}>
-                                                <ExerciseSelect 
-                                                    value={ex.name} 
+                                                <ExerciseSelect
+                                                    name={`exercise-name-${i}`}
+                                                    value={ex.name}
                                                     onChange={(value) => values.exercises[i].name = value} />
+                                                <br />
                                                 <Input
+                                                    name={`exercise-description-${i}`}
                                                     style={{ width: 200 }}
                                                     value={ex.description}
                                                     onChange={(e) => {
@@ -108,6 +117,7 @@ const PostForm = ({initPost, onSubmit}) => {
                                                     }} />
                                             </Row>
                                         </Input.Group>
+                                        <br />
                                     </React.Fragment>
                                 );
                             })
