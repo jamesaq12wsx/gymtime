@@ -2,6 +2,8 @@ package com.jamesaq12wsx.gymtime.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -24,6 +26,19 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException e){
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                HttpStatus.FORBIDDEN,
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, HttpStatus.FORBIDDEN);
+
+    }
+
+    @ExceptionHandler(value = AuthenticationException.class)
+    public ResponseEntity<Object> handleBadCredentialException(AuthenticationException e){
 
         ApiException apiException = new ApiException(
                 e.getMessage(),

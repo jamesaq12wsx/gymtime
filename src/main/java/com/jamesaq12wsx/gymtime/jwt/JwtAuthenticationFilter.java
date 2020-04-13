@@ -1,7 +1,10 @@
 package com.jamesaq12wsx.gymtime.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jamesaq12wsx.gymtime.exception.ApiException;
+import com.jamesaq12wsx.gymtime.model.payload.UsernameAndPasswordAuthenticationRequest;
 import io.jsonwebtoken.Jwts;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -37,7 +41,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     .readValue(request.getInputStream(), UsernameAndPasswordAuthenticationRequest.class);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    authenticationRequest.getUsername(),
+                    authenticationRequest.getEmail(),
                     authenticationRequest.getPassword()
             );
 
@@ -74,5 +78,26 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.addHeader(jwtConfig.getAuthorizationHeader(),  jwtConfig.getTokenPrefix()+ " " + token);
 
 //        super.successfulAuthentication(request, response, chain, authResult);
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+
+        logger.debug(String.format("Credential login failed: %s", failed.getMessage()));
+
+        ApiException apiException = new ApiException(
+                failed.getMessage(),
+                HttpStatus.FORBIDDEN,
+                LocalDateTime.now()
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getOutputStream().println(mapper.writeValueAsString(apiException));
+
+//        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+//                mapper.writeValueAsString(apiException));
+
+//        super.unsuccessfulAuthentication(request, response, failed);
     }
 }

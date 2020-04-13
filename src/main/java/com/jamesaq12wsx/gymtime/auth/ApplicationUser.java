@@ -1,54 +1,64 @@
 package com.jamesaq12wsx.gymtime.auth;
 
 import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
+import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
 @Table(name = "gym_time_user")
+@TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ApplicationUser implements UserDetails {
+public class ApplicationUser {
 
     //    final private Set<? extends  GrantedAuthority> grantedAuthorities;
     @Id
     @Column(name = "user_uuid")
     private UUID uuid;
 
-    private String username;
+    @Email
+    @Column(nullable = false)
+    private String email;
+
+    @Column(name = "name")
+    private String name;
 
     private String password;
 
-    @Column(name = "facebook_id")
-    private String facebookId;
+    @Column(name = "image_url")
+    private String imageUrl;
 
-    private String email;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider")
+    private AuthProvider authProvider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "email_verify")
+    private boolean emailVerify;
 
     @Enumerated(EnumType.STRING)
     private ApplicationUserRole role;
 
-    @Transient
-    private boolean isAccountNonExpired;
-
-    @Transient
-    private boolean isAccountNonLocked;
-
-    @Transient
-    private boolean isCredentialsNonExpired;
-
-    @Column(name = "is_enable")
-    private boolean isEnabled;
+    @Type(type = "hstore")
+    @Column(name = "attributes", columnDefinition = "hstore")
+    private Map<String, Object> attributes;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -56,58 +66,18 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getGrantedAuthorities();
+    @PrePersist
+    public void beforeInsert(){
+        LocalDateTime now = LocalDateTime.now();
+        this.uuid = UUID.randomUUID();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
-//    @Override
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    @Override
-//    public String getUsername() {
-//        return username;
-//    }
-//
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    @PreUpdate
+    public void beforeUpdate(){
+        LocalDateTime now = LocalDateTime.now();
+        this.updatedAt = now;
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-//
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-//
-//    public UUID getUuid() {
-//        return uuid;
-//    }
-//
-//    public String getEmail() {
-//        return email;
-//    }
-//
-//    public ApplicationUserRole getRole() {
-//        return role;
-//    }
-//
-//    public LocalDateTime getCreatedAt() {
-//        return createdAt;
-//    }
-//
-//    public LocalDateTime getUpdatedAt() {
-//        return updatedAt;
-//    }
 }

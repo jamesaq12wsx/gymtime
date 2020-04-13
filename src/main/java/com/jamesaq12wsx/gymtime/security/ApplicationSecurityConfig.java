@@ -1,6 +1,11 @@
 package com.jamesaq12wsx.gymtime.security;
 
 import com.jamesaq12wsx.gymtime.auth.ApplicationUserService;
+import com.jamesaq12wsx.gymtime.auth.AuthenticationFailureHandler;
+import com.jamesaq12wsx.gymtime.auth.oauth2.CustomOAuth2UserService;
+import com.jamesaq12wsx.gymtime.auth.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.jamesaq12wsx.gymtime.auth.oauth2.OAuth2AuthenticationFailureHandler;
+import com.jamesaq12wsx.gymtime.auth.oauth2.OAuth2AuthenticationSuccessHandler;
 import com.jamesaq12wsx.gymtime.jwt.JwtAuthenticationFilter;
 import com.jamesaq12wsx.gymtime.jwt.JwtConfig;
 import com.jamesaq12wsx.gymtime.jwt.JwtTokenVerifier;
@@ -14,12 +19,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 import javax.crypto.SecretKey;
-
-import static com.jamesaq12wsx.gymtime.security.ApplicationUserRole.USER;
 
 
 @Configuration
@@ -32,34 +35,73 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
 
+    private final HttpCookieOAuth2AuthorizationRequestRepository auth2AuthorizationRequestRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
+    private final AuthenticationFailureHandler authenticationFailureHandler;
+
     @Autowired
-    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService, SecretKey secretKey, JwtConfig jwtConfig) {
+    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService, SecretKey secretKey, JwtConfig jwtConfig, HttpCookieOAuth2AuthorizationRequestRepository auth2AuthorizationRequestRepository, CustomOAuth2UserService customOAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler, AuthenticationFailureHandler authenticationFailureHandler) {
         this.passwordEncoder = passwordEncoder;
         this.applicationUserService = applicationUserService;
         this.secretKey = secretKey;
         this.jwtConfig = jwtConfig;
+
+        this.auth2AuthorizationRequestRepository = auth2AuthorizationRequestRepository;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+        this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
+
+        this.authenticationFailureHandler = authenticationFailureHandler;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-//              use csrf when client is browser
-//                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//                .and()
+                .requiresChannel()
+                    .anyRequest()
+                    .requiresSecure()
+                    .and()
+                .cors()
+                    .and()
                 .csrf().disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                .oauth2Login()
+                    .authorizationEndpoint()
+                        .authorizationRequestRepository(auth2AuthorizationRequestRepository)
+                    .and()
+                    .successHandler(oAuth2AuthenticationSuccessHandler)
+                    .failureHandler(oAuth2AuthenticationFailureHandler)
+                    .userInfoEndpoint()
+                        .userService(customOAuth2UserService)
+                .and().and()
+//                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
+                .addFilter(tokenAuthenticationFilter())
+//                .addFilterBefore(new ExceptionTranslationFilter(
+//                        new Http403ForbiddenEntryPoint(),
+//                ))
+//                    .exceptionHandling()
                 .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig), JwtAuthenticationFilter.class)
                 .antMatcher("/**").authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/v1/clubs/**").permitAll()
                 .antMatchers("/api/v1/auth/check").hasAuthority("user:read")
                 .antMatchers("/api/v1/auth/signup").permitAll()
-//                .antMatchers("/api/**").hasRole(USER.name())
                 .anyRequest()
                 .authenticated();
+    }
+
+    @Bean
+    AbstractAuthenticationProcessingFilter tokenAuthenticationFilter() throws Exception {
+        final AbstractAuthenticationProcessingFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey);
+        filter.setAuthenticationManager(authenticationManager());
+//        filter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        // maybe error handling to provide some custom response?
+        return filter;
     }
 
     @Override
