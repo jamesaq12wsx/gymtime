@@ -1,5 +1,6 @@
 import fetch from 'unfetch';
 import { MdRoom } from 'react-icons/md';
+import { ACCESS_TOKEN } from '../components/constants';
 
 const apiRoot = '/api/v1';
 
@@ -21,7 +22,9 @@ const checkStatus = response => {
 }
 
 export const getAllClubs = () => {
-    const jwtToken = localStorage.getItem('jwtToken')
+    
+    const jwtToken = localStorage.getItem(ACCESS_TOKEN);
+
     if(jwtToken){
         return fetch(apiRoot + '/clubs', {
             headers: {
@@ -40,7 +43,7 @@ export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/loc
 
 export const getClubDetailWithToken = (uuid) => {
 
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem(ACCESS_TOKEN);
 
     if(token){
         return fetch(apiRoot + `/clubs/club/${uuid}`,{
@@ -57,7 +60,7 @@ export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${c
 
 export const getUserPost = (year) => fetch(apiRoot + `/post`, {
     headers: {
-        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
     }
 }).then(checkStatus);
 
@@ -83,11 +86,11 @@ export const login = (values) => fetch(
     }
 ).then(checkStatus);
 
-export const checkToken = async (token) => {
+export const checkToken = async () => {
 
     let response = await fetch(apiRoot + '/auth/check', {
         headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
         }
     });
 
@@ -114,7 +117,7 @@ export const quickPost = (clubUuid, token) => {
 export const newPost = (post) => fetch(apiRoot + '/post', {
     method: 'POST',
     headers: {
-        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
         'Content-Type': 'application/json'
     },
     body: JSON.stringify(post)
@@ -123,7 +126,7 @@ export const newPost = (post) => fetch(apiRoot + '/post', {
 export const updatePost = (post) => fetch(apiRoot + '/post', {
     method: 'PUT',
     headers: {
-        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
         'Content-Type': 'application/json'
     },
     body: JSON.stringify(post)
@@ -132,7 +135,7 @@ export const updatePost = (post) => fetch(apiRoot + '/post', {
 export const deletePost = (postUuid) => fetch(apiRoot+`/post/${postUuid}`, {
     method: 'DELETE',
     headers: {
-        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
     }
 }).then(checkStatus);
 

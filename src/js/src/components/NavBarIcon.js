@@ -20,7 +20,7 @@ const NavBarIcon = ({ pathName, children }) => {
 
     const location = useLocation();
 
-    console.log('nav bar icon location', location);
+    // console.log('nav bar icon location', location);
 
     const [hover, setHover] = useState(false);
 

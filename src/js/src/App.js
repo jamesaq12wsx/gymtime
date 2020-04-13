@@ -29,6 +29,7 @@ import { IoIosFitness } from "react-icons/io";
 import { GiJumpAcross } from "react-icons/gi";
 import Footer from './components/Footer';
 import Header from './components/Header';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
 var _ = require('lodash');
 
 
@@ -206,7 +207,7 @@ const App = (props) => {
 
     if (authenticated) {
       return (
-        <Row>
+        <Row justify="space-between">
           <Col span={4}>
             <Link to='/clubs'>
               <h3 className="logo">GymTime</h3>
@@ -227,17 +228,20 @@ const App = (props) => {
       );
     } else {
       return (
-        <Row>
-          <Col span={8} offset={9}>
+        <Row justify="space-between">
+          <Col span={4}>
             <Link to='/clubs'>
               <h3 className="logo">GymTime</h3>
             </Link>
           </Col>
-          <Col span={1} offset={6}>
-            <LoginOutlined
-              onClick={() => openLoginModal()}
-              style={{ fontSize: '20px', marginTop: '7px' }}
-            />
+          <Col span={2}>
+            <NavBarIcon>
+              <Link to='/login' style={{ color: 'white' }}>
+                <LoginOutlined
+                  style={{ fontSize: '20px', marginTop: '7px' }}
+                />
+              </Link>
+            </NavBarIcon>
           </Col>
         </Row>
       );
@@ -318,13 +322,14 @@ const App = (props) => {
         {getHeader()}
         <Container>
           <Switch>
-            <Route exact path="/login" component={Login} />
+            <Route exact path={["/login/:error", "/login"]} component={Login} />
             <Route exact path='/signup' component={SignUp} />
             <Route exact path={['', "/clubs"]}>
               <Clubs markOnClick={listMarkOnClickHandler} detailOnClick={listDetailOnClickHander} />
             </Route>
             <Route exact path="/exercise" component={ExercisePage} />
             <Route exact path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
+            <Route path="/oauth2/redirect" component={OAuth2RedirectHandler}></Route>
             <AuthRoute path='/post' component={UserPost} />
             <AuthRoute path='/user' component={User} />
             <AuthRoute exact path='/logout' component={LogoutPage} />

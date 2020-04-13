@@ -1,4 +1,5 @@
 import { checkToken } from '../api/client';
+import { ACCESS_TOKEN } from '../components/constants';
 
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
@@ -12,13 +13,13 @@ export const appContextReducer = (state, action) => {
 
             const jwtToken = action.payload;
 
-            state = { ...state, authenticated: true, jwtToken: jwtToken };
+            state = { ...state, authenticated: true, ACCESS_TOKEN: jwtToken };
 
             break;
 
         case LOGOUT:
 
-            state = { ...state, authenticated: false, jwtToken: '' };
+            state = { ...state, authenticated: false, ACCESS_TOKEN: '' };
 
             break;
 

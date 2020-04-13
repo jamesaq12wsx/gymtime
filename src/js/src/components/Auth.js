@@ -1,12 +1,13 @@
 import { login, signUp, checkToken } from '../api/client';
 import decode from 'jwt-decode';
 import { wait } from '@testing-library/react';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from './constants';
 
 class Auth {
 
     constructor() {
-        this.jwtToken = localStorage.getItem('jwtToken');
-        this.refreshToken = localStorage.getItem('refreshToken');
+        this.accessToken = localStorage.getItem(ACCESS_TOKEN);
+        this.refreshToken = localStorage.getItem(REFRESH_TOKEN);
         this.authenticated = this.isAuthenticated();
         this.serverCheck = false;
     }
@@ -32,11 +33,11 @@ class Auth {
 
                 const token = res.headers.get('Authorization').slice(7);
 
-                this.jwtToken = token;
+                this.accessToken = token;
 
                 this.authenticated = true;
 
-                localStorage.setItem('jwtToken', token);
+                localStorage.setItem(ACCESS_TOKEN, token);
 
                 if(cb){
                     cb(token);
@@ -44,9 +45,9 @@ class Auth {
 
             })
             .catch(err => {
-                this.jwtToken = '';
+                this.accessToken = '';
                 this.authenticated = false;
-                localStorage.setItem('jwtToken', '');
+                localStorage.setItem(ACCESS_TOKEN, '');
 
                 errCb(err);
             })
@@ -56,7 +57,7 @@ class Auth {
 
         console.log('logout');
 
-        localStorage.setItem('jwtToken', '');
+        localStorage.setItem(ACCESS_TOKEN, '');
 
         if(cb){
             cb();
@@ -65,15 +66,15 @@ class Auth {
     }
 
     getToken() {
-        return localStorage.getItem('jwtToken');
+        return localStorage.getItem(ACCESS_TOKEN);
     }
 
     isAuthenticated() {
 
-        const token = localStorage.getItem('jwtToken') || '';
+        const token = localStorage.getItem(ACCESS_TOKEN) || '';
 
         if(token === ''){
-            localStorage.setItem('jwtToken', '');
+            localStorage.setItem(ACCESS_TOKEN, '');
 
             return false;
         }
@@ -87,9 +88,9 @@ class Auth {
 
                 this.authenticated = false;
 
-                this.jwtToken = '';
+                this.accessToken = '';
 
-                localStorage.setItem('jwtToken', '');
+                localStorage.setItem(ACCESS_TOKEN, '');
 
             }else{
 
@@ -111,7 +112,7 @@ class Auth {
 
                 }else{
                     
-                    localStorage.setItem('jwtToken', '');
+                    localStorage.setItem(ACCESS_TOKEN, '');
 
                     this.authenticated = false;
 
@@ -123,7 +124,7 @@ class Auth {
 
         }catch(e) {
             
-            localStorage.setItem('jwtToken', '');
+            localStorage.setItem(ACCESS_TOKEN, '');
 
             this.authenticated = false;
 

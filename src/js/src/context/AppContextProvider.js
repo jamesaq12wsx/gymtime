@@ -12,7 +12,7 @@ const AppContextProvider = (props) => {
     const initAppState = {
         auth: auth,
         authenticated: false,
-        jwtToken: '',
+        accessToken: '',
         user: {},
         location: {},
         fetchedLocation: false

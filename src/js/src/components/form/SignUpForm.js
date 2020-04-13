@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { Button, Input, Tag, Row, Col } from 'antd';
 import { Formik } from 'formik';
 import { AppContext } from '../../context/AppContextProvider';
@@ -12,11 +12,11 @@ const errorTagStyle = { backgroundColor: '#fc88a1', color: 'white', ...inputBott
 const SignUpForm = (props) => {
 
     const appContext = useContext(AppContext);
-    const {state, dispatch} = appContext;
+    const { state, dispatch } = appContext;
 
     return (
         <Formik
-            initialValues={{ username: '', password: '', passwordConfirm: '', email: '' }}
+            initialValues={{ username: '', email: '', password: '', passwordConfirm: '' }}
             validate={values => {
                 const errors = {};
 
@@ -26,36 +26,36 @@ const SignUpForm = (props) => {
 
                 if (!values.password) {
                     errors.password = 'Password is Required';
-                }else{
+                } else {
                     const res = values.password.match(passwordReg);
-                    if(!res){
+                    if (!res) {
                         errors.password = 'Password format is not valid';
-                    }else{
-                        if(res[0].localeCompare(values.password) !== 0){
+                    } else {
+                        if (res[0].localeCompare(values.password) !== 0) {
                             errors.password = 'Email format is not valid';
                         }
                     }
                 }
 
                 if (!values.passwordConfirm) {
-                    errors.password = 'Confirm password is Required';
-                }else{
-                    if(values.passwordConfirm.localeCompare(values.password) !== 0){
+                    errors.passwordConfirm = 'Confirm password is Required';
+                } else {
+                    if (values.passwordConfirm.localeCompare(values.password) !== 0) {
                         errors.passwordConfirm = 'Must as same as password';
                     }
                 }
 
                 if (!values.email) {
                     errors.email = 'Email is Required';
-                }else{
+                } else {
                     let emailReg = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/g;
 
                     const regResult = values.email.match(emailReg);
 
-                    if(!regResult){
+                    if (!regResult) {
                         errors.email = 'Email format is not valid';
-                    }else{
-                        if(regResult[0].localeCompare(values.email) !== 0){
+                    } else {
+                        if (regResult[0].localeCompare(values.email) !== 0) {
                             errors.email = 'Email format is not valid';
                         }
                     }
@@ -78,18 +78,39 @@ const SignUpForm = (props) => {
                 /* and other goodies */
             }) => (
                     <form onSubmit={handleSubmit}>
+
+                        <h2>Sign up GymTime</h2>
+
                         <Input
+                            size="large"
                             style={inputBottomStyle}
-                            type="username"
-                            name="username"
+                            type="name"
+                            name="name"
                             onChange={handleChange}
                             onBlur={handleBlur}
                             value={values.username}
-                            placeholder="Username"
+                            placeholder="Your Name"
                         />
-                        {errors.username && touched.username &&
-                            <Tag style={errorTagStyle}> {errors.username}</Tag>}
+                        {errors.name && touched.usernamename && <Tag style={errorTagStyle}> {errors.name}</Tag>}
+
+                        <br />
+
                         <Input
+                            size="large"
+                            style={inputBottomStyle}
+                            type="email"
+                            name="email"
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.email}
+                            placeholder="Your Email"
+                        />
+                        {errors.email && touched.email && <Tag style={errorTagStyle}> {errors.email}</Tag>}
+
+                        <br />
+
+                        <Input
+                            size="large"
                             style={inputBottomStyle}
                             type="password"
                             name="password"
@@ -100,9 +121,12 @@ const SignUpForm = (props) => {
                         />
                         {errors.password && touched.password && <Tag style={errorTagStyle}> {errors.password}</Tag>}
 
+                        <br />
+
                         <Input
+                            size="large"
                             style={inputBottomStyle}
-                            type="password"
+                            type="passwordConfirm"
                             name="passwordConfirm"
                             onChange={handleChange}
                             onBlur={handleBlur}
@@ -111,27 +135,15 @@ const SignUpForm = (props) => {
                         />
                         {errors.passwordConfirm && touched.passwordConfirm && <Tag style={errorTagStyle}> {errors.passwordConfirm}</Tag>}
 
-                        <Input
-                            style={inputBottomStyle}
-                            type="email"
-                            name="email"
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.email}
-                            placeholder="Eamil"
-                        />
-                        {errors.email && touched.email && <Tag style={errorTagStyle}> {errors.email}</Tag>}
-
-                        <Row>
-                            <Col span={2} offset={20}>
-                                <Button
-                                    onClick={submitForm}
-                                    type="submit"
-                                    disabled={isSubmitting | (touched && !isValid)}>
-                                    SignUp
-                                </Button>
-                            </Col>
-                        </Row>
+                        <Button
+                            block
+                            size="large"
+                            style={{backgroundColor: 'rgb(223, 123, 46)', color: 'white', marginTop: 30}}
+                            onClick={submitForm}
+                            type="submit"
+                            disabled={isSubmitting | (touched && !isValid)}>
+                            SignUp
+                        </Button>
                     </form>
                 )}
         </Formik>

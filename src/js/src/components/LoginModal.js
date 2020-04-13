@@ -1,6 +1,8 @@
 import React from 'react';
 import LoginForm from './form/LoginForm';
-import { Modal } from 'antd';
+import { Modal, Divider } from 'antd';
+import SocialLogin from './SocialLogin';
+import Login from '../page/Login';
 
 const LoginModal = ({ visible, onOk, onCancel, onSuccess, onFailure, toSignUp }) => {
 
@@ -12,11 +14,17 @@ const LoginModal = ({ visible, onOk, onCancel, onSuccess, onFailure, toSignUp })
             onCancel={onCancel}
 
         >
-            <LoginForm
+            {/* <LoginForm
                 onSuccess={onSuccess}
                 onFailure={onFailure}
                 toSignUp={toSignUp}
             />
+
+            <Divider> OR </Divider>
+
+            <SocialLogin /> */}
+
+            <Login />
 
         </Modal>
     );
