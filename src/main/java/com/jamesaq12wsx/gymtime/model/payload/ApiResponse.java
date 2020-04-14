@@ -5,17 +5,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
-public class ApiResponse {
+@AllArgsConstructor
+public class ApiResponse<T> {
 
     private boolean success;
+
     private String message;
 
-    public ApiResponse(boolean success, String message) {
-        this.success = success;
-        this.message = message;
-    }
+    private T result;
+
+    private final LocalDateTime timestamp = LocalDateTime.now();
 
 }

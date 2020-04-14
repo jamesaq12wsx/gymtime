@@ -1,12 +1,17 @@
 package com.jamesaq12wsx.gymtime.exception;
 
+import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
+import org.springframework.boot.web.reactive.error.ErrorAttributes;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
@@ -14,54 +19,66 @@ import java.time.LocalDateTime;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(value = ApiRequestException.class)
-    public ResponseEntity<Object> handleApiRequestException(ApiRequestException e){
-        ApiException apiException = new ApiException(
+    @ResponseBody
+    public ResponseEntity<Object> handleApiRequestException(HttpServletRequest request, ApiRequestException e){
+
+        ApiResponse apiResponse = new ApiResponse(
+                false,
                 e.getMessage(),
-                HttpStatus.BAD_REQUEST,
-                LocalDateTime.now()
+                null
         );
 
-        return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException e){
+    public ResponseEntity<Object> handleAccessDeniedException(HttpServletRequest request, AccessDeniedException e){
 
-        ApiException apiException = new ApiException(
+        ApiResponse apiResponse = new ApiResponse(
+                false,
                 e.getMessage(),
-                HttpStatus.FORBIDDEN,
-                LocalDateTime.now()
+                null
         );
 
-        return new ResponseEntity<>(apiException, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(apiResponse, HttpStatus.UNAUTHORIZED);
 
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     public ResponseEntity<Object> handleBadCredentialException(AuthenticationException e){
 
-        ApiException apiException = new ApiException(
+        ApiResponse apiResponse = new ApiResponse(
+                false,
                 e.getMessage(),
-                HttpStatus.FORBIDDEN,
-                LocalDateTime.now()
+                null
         );
 
-        return new ResponseEntity<>(apiException, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(apiResponse, HttpStatus.FORBIDDEN);
 
     }
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Object> handleApiInternalException(Exception e){
+//    @ExceptionHandler(value = Exception.class)
+//    public ResponseEntity<Object> handleApiInternalException(HttpServletRequest request, Exception e){
+//
+//        e.printStackTrace();
+//
+//        HttpStatus status = getStatus(request);
+//
+//        ApiException apiException = new ApiException(
+//                e.getMessage(),
+//                status,
+//                LocalDateTime.now()
+//        );
+//
+//        return new ResponseEntity<>(apiException, status);
+//    }
 
-        e.printStackTrace();
-
-        ApiException apiException = new ApiException(
-                e.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                LocalDateTime.now()
-        );
-
-        return new ResponseEntity<>(apiException, HttpStatus.INTERNAL_SERVER_ERROR);
+    private HttpStatus getStatus(HttpServletRequest request) {
+        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        if (statusCode == null) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return HttpStatus.valueOf(statusCode);
     }
 
 }

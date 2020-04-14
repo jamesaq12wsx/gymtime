@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 import javax.crypto.SecretKey;
@@ -42,8 +43,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AuthenticationFailureHandler authenticationFailureHandler;
 
+    private final AccessDeniedHandler accessDeniedHandler;
+
     @Autowired
-    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService, SecretKey secretKey, JwtConfig jwtConfig, HttpCookieOAuth2AuthorizationRequestRepository auth2AuthorizationRequestRepository, CustomOAuth2UserService customOAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler, AuthenticationFailureHandler authenticationFailureHandler) {
+    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService, SecretKey secretKey, JwtConfig jwtConfig, HttpCookieOAuth2AuthorizationRequestRepository auth2AuthorizationRequestRepository, CustomOAuth2UserService customOAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler, AuthenticationFailureHandler authenticationFailureHandler, AccessDeniedHandler accessDeniedHandler) {
         this.passwordEncoder = passwordEncoder;
         this.applicationUserService = applicationUserService;
         this.secretKey = secretKey;
@@ -55,6 +58,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
 
         this.authenticationFailureHandler = authenticationFailureHandler;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Override
@@ -92,7 +96,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/auth/check").hasAuthority("user:read")
                 .antMatchers("/api/v1/auth/signup").permitAll()
                 .anyRequest()
-                .authenticated();
+                .authenticated()
+                .and()
+                .exceptionHandling()
+                    .accessDeniedHandler(accessDeniedHandler);
     }
 
     @Bean
