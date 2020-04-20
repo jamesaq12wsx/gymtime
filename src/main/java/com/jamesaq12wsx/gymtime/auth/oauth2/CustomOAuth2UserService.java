@@ -1,6 +1,6 @@
 package com.jamesaq12wsx.gymtime.auth.oauth2;
 
-import com.jamesaq12wsx.gymtime.auth.ApplicationUser;
+import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.jamesaq12wsx.gymtime.auth.UserPrincipal;
 import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
@@ -68,6 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.setProviderId(oAuth2UserInfo.getId());
         user.setName(oAuth2UserInfo.getName());
         user.setEmail(oAuth2UserInfo.getEmail());
+        user.setEmailVerify(true);
         user.setImageUrl(oAuth2UserInfo.getImageUrl());
         user.setRole(ApplicationUserRole.USER);
         return userRepository.save(user);

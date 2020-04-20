@@ -8,13 +8,17 @@ import java.util.Set;
 @JsonSubTypes({@JsonSubTypes.Type(SimpleExercise.class)})
 public interface Exercise {
 
-    int getId();
+    Integer getId();
 
     String getName();
 
     String getDescription();
 
-    Set<? extends ExCategory> getCategory();
+    MuscleGroup getMuscleGroup();
+
+    Muscle getPrimaryMuscle();
+
+    Muscle getSecondaryMuscle();
 
     List<String> getImages();
 

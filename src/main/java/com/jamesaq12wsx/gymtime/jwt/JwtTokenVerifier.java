@@ -73,8 +73,8 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
                     username,
                     null,
                     simpleGrantedAuthorities
-
             );
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         }catch (JwtException e){

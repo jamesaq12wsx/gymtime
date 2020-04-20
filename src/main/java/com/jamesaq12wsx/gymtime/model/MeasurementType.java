@@ -2,14 +2,18 @@ package com.jamesaq12wsx.gymtime.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
+import lombok.Setter;
 
-public enum PostPrivacy {
-    PUBLIC("public"),
-    PRIVATE("private");
+public enum MeasurementType {
+
+    DISTANCE("distance"),
+    HEIGHT("height"),
+    WEIGHT("weight"),
+    DURATION("duration");
 
     private String value;
 
-    PostPrivacy(String value) {
+    MeasurementType(String value) {
         this.value = value;
     }
 
@@ -23,9 +27,10 @@ public enum PostPrivacy {
     }
 
     @JsonCreator
-    public static PostPrivacy getEnum(String value) {
-        for(PostPrivacy v : values())
+    public static MeasurementType getEnum(String value) {
+        for(MeasurementType v : values())
             if(v.getValue().equalsIgnoreCase(value)) return v;
         throw new IllegalArgumentException();
     }
+
 }

@@ -1,11 +1,9 @@
 package com.jamesaq12wsx.gymtime.controller;
 
-import com.google.common.base.Strings;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.PostCount;
-import com.jamesaq12wsx.gymtime.model.payload.ClubPostHourCount;
-import com.jamesaq12wsx.gymtime.service.ExercisePostService;
+import com.jamesaq12wsx.gymtime.service.PostService;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
@@ -25,12 +22,12 @@ public class FitnessClubController {
 
     private final FitnessClubService fitnessClubService;
 
-    private final ExercisePostService exercisePostService;
+    private final PostService postService;
 
     @Autowired
-    public FitnessClubController(FitnessClubService fitnessClubService, ExercisePostService exercisePostService) {
+    public FitnessClubController(FitnessClubService fitnessClubService, PostService postService) {
         this.fitnessClubService = fitnessClubService;
-        this.exercisePostService = exercisePostService;
+        this.postService = postService;
     }
 
     @GetMapping
@@ -59,7 +56,7 @@ public class FitnessClubController {
     @GetMapping("/club/{clubUuid}/posts")
     @PreAuthorize("permitAll()")
     public List<PostCount> getClubDailyPostNoDate(@PathVariable("clubUuid") UUID clubUuid){
-        return exercisePostService.dailyPost(clubUuid, LocalDate.now());
+        return postService.dailyPost(clubUuid, LocalDate.now());
     }
 
     @GetMapping("/club/{clubUuid}/posts/{date}")
@@ -70,7 +67,7 @@ public class FitnessClubController {
 
             LocalDate date = LocalDate.parse(dateStr);
 
-            return exercisePostService.dailyPost(clubUuid, date);
+            return postService.dailyPost(clubUuid, date);
 
         }catch (DateTimeParseException e){
             e.printStackTrace();

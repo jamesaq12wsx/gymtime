@@ -1,11 +1,6 @@
 package com.jamesaq12wsx.gymtime.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
+import com.jamesaq12wsx.gymtime.model.entity.Audit;
 
 public interface Auditable {
 

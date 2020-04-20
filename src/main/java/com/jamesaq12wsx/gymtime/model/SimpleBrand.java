@@ -1,14 +1,13 @@
 package com.jamesaq12wsx.gymtime.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.jamesaq12wsx.gymtime.model.entity.Audit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.lang.annotation.Target;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fitness_brand")

@@ -3,6 +3,7 @@ package com.jamesaq12wsx.gymtime.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamesaq12wsx.gymtime.exception.ApiException;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
+import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.util.CookieUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -15,6 +16,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 
 import static com.jamesaq12wsx.gymtime.auth.oauth2.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
@@ -25,27 +27,18 @@ public class AuthenticationFailureHandler extends SimpleUrlAuthenticationFailure
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
-        ApiException apiException = new ApiException(
+        ApiResponse apiResponse = new ApiResponse(
+                false,
                 exception.getMessage(),
-                HttpStatus.FORBIDDEN,
-                LocalDateTime.now()
+                null
         );
 
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        OutputStream out = response.getOutputStream();
         ObjectMapper mapper = new ObjectMapper();
-
-        response.getOutputStream().println(
-                mapper.writeValueAsString(apiException)
-        );
-
-//        String targetUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
-//                .map(Cookie::getValue)
-//                .orElse(("/"));
-//
-//        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
-//                .queryParam("error", exception.getLocalizedMessage())
-//                .build().toUriString();
-
-//        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        mapper.writeValue(out, apiResponse);
+        out.flush();
 
     }
 

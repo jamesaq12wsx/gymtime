@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -19,6 +20,6 @@ public class ApiResponse<T> {
 
     private T result;
 
-    private final LocalDateTime timestamp = LocalDateTime.now();
+    private final OffsetDateTime timestamp = OffsetDateTime.now();
 
 }

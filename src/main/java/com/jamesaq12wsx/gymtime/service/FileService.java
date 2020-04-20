@@ -17,10 +17,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class FileService {
@@ -37,6 +35,10 @@ public class FileService {
     }
 
     public List<String> saveImages(MultipartFile[] files){
+
+        if (files == null || files.length == 0){
+            return Collections.emptyList();
+        }
 
         List<String> resultList = new ArrayList<>();
 

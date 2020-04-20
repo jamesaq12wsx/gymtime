@@ -1,13 +1,15 @@
 package com.jamesaq12wsx.gymtime.model.payload;
 
-import com.jamesaq12wsx.gymtime.model.SimpleExCategory;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jamesaq12wsx.gymtime.model.MeasurementType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Set;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,13 +17,22 @@ import java.util.Set;
 @Setter
 public class ExerciseRequest {
 
-    private int id;
-
+    @NotBlank
     private String name;
 
-    private String description;
+    private String description = "";
 
-    private Set<SimpleExCategory> category;
+    private final MeasurementType measurementType = MeasurementType.WEIGHT;
+
+    @NotNull
+    @JsonProperty("muscleGroup")
+    private Integer muscleGroupId;
+
+    @JsonProperty("primaryMuscle")
+    private Integer primaryMuscleId;
+
+    @JsonProperty("secondaryMuscle")
+    private Integer secondaryMuscleId;
 
     private MultipartFile[] images;
 

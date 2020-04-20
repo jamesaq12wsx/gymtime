@@ -2,9 +2,11 @@ package com.jamesaq12wsx.gymtime.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamesaq12wsx.gymtime.exception.ApiException;
+import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.model.payload.UsernameAndPasswordAuthenticationRequest;
 import io.jsonwebtoken.Jwts;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -85,15 +87,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         logger.debug(String.format("Credential login failed: %s", failed.getMessage()));
 
-        ApiException apiException = new ApiException(
+        ApiResponse apiResponse = new ApiResponse(
+                false,
                 failed.getMessage(),
-                HttpStatus.FORBIDDEN,
-                LocalDateTime.now()
+                null
         );
 
         ObjectMapper mapper = new ObjectMapper();
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getOutputStream().println(mapper.writeValueAsString(apiException));
+        response.getOutputStream().println(mapper.writeValueAsString(apiResponse));
 
 //        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
 //                mapper.writeValueAsString(apiException));

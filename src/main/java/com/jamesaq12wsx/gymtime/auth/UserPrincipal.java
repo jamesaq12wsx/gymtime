@@ -1,11 +1,11 @@
 package com.jamesaq12wsx.gymtime.auth;
 
+import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 

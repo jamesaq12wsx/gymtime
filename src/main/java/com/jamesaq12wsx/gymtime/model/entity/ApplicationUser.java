@@ -1,5 +1,7 @@
-package com.jamesaq12wsx.gymtime.auth;
+package com.jamesaq12wsx.gymtime.model.entity;
 
+import com.jamesaq12wsx.gymtime.auth.AuthProvider;
+import com.jamesaq12wsx.gymtime.model.Auditable;
 import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.AllArgsConstructor;
@@ -8,12 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,10 +25,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ApplicationUser {
+public class ApplicationUser implements Auditable, Serializable {
 
-    //    final private Set<? extends  GrantedAuthority> grantedAuthorities;
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_uuid")
     private UUID uuid;
 
@@ -60,24 +61,33 @@ public class ApplicationUser {
     @Column(name = "attributes", columnDefinition = "hstore")
     private Map<String, Object> attributes;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Embedded
+    private UserInfo userInfo;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Embedded
+    private UserUnitSetting userUnitSetting;
 
-    @PrePersist
-    public void beforeInsert(){
-        LocalDateTime now = LocalDateTime.now();
-        this.uuid = UUID.randomUUID();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
+    @Embedded
+    private Audit audit;
 
-    @PreUpdate
-    public void beforeUpdate(){
-        LocalDateTime now = LocalDateTime.now();
-        this.updatedAt = now;
-    }
+//    @Column(name = "created_at")
+//    private LocalDateTime createdAt;
+//
+//    @Column(name = "updated_at")
+//    private LocalDateTime updatedAt;
+
+//    @PrePersist
+//    public void beforeInsert(){
+//        LocalDateTime now = LocalDateTime.now();
+//        this.uuid = UUID.randomUUID();
+//        this.createdAt = now;
+//        this.updatedAt = now;
+//    }
+//
+//    @PreUpdate
+//    public void beforeUpdate(){
+//        LocalDateTime now = LocalDateTime.now();
+//        this.updatedAt = now;
+//    }
 
 }

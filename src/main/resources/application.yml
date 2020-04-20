@@ -24,8 +24,11 @@ spring:
             ## Note that facebook now mandates the use of https redirect URIs, so make sure your app supports https in production
 #            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
-              - email
               - public_profile
+              - email
+              - user_birthday
+              - user_photos
+              - user_gender
           google:
             clientId: 431441829487-gvihsd5tqvb93ok7rpu79t0b9gdthtrf.apps.googleusercontent.com
             clientSecret: Mr4S1hoKlgAnusUK3w_gZGY9
@@ -62,7 +65,7 @@ server:
     key-store-password: Asd!5951
     key-alias: gymtime
     key-password: Asd!5951
-  port: 8443
+  port: 8080
 
 #security:
 #  require-ssl: true

@@ -2,6 +2,9 @@ package com.jamesaq12wsx.gymtime.auth;
 
 import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
+import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
+import com.jamesaq12wsx.gymtime.model.entity.UserInfo;
+import com.jamesaq12wsx.gymtime.model.entity.UserUnitSetting;
 import com.jamesaq12wsx.gymtime.model.payload.SignUpRequest;
 import com.jamesaq12wsx.gymtime.security.PasswordConfig;
 import com.jamesaq12wsx.gymtime.validator.EmailValidator;
@@ -13,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.UUID;
 
 import static com.jamesaq12wsx.gymtime.security.ApplicationUserRole.USER;
@@ -35,10 +39,11 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
         ApplicationUser user = applicationUserRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("Email % is not found", username)));
 
-        if (user.getAuthProvider() != AuthProvider.LOCAL){
+        if (user.getAuthProvider() != AuthProvider.LOCAL) {
             throw new BadCredentialsException(
                     String.format("Looks like Email %s has sign up with %s, you should use %s to login",
                             user.getEmail(),
@@ -78,15 +83,15 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
         EmailValidator emailValidator = new EmailValidator();
 
-        if (!emailValidator.test(request.getEmail())){
+        if (!emailValidator.test(request.getEmail())) {
             throw new ApiRequestException(String.format("The email %s is not valid email", request.getEmail()));
         }
 
-        if (!passwordValidator.test(request.getPassword())){
+        if (!passwordValidator.test(request.getPassword())) {
             throw new ApiRequestException(String.format("The password %s is not valid", request.getPassword()));
         }
 
-        if(!request.getPassword().equals(request.getPasswordConfirm())){
+        if (!request.getPassword().equals(request.getPasswordConfirm())) {
             throw new ApiRequestException("Password confirm should be same as password");
         }
 
@@ -105,5 +110,48 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
 //        applicationUserDao.save(new ApplicationUser(null,request.getUsername(), request.getPassword(), request.getEmail(), USER,true,true,true,true,null,null));
 
+    }
+
+    @Override
+    public ApplicationUser loadUserInfoByEmail(String email) {
+        return applicationUserRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiRequestException(String.format("Username %s not found", email)));
+    }
+
+    @Override
+    public ApplicationUser updateUserUnitSetting(String email, UserUnitSetting userUnitSetting) {
+
+        ApplicationUser updateUser = applicationUserRepository.findByEmail(email).get();
+
+        UserUnitSetting preSetting = updateUser.getUserUnitSetting();
+
+        if (preSetting.getWeightUnit() == userUnitSetting.getWeightUnit() &&
+                preSetting.getHeightUnit() == userUnitSetting.getHeightUnit() &&
+                preSetting.getDistanceUnit() == userUnitSetting.getDistanceUnit()) {
+            return updateUser;
+        }
+
+        updateUser.setUserUnitSetting(userUnitSetting);
+
+        return applicationUserRepository.save(updateUser);
+    }
+
+    @Override
+    public ApplicationUser updateUserInfo(String email, UserInfo userInfo) {
+
+        ApplicationUser updateUser = applicationUserRepository.findByEmail(email).get();
+
+        UserInfo preInfo = updateUser.getUserInfo();
+
+        if (preInfo.getHeight() == userInfo.getHeight() &&
+                preInfo.getWeight() == userInfo.getWeight() &&
+                preInfo.getGender() == userInfo.getGender() &&
+                preInfo.getBirthday().equals(userInfo.getBirthday())) {
+            return updateUser;
+        }
+
+        updateUser.setUserInfo(userInfo);
+
+        return applicationUserRepository.save(updateUser);
     }
 }
