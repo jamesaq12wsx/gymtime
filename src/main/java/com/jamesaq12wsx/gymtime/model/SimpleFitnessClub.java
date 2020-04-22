@@ -31,6 +31,7 @@ import java.util.UUID;
 public class SimpleFitnessClub implements FitnessClub, Serializable, Auditable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "club_uid")
     private UUID clubUuid;
 

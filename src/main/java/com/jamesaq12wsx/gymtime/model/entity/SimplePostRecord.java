@@ -1,10 +1,9 @@
 package com.jamesaq12wsx.gymtime.model.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jamesaq12wsx.gymtime.model.SimpleExercise;
 import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
-import com.jamesaq12wsx.gymtime.model.SimplePost;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +30,7 @@ public class SimplePostRecord {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_uuid", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
+    @JsonIgnoreProperties("records")
     private SimplePost post;
 
     @OneToOne(fetch = FetchType.LAZY)

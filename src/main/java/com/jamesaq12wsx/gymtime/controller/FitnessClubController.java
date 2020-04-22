@@ -1,8 +1,10 @@
 package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
+import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
 import com.jamesaq12wsx.gymtime.model.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.PostCount;
+import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.service.PostService;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/clubs")
+@RequestMapping("api/v1/club")
 public class FitnessClubController {
 
     private final FitnessClubService fitnessClubService;
@@ -30,44 +32,55 @@ public class FitnessClubController {
         this.postService = postService;
     }
 
-    @GetMapping
-    public List<? extends FitnessClub> getAllFitnessClubs(@PathParam("brand") String brandId, @PathParam("country") String country, Principal principal){
+//    @GetMapping
+//    public ApiResponse<List<? extends FitnessClub>> getAllFitnessClubs(@PathParam("brand") String brandId, @PathParam("country") String country, Principal principal){
+//
+//        List<? extends FitnessClub> result =  fitnessClubService.getAllFitnessClubs();
+//
+//        return ApiResponseBuilder.createSuccessResponse(result);
+//    }
 
-        return fitnessClubService.getAllFitnessClubs();
+    @GetMapping
+    public ApiResponse<List<? extends FitnessClub>> getClubByLocation(@PathParam("lat") Double lat, @PathParam("lng") Double lng){
+
+        List<? extends FitnessClub> result = fitnessClubService.getClubByLocation(lat, lng);
+
+        return ApiResponseBuilder.createSuccessResponse(result);
+
     }
 
     @GetMapping("/brand/{brandId}")
-    public List<? extends FitnessClub> getAllFitnessClubsBYBrand(@PathVariable("brandId") Integer brandId, Principal principal){
+    public ApiResponse<List<? extends FitnessClub>> getAllFitnessClubsBYBrand(@PathVariable("brandId") Integer brandId, Principal principal){
 
-        return fitnessClubService.getAllClubsByBrandId(Integer.valueOf(brandId));
+        return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getAllClubsByBrandId(Integer.valueOf(brandId)));
     }
 
     @GetMapping("/country/{countryCode}")
-    public List<? extends FitnessClub> getAllFitnessClubsByCountry(@PathVariable("countryCode") String country, Principal principal){
+    public ApiResponse<List<? extends FitnessClub>> getAllFitnessClubsByCountry(@PathVariable("countryCode") String country, Principal principal){
 
-        return fitnessClubService.getAllFitnessByCountry(country);
+        return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getAllFitnessByCountry(country));
     }
 
-    @GetMapping("/club/{uuid}")
-    public FitnessClub getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
-        return fitnessClubService.getFitnessById(uuid, principal);
+    @GetMapping("/{uuid}")
+    public ApiResponse<FitnessClub> getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
+        return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getFitnessById(uuid, principal));
     }
 
-    @GetMapping("/club/{clubUuid}/posts")
+//    @GetMapping("/{clubUuid}/post")
+//    @PreAuthorize("permitAll()")
+//    public List<PostCount> getClubDailyPostNoDate(@PathVariable("clubUuid") UUID clubUuid){
+//        return postService.dailyPost(clubUuid, LocalDate.now());
+//    }
+
+    @GetMapping("/{clubUuid}/post/{date}")
     @PreAuthorize("permitAll()")
-    public List<PostCount> getClubDailyPostNoDate(@PathVariable("clubUuid") UUID clubUuid){
-        return postService.dailyPost(clubUuid, LocalDate.now());
-    }
-
-    @GetMapping("/club/{clubUuid}/posts/{date}")
-    @PreAuthorize("permitAll()")
-    public List<PostCount> getClubDailyPost(@PathVariable("clubUuid") UUID clubUuid, @PathVariable(value = "date") String dateStr){
+    public ApiResponse<List<PostCount>> getClubDailyPost(@PathVariable("clubUuid") UUID clubUuid, @PathVariable(value = "date") String dateStr){
 
         try{
 
             LocalDate date = LocalDate.parse(dateStr);
 
-            return postService.dailyPost(clubUuid, date);
+            return ApiResponseBuilder.createSuccessResponse(postService.dailyPost(clubUuid, date));
 
         }catch (DateTimeParseException e){
             e.printStackTrace();

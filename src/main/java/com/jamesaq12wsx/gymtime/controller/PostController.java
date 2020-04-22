@@ -44,34 +44,34 @@ public class PostController {
         return apiResponseBuilder.createSuccessResponse(results);
     }
 
+    @GetMapping("/{postUuid}")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    public ApiResponse<Post> getUserPostById(@PathVariable("postUuid")UUID postId, Principal principal){
+
+        return apiResponseBuilder.createSuccessResponse(postService.getPostById(postId, principal));
+
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public void newPost(@RequestBody PostRequest post, Principal principal){
-        postService.newPost(post, principal);
+    public ApiResponse<Post> newPost(@RequestBody PostRequest post, Principal principal){
+        return ApiResponseBuilder.createSuccessResponse(postService.newPost(post, principal));
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public void updateExercisePost(@RequestBody UpdatePostRequest post, Principal principal){
-        postService.update(post, principal);
+    public ApiResponse<Post> updateExercisePost(@RequestBody UpdatePostRequest post, Principal principal){
+        return ApiResponseBuilder.createSuccessResponse(postService.update(post, principal));
     }
 
     @DeleteMapping("/{postUuid}")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public void deleteExercisePost(@PathVariable("postUuid") String postUuidStr, Principal principal){
-
-        UUID postUuid = null;
-
-        try{
-            postUuid = UUID.fromString(postUuidStr);
-        }catch (IllegalStateException e){
-            e.printStackTrace();
-
-            throw new ApiRequestException(String.format("Post uuid %s not valid", postUuidStr));
-
-        }
+    public ApiResponse deleteExercisePost(@PathVariable("postUuid") UUID postUuid, Principal principal){
 
         postService.delete(postUuid, principal);
+
+        return ApiResponseBuilder.createSuccessResponse(true);
+
     }
 
     @GetMapping("/{postUuid}/record")

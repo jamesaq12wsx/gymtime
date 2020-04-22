@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.jamesaq12wsx.gymtime.model.Auditable;
 import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
@@ -57,6 +58,7 @@ public class ApplicationUser implements Auditable, Serializable {
     @Enumerated(EnumType.STRING)
     private ApplicationUserRole role;
 
+    @JsonIgnore
     @Type(type = "hstore")
     @Column(name = "attributes", columnDefinition = "hstore")
     private Map<String, Object> attributes;
@@ -64,9 +66,13 @@ public class ApplicationUser implements Auditable, Serializable {
     @Embedded
     private UserInfo userInfo;
 
+//    @Embedded
+//    private UserBodyStat userBodyStat;
+
     @Embedded
     private UserUnitSetting userUnitSetting;
 
+    @JsonIgnore
     @Embedded
     private Audit audit;
 

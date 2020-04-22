@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime;
 
+import com.jamesaq12wsx.gymtime.security.ApplicationSecurityConfig;
 import com.jamesaq12wsx.gymtime.security.PasswordConfig;
 import com.jamesaq12wsx.gymtime.validator.PasswordValidator;
 import org.junit.jupiter.api.Test;

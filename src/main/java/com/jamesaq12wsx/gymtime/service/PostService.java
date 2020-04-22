@@ -1,20 +1,16 @@
 package com.jamesaq12wsx.gymtime.service;
 
-import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
-import com.jamesaq12wsx.gymtime.database.PostRepository;
-import com.jamesaq12wsx.gymtime.database.FitnessClubRepository;
-import com.jamesaq12wsx.gymtime.database.PostCountRepository;
+import com.jamesaq12wsx.gymtime.database.*;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.*;
 import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
 import com.jamesaq12wsx.gymtime.model.entity.Audit;
+import com.jamesaq12wsx.gymtime.model.entity.SimplePost;
+import com.jamesaq12wsx.gymtime.model.entity.SimplePostRecord;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
 import com.jamesaq12wsx.gymtime.model.payload.UpdatePostRequest;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -28,6 +24,8 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+    private final PostRecordRepository postRecordRepository;
+
     private final PostCountRepository postCountRepository;
 
     private final FitnessClubRepository fitnessClubRepository;
@@ -35,8 +33,9 @@ public class PostService {
     private final ApplicationUserRepository userRepository;
 
     @Autowired
-    public PostService(PostRepository postRepository, PostCountRepository postCountRepository, FitnessClubRepository fitnessClubRepository, ApplicationUserRepository userRepository) {
+    public PostService(PostRepository postRepository, PostRecordRepository postRecordRepository, PostCountRepository postCountRepository, FitnessClubRepository fitnessClubRepository, ApplicationUserRepository userRepository) {
         this.postRepository = postRepository;
+        this.postRecordRepository = postRecordRepository;
         this.postCountRepository = postCountRepository;
         this.fitnessClubRepository = fitnessClubRepository;
         this.userRepository = userRepository;
@@ -46,9 +45,12 @@ public class PostService {
         return postRepository.findAllByUserEmail(principal.getName());
     }
 
-    @GetMapping("/{year}")
-    public List<Post> getAllPostByUserWithYear(@PathVariable("year") String year, Principal principal) {
+    public List<Post> getAllPostByUserWithYear(String year, Principal principal) {
         return postRepository.findAllByAudit_CreatedByAndYear(principal.getName(), year);
+    }
+
+    public Post getPostById(UUID postId, Principal principal){
+        return postRepository.findById(postId).orElseThrow(() -> new ApiRequestException(String.format("Post %s not found", postId)));
     }
 
     public SimplePost newPost(PostRequest mark, Principal principal) {
@@ -63,6 +65,7 @@ public class PostService {
                         OffsetDateTime.now(),
                         mark.getPrivacy() == null ? PostPrivacy.PRIVATE : mark.getPrivacy(),
                         postClub,
+                        null,
                         user,
                         new Audit()));
 
@@ -125,6 +128,10 @@ public class PostService {
     }
 
     public void delete(UUID uuid, Principal principal) {
+
+        List<SimplePostRecord> records = postRecordRepository.findAllByPostUuid(uuid);
+
+        postRecordRepository.deleteAll(records);
 
         postRepository.deleteById(uuid);
 

@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApiResponseBuilder {
 
-    public ApiResponse createSuccessResponse(Object result){
+    public static ApiResponse createSuccessResponse(Object result){
         return new ApiResponse(true, "", result);
     }
 
-    public ApiResponse createFailedResponse(String message){
+    public static ApiResponse createFailedResponse(String message){
         return new ApiResponse(false, message, null);
     }
 

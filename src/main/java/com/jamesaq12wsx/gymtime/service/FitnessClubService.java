@@ -31,8 +31,18 @@ public class FitnessClubService {
     }
 
     public List<? extends FitnessClub> getAllFitnessClubs(){
-//        return fitnessClubDao.getAll();
+
         return fitnessClubRepository.findAll();
+
+    }
+
+    public List<? extends FitnessClub> getClubByLocation(Double lat, Double lng){
+
+        if(lat == null || lng == null){
+            throw new ApiRequestException(String.format("Location not valid, you should provide lat and lng"));
+        }
+
+        return fitnessClubRepository.findAllByLocation(lat, lng);
     }
 
     public List<? extends FitnessClub> getAllClubsByBrandId(Integer brandId){
@@ -42,6 +52,15 @@ public class FitnessClubService {
         }
 
         return fitnessClubRepository.findAllByBrand_BrandId(brandId);
+    }
+
+    public List<? extends FitnessClub> getAllFitnessByCountry(String countryCode){
+
+        if (!countryRepository.existsByAlphaTwoCode(countryCode)){
+            throw new ApiRequestException(String.format("Country code %s is not valid", countryCode));
+        }
+
+        return fitnessClubRepository.findAllByBrand_Country_AlphaTwoCode(countryCode);
     }
 
     /**
@@ -61,14 +80,5 @@ public class FitnessClubService {
 
         return fitnessClubRepository.findById(uuid).orElseThrow(() -> new ApiRequestException(String.format("Cannot get club, club id %s is not existed", uuid)));
 
-    }
-
-    public List<? extends FitnessClub> getAllFitnessByCountry(String countryCode){
-
-        if (!countryRepository.existsByAlphaTwoCode(countryCode)){
-            throw new ApiRequestException(String.format("Country code %s is not valid", countryCode));
-        }
-
-        return fitnessClubRepository.findAllByBrand_Country_AlphaTwoCode(countryCode);
     }
 }

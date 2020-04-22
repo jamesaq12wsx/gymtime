@@ -8,7 +8,7 @@ import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.MeasurementType;
 import com.jamesaq12wsx.gymtime.model.SimpleExercise;
 import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
-import com.jamesaq12wsx.gymtime.model.SimplePost;
+import com.jamesaq12wsx.gymtime.model.entity.SimplePost;
 import com.jamesaq12wsx.gymtime.model.entity.SimplePostRecord;
 import com.jamesaq12wsx.gymtime.model.entity.SimplePostRecordFactory;
 import com.jamesaq12wsx.gymtime.model.payload.RecordRequest;

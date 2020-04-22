@@ -1,7 +1,7 @@
 package com.jamesaq12wsx.gymtime.database;
 
 import com.jamesaq12wsx.gymtime.model.Post;
-import com.jamesaq12wsx.gymtime.model.SimplePost;
+import com.jamesaq12wsx.gymtime.model.entity.SimplePost;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,9 +1,14 @@
-package com.jamesaq12wsx.gymtime.model;
+package com.jamesaq12wsx.gymtime.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.jamesaq12wsx.gymtime.model.Auditable;
+import com.jamesaq12wsx.gymtime.model.Post;
+import com.jamesaq12wsx.gymtime.model.PostPrivacy;
+import com.jamesaq12wsx.gymtime.model.SimpleFitnessClub;
 import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
 import com.jamesaq12wsx.gymtime.model.entity.Audit;
+import com.jamesaq12wsx.gymtime.model.entity.SimplePostRecord;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -51,6 +56,11 @@ public class SimplePost implements Post, Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location")
     private SimpleFitnessClub club;
+
+    @OneToMany
+    @JoinColumn(name = "post_uuid")
+    @JsonIgnoreProperties("post")
+    private List<SimplePostRecord> records;
 
 //    @ElementCollection(fetch = FetchType.LAZY)
 //    @CollectionTable(name = "exercise_post_exercise", joinColumns = @JoinColumn(name = "post_uuid"))

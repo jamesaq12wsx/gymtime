@@ -15,10 +15,6 @@ import java.time.LocalDate;
 @Setter
 public class UserInfo {
 
-    private float height;
-
-    private float weight;
-
     @Enumerated(EnumType.STRING)
     private Gender gender;
 

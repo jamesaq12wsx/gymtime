@@ -1,10 +1,15 @@
 package com.jamesaq12wsx.gymtime.auth;
 
 import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
+import com.jamesaq12wsx.gymtime.database.BodyFatRepository;
+import com.jamesaq12wsx.gymtime.database.HeightRepository;
+import com.jamesaq12wsx.gymtime.database.WeightRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
-import com.jamesaq12wsx.gymtime.model.entity.UserInfo;
-import com.jamesaq12wsx.gymtime.model.entity.UserUnitSetting;
+import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
+import com.jamesaq12wsx.gymtime.model.entity.*;
+import com.jamesaq12wsx.gymtime.model.payload.NewBodyFatRequest;
+import com.jamesaq12wsx.gymtime.model.payload.NewHeightRequest;
+import com.jamesaq12wsx.gymtime.model.payload.NewWeightRequest;
 import com.jamesaq12wsx.gymtime.model.payload.SignUpRequest;
 import com.jamesaq12wsx.gymtime.security.PasswordConfig;
 import com.jamesaq12wsx.gymtime.validator.EmailValidator;
@@ -26,13 +31,22 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
     private final ApplicationUserRepository applicationUserRepository;
 
+    private final HeightRepository heightRepository;
+
+    private final WeightRepository weightRepository;
+
+    private final BodyFatRepository bodyFatRepository;
+
     private final PasswordConfig passwordConfig;
 
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public ApplicationUserService(ApplicationUserRepository applicationUserRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder) {
+    public ApplicationUserService(ApplicationUserRepository applicationUserRepository, HeightRepository heightRepository, WeightRepository weightRepository, BodyFatRepository bodyFatRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder) {
         this.applicationUserRepository = applicationUserRepository;
+        this.heightRepository = heightRepository;
+        this.weightRepository = weightRepository;
+        this.bodyFatRepository = bodyFatRepository;
         this.passwordConfig = passwordConfig;
         this.passwordEncoder = passwordEncoder;
     }
@@ -143,9 +157,7 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
         UserInfo preInfo = updateUser.getUserInfo();
 
-        if (preInfo.getHeight() == userInfo.getHeight() &&
-                preInfo.getWeight() == userInfo.getWeight() &&
-                preInfo.getGender() == userInfo.getGender() &&
+        if (preInfo.getGender() == userInfo.getGender() &&
                 preInfo.getBirthday().equals(userInfo.getBirthday())) {
             return updateUser;
         }
@@ -153,5 +165,118 @@ public class ApplicationUserService implements SelfUserDetailsService {
         updateUser.setUserInfo(userInfo);
 
         return applicationUserRepository.save(updateUser);
+    }
+
+    @Override
+    public UserBodyStat getUserBodyStat(Principal principal) {
+
+        UserBodyStat userBodyStat = new UserBodyStat();
+
+        userBodyStat.setHeight(heightRepository.findByUsername(principal.getName()).orElse(null));
+
+        userBodyStat.setWeights(weightRepository.findAllByUsername(principal.getName()));
+
+        userBodyStat.setBodyFats(bodyFatRepository.findAllByUsername(principal.getName()));
+
+        return userBodyStat;
+    }
+
+    @Override
+    public void updateUserHeight(NewHeightRequest request, Principal principal) {
+
+        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+
+        SimpleMeasurementUnit heightUnit = user.getUserUnitSetting().getHeightUnit();
+
+        if (heightRepository.existsByUser(user)) {
+            SimpleUserHeight userHeight = heightRepository.findByUser(user).get();
+
+            if (userHeight.getMeasurementUnit().getId() != heightUnit.getId() || !userHeight.getHeight().equals(request.getHeight())) {
+                userHeight.setMeasurementUnit(heightUnit);
+                userHeight.setHeight(request.getHeight());
+
+                heightRepository.save(userHeight);
+
+                return;
+            }
+        } else {
+
+            heightRepository.save(new SimpleUserHeight(null, user, heightUnit, request.getHeight()));
+
+            return;
+
+        }
+
+    }
+
+    @Override
+    public void newUserWeight(NewWeightRequest request, Principal principal) {
+
+        ApplicationUser user = getUserFromDb(principal);
+
+        SimpleMeasurementUnit weightUnit = user.getUserUnitSetting().getWeightUnit();
+
+        if (weightRepository.existsByUserAndDate(user, request.getDate())) {
+
+            throw new ApiRequestException("You could not add two weight record at same date");
+
+        } else {
+
+            weightRepository.save(new SimpleUserWeight(null, user, weightUnit, request.getWeight(), request.getDate()));
+
+        }
+    }
+
+    @Override
+    public void deleteUserWeight(Integer id, Principal principal) {
+
+        SimpleUserWeight userWeight = weightRepository
+                .findById(id)
+                .orElseThrow(() -> new ApiRequestException(String.format("User weight %s not found", id)));
+
+        if (!userWeight.getUser().getEmail().equals(principal.getName())) {
+            throw new ApiRequestException(String.format("You have no right delete this weight record"));
+        }
+
+        weightRepository.deleteById(id);
+    }
+
+    @Override
+    public void newUserBodyFat(NewBodyFatRequest request, Principal principal) {
+
+        ApplicationUser user = getUserFromDb(principal);
+
+        if (bodyFatRepository.existsByUserAndDate(user, request.getDate())) {
+
+            throw new ApiRequestException("You could not add two body fat record at same date");
+
+        } else {
+
+            bodyFatRepository.save(new SimpleUserBodyFat(null, user, request.getBodyFat(), request.getDate()));
+
+        }
+    }
+
+    @Override
+    public void deleteUserBodyFat(Integer id, Principal principal) {
+        SimpleUserBodyFat userBodyFat = bodyFatRepository
+                .findById(id)
+                .orElseThrow(() -> new ApiRequestException(String.format("User body fat %s not found", id)));
+
+        if (!userBodyFat.getUser().getEmail().equals(principal.getName())) {
+            throw new ApiRequestException(String.format("You have no right delete this body fat record"));
+        }
+
+        weightRepository.deleteById(id);
+    }
+
+    private ApplicationUser getUserFromDb(Principal principal) {
+
+        return applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+
+    }
+
+    private ApiRequestException getUserNotFoundException(Principal principal) {
+        return new ApiRequestException(String.format("Username %s not found", principal.getName()));
     }
 }
