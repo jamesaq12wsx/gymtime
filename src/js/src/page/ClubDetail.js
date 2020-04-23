@@ -11,6 +11,7 @@ import { appContextReducer } from '../reducer/appContextReducer';
 import { quickPost } from '../api/client';
 import { successNotification, errorNotification } from '../components/Notification';
 import { PostContext } from '../context/PostContextProvider';
+import moment from 'moment';
 
 const { Meta } = Card;
 
@@ -78,64 +79,53 @@ const ClubDetail = (props) => {
     const [fetchingChartData, setFetchingChartData] = useState(false);
     const [posts, setPosts] = useState([]);
     const [lastWeekPosts, setLastWeekPosts] = useState([]);
+    const [newPostModalVisible, setNewPostModalVisible] = useState(false);
 
     const fetchClub = () => {
         if (clubUuid) {
 
-            setFetchingChartData(true);
-
-            console.log('club detail auth', authenticated);
-
             getClubDetailWithToken(clubUuid)
                 .then(r => r.json())
+                .then(r => r.result)
                 .then(club => {
                     console.log('get club by id', club);
                     setClub(club);
                 });
-
-            getClubPosts(clubUuid, getDate(new Date(), 0, false)).then(r => r.json()).then(posts => setPosts(posts));
-
-            getClubPosts(clubUuid, getDate(new Date(), 7, false)).then(r => r.json()).then(posts => setLastWeekPosts(posts));
-
-            setFetchingChartData(false);
         }
+    }
+
+    const fetchPostData = () => {
+
+        setFetchingChartData(true);
+
+        getClubPosts(clubUuid, getDate(new Date(), 0, false))
+            .then(r => r.json())
+            .then(r => r.result)
+            .then(posts => setPosts(posts));
+
+        getClubPosts(clubUuid, getDate(new Date(), 7, false))
+            .then(r => r.json())
+            .then(r => r.result)
+            .then(posts => setLastWeekPosts(posts));
+
+        setFetchingChartData(false);
+
     }
 
     useEffect(() => {
 
         fetchClub();
 
+        fetchPostData();
+
     }, [authenticated]);
 
     const getQuickPostButton = () => {
-        const { postDateTimeList } = club;
-
-        if (postDateTimeList && postDateTimeList.length != 0) {
-            const lastDay = new Date(postDateTimeList[0]);
-            const today = new Date();
-
-            if (getDate(lastDay, 0, null) === getDate(today, 0, null)) {
-                return (
-                    <Button shape="round" size="medium" disabled>Exercise(Posted Today)</Button>
-                );
-            } else {
-                return (
-                    <Button
-                        onClick={markOnClick}
-                        type="primary"
-                        shape="round"
-                        size="medium">
-                        Exercise
-                    </Button>
-                );
-            }
-        } else {
-            return (
-                <Button onClick={markOnClick} type="primary" shape="round" size={"medium"}>
-                    Exercise
-                </Button>
-            );
-        }
+        return (
+            <Button onClick={() => setNewPostModalVisible(true)} type="primary" shape="round" size={"medium"}>
+                Exercise
+            </Button>
+        );
     }
 
     const getMarksChart = () => {
@@ -163,7 +153,7 @@ const ClubDetail = (props) => {
     const markOnClick = () => {
         console.log(`mark ${clubUuid}`);
 
-        postDispatch({type: 'NEW_POST', payload: club});
+        postDispatch({ type: 'NEW_POST', payload: club });
 
         // quickPost(clubUuid, jwtToken)
         //     .then(res => {
@@ -247,7 +237,8 @@ const ClubDetail = (props) => {
                         <GlobalOutlined />
                     </Col>
                     <Col span={22}>
-                        {`${homeUrl}`}
+                        <a href={homeUrl}>Club Home Page</a>
+                        {/* {`${homeUrl}`} */}
                     </Col>
                 </Row>
             </List.Item>
@@ -290,7 +281,7 @@ const ClubDetail = (props) => {
     }
 
     const newPostModalOnCancelHandler = () => {
-        postDispatch({type:'FINISH_NEW_POST'});
+        setNewPostModalVisible(false);
     }
 
     if (!club) {
@@ -316,12 +307,31 @@ const ClubDetail = (props) => {
             {getDetailList()}
 
             <Modal
-                visible={newPost}
-                onOk={newPostModalOnCancelHandler}
+                visible={newPostModalVisible}
+                // onOk={newPostModalOnCancelHandler}
                 onCancel={newPostModalOnCancelHandler}
-                title={newPost ? `Work Out at ------ ${club.clubName}` : ''}
+                footer={[
+                    <Button key="cancle" onClick={() => setNewPostModalVisible(false)}>
+                        Cancle
+                    </Button>,
+                    <Button key="post" onClick={() => {
+                        quickPost(clubUuid)
+                            .then(res => res.json())
+                            .then(r => {
+                                successNotification('New Post Successed');
+                                setNewPostModalVisible(false);
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                errorNotification('New Post Failed', err.error);
+                            })
+                    }}>
+                        New Post
+                    </Button>
+                ]}
             >
-                {newPost ? <NewPost /> : <React.Fragment />}
+                <h2>{`Work Out at ------ ${club.clubName}`}</h2>
+                <h4>Time now : {moment().format('YYYY/MM/DD HH:mm:ss')}</h4>
             </Modal>
         </div>
     );

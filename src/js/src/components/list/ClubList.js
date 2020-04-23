@@ -1,7 +1,8 @@
 import React from 'react';
 import { List, Card, Row, Col, Avatar } from 'antd';
-import { EnvironmentFilled, ClockCircleFilled, MehFilled, SettingOutlined, EditOutlined, DownCircleTwoTone, MoreOutlined } from '@ant-design/icons';
-import {useHistory} from 'react-router-dom'
+import { EnvironmentFilled, ClockCircleFilled, MehFilled, SettingOutlined, EditOutlined, DownCircleTwoTone, MoreOutlined, HomeOutlined } from '@ant-design/icons';
+
+import { useHistory } from 'react-router-dom'
 const { Meta } = Card;
 
 const weekday = {
@@ -22,8 +23,6 @@ const ClubList = ({ clubs, markOnClick, detailOnClick }) => {
 
     let today = new Date();
 
-    console.log(weekday[today.getDay()]);
-
     return (
         <List
             grid={{
@@ -35,7 +34,7 @@ const ClubList = ({ clubs, markOnClick, detailOnClick }) => {
                 xl: 4,
                 xxl: 4,
             }}
-            dataSource={clubs.slice(0,50)}
+            dataSource={clubs.slice(0, 50)}
             renderItem={item => (
                 <List.Item>
                     <Card title={item.clubName}
@@ -43,12 +42,18 @@ const ClubList = ({ clubs, markOnClick, detailOnClick }) => {
                             // <DownCircleTwoTone onClick={(e) => markOnClick(e, item)} twoToneColor="#eb2f96" key="check" />,
                             <MoreOutlined onClick={(e) => detailOnClick(e, item)} key="more" />
                         ]}>
-                            {item.icon ? <img width="100" src="https://www.lafitness.com/Pages/Images/LAF_logo_2C_H.gif" style={{marginBottom: '15px'}} /> : <React.Fragment />}
+                        {item.icon ? <img width="100" src="https://www.lafitness.com/Pages/Images/LAF_logo_2C_H.gif" style={{ marginBottom: '15px' }} /> : <React.Fragment />}
+                        <Row>
+                            <Col span={4}>
+                                <HomeOutlined />
+                            </Col>
+                            <Col span={20}>{`${item.brand.brandName}`}</Col>
+                        </Row>
                         <Row>
                             <Col span={4}>
                                 <EnvironmentFilled />
                             </Col>
-                            <Col span={20}>{`${item.address} ${item.city}${item.state ? ' ,'+ item.state : ''} ${item.zipCode ? ' ' + item.zipCode : ''}`}</Col>
+                            <Col span={20}>{`${item.address} ${item.city}${item.state ? ' ,' + item.state : ''} ${item.zipCode ? ' ' + item.zipCode : ''}`}</Col>
                         </Row>
                         <Row>
                             <Col span={4}>

@@ -26,19 +26,20 @@ const ExerciseSelect = ({ value, onChange, style }) => {
 
     const getExerciseOptions = () => {
         if (exercises) {
-            const cats = Object.keys(exercises);
+            const cats = Object.keys(exercises).sort();
 
             return cats.map((c, i) => {
 
                 return (
                     <TreeNode key={c} value={c} selectable={false} title={c.toUpperCase()}>
                         {
-                            exercises[c].map((ex, j) => {
-                                return (
-                                    <TreeNode key={ex.name} value={ex.name} title={ex.name}
-                                    />
-                                );
-                            })
+                            exercises[c].sort((ex1, ex2) => ex1.name.localeCompare(ex2.name))
+                                .map((ex, j) => {
+                                    return (
+                                        <TreeNode key={ex.name} value={ex} title={ex.name}
+                                        />
+                                    );
+                                })
                         }
                     </TreeNode>);
             })
@@ -48,7 +49,8 @@ const ExerciseSelect = ({ value, onChange, style }) => {
     return (
         <React.Fragment>
             <TreeSelect
-                style={style || { width: 150 }}
+                placeholder="Select Exercise"
+                style={style || null}
                 onChange={selectHandler}
                 value={selectExercise}
             >

@@ -8,6 +8,7 @@ import CardList from '../components/CardList';
 import './UserPost.page.css';
 import { useHistory } from 'react-router-dom';
 import { PostContext } from '../context/PostContextProvider';
+import { SELECT_POST, DESELECT_POST, SET_POSTS } from '../reducer/postContextReducer';
 import PostEdit from './PostEdit.page';
 var _ = require('lodash');
 
@@ -39,6 +40,8 @@ const UserPost = (props) => {
 
         getYearPost(moment().format('YYYY'));
 
+        dispatch({ type: DESELECT_POST });
+
     }, []);
 
     useEffect(() => {
@@ -51,13 +54,22 @@ const UserPost = (props) => {
 
     }, [selectedDate]);
 
+    const postCardEditClickHandler = (post) => {
+
+        dispatch({ type: SELECT_POST, payload: post });
+
+        history.push(`/post/${post.postUuid}`);
+
+    }
+
     const setPosts = (posts) => {
-        dispatch({ type: 'SET_POSTS', payload: posts });
+        dispatch({ type: SET_POSTS, payload: posts });
     }
 
     const getYearPost = (year) => {
         getUserPost(year)
             .then(res => res.json())
+            .then(res => res.result)
             .then(posts => {
                 setPosts(posts);
 
@@ -69,10 +81,6 @@ const UserPost = (props) => {
                 errorNotification('Fetch Posts Error', err.message);
             });
     }
-
-    // useEffect(() => {
-    //     setSelectedDatePosts(posts.filter(p => moment(p.postDate).format('YYYY-MM-dd') === selectedDate.format('YYYY-MM-dd')));
-    // }, [selectedDate]);
 
     const openDeleteModal = () => setDeletedModalVisible(true);
     const closeDeleteModal = () => setDeletedModalVisible(false);
@@ -240,13 +248,35 @@ const UserPost = (props) => {
     }
 
     const getExercises = (p) => {
-        if (p.exercises && getExercises.length != 0) {
+        if (p.records && getExercises.length != 0) {
 
-            const exercises = p.exercises.map((ex, i) => <Descriptions.Item key={i}>{`${ex.name} - ${ex.description}`}</Descriptions.Item>)
+            const records = p.records.map((r, i) => {
+
+                const { measurementType } = r.exercise;
+                let description = '';
+
+                switch (measurementType.toLowerCase()) {
+                    case 'weight':
+                        description = `${r.weight} ${r.measurementUnit.alias} x ${r.reps} reps`;
+                        break;
+                    case 'distance':
+                        description = `${r.distance} ${r.measurementUnit.alias} x ${r.min} mins`;
+                        break;
+                    case 'duration':
+                        description = `${r.duration} ${r.measurementUnit.alias} x ${r.reps} reps`;
+                        break;
+                    default:
+                        console.error(`recorde type ${measurementType} error`);
+                }
+
+                return (
+                    <Descriptions.Item key={i}>{`${r.exercise.name} - ${description}`}</Descriptions.Item>
+                );
+            });
 
             return (
                 <Descriptions title="Exercises">
-                    {exercises}
+                    {records}
                 </Descriptions>
             )
         } else {
@@ -270,10 +300,7 @@ const UserPost = (props) => {
                         }} key="delete" />,
                         <EditOutlined
                             key="edit"
-                            onClick={() => {
-                                console.log('edit post on click', p);
-                                dispatch({ type: 'EDITING', post: p});
-                            }}
+                            onClick={() => postCardEditClickHandler(p)}
                         />,
                     ]}
                 >
@@ -281,7 +308,7 @@ const UserPost = (props) => {
                         title={
                             <div className="post-card-title">
                                 <h4 className="post-card-title-club-name">{p.club.clubName}</h4>
-                                <p className="post-card-title-club-brand">{ _.get(p, 'club.brand.brandName', '')}</p>
+                                <p className="post-card-title-club-brand">{_.get(p, 'club.brand.brandName', '')}</p>
                             </div>
                         }
                         description={moment(p.exerciseTime).format('YYYY/MM/DD HH:mm')} />
@@ -349,7 +376,7 @@ const UserPost = (props) => {
                 <p>{selectDeletePost ? moment(selectDeletePost.postTime).format('YYYY-MM-DD HH:mm') : ''}</p>
             </Modal>
 
-            <Modal
+            {/* <Modal
                 title="EDIT POST"
                 visible={editing}
                 onOk={() => closeDeleteModal()}
@@ -388,7 +415,7 @@ const UserPost = (props) => {
                 ]}
             >
                 {editing ? <PostEdit /> : <React.Fragment />}
-            </Modal>
+            </Modal> */}
         </div>
     );
 }

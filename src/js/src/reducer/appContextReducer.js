@@ -4,6 +4,8 @@ import { ACCESS_TOKEN } from '../components/constants';
 export const LOGIN = 'LOGIN';
 export const LOGOUT = 'LOGOUT';
 export const SET_LOCATION = 'SET_LOCATION';
+export const FETCHED_LOCATION_ERROR = 'FETCHED_LOCATION_ERROR';
+export const SET_BODY_STAT = 'SET_BODY_STAT';
 
 export const appContextReducer = (state, action) => {
 
@@ -26,6 +28,18 @@ export const appContextReducer = (state, action) => {
         case SET_LOCATION:
 
             state = { ...state, location: action.payload, fetchedLocation: true };
+
+            break;
+
+        case FETCHED_LOCATION_ERROR:
+
+            state = {...state, fetchedLocation: false};
+
+            break;
+
+        case SET_BODY_STAT:
+
+            state= {...state, userBodyStat: action.payload}
 
             break;
 

@@ -1,10 +1,12 @@
 import React from 'react';
 import { List } from 'antd';
 
-const CardList = ({ cards, header, grid }) => {
+const CardList = ({ cards, header, grid, className, locale }) => {
 
     return (
         <List
+            className={className}
+            locale={locale}
             size='large'
             header={header ? header : ''}
             grid={grid ? grid :

@@ -35,7 +35,9 @@ const ExercisePage = (props) => {
 
     const getCategoryList = () => {
         if (exercises) {
-            const categories = Object.keys(exercises);
+            let categories = Object.keys(exercises);
+
+            categories.sort();
 
             return categories.map((cat, i) => {
                 return (
@@ -63,9 +65,10 @@ const ExercisePage = (props) => {
     }
 
     const getExerciseCards = (exs) => {
-        return exs.map(ex => {
-            return getExerciseCard(ex);
-        })
+        return exs.sort((a, b) => a.name.localeCompare(b.name))
+            .map(ex => {
+                return getExerciseCard(ex);
+            })
     }
 
     const getExerciseCard = (ex) => {

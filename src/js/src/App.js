@@ -12,7 +12,7 @@ import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
 import AppContextProvider from './context/AppContextProvider';
-import { Modal, Row, Col, Drawer, Button, Layout, Menu, Tooltip } from 'antd';
+import { Modal, Row, Col, Drawer, Button, Layout, Menu, Tooltip, Avatar } from 'antd';
 import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
 import { AppContext } from './context/AppContextProvider';
@@ -30,6 +30,8 @@ import { GiJumpAcross } from "react-icons/gi";
 import Footer from './components/Footer';
 import Header from './components/Header';
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
+import { FETCHED_LOCATION_ERROR } from './reducer/appContextReducer';
+import PostEdit from './page/PostEdit.page';
 var _ = require('lodash');
 
 
@@ -37,10 +39,12 @@ const AuthRoute = ({ component: Component, ...rest }) => {
 
   const appContext = useContext(AppContext);
 
-  const { state } = appContext;
+  const { state: appState } = appContext;
+
+  const { auth } = appState;
 
   return <Route {...rest} render={props => (
-    state.authenticated ?
+    auth.authenticated ?
       (
         <Component {...props} />
       ) : (
@@ -65,7 +69,7 @@ const App = (props) => {
   const { state: clubState, dispatch: clubDispatch } = clubContext;
   const { state: infoState, dispatch: infoDispatch } = infoContext;
 
-  const { auth, authenticated, location } = appState;
+  const { auth, location, fetchedLocation } = appState;
 
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [settingSideBarVisible, setSettingSideBarVisible] = useState(false);
@@ -78,9 +82,9 @@ const App = (props) => {
 
   useEffect(() => {
 
-    if (auth.isAuthenticated()) {
-      appDispatch({ type: 'LOGIN', payload: auth.getToken() });
-    }
+    // if (auth.isAuthenticated()) {
+    //   appDispatch({ type: 'LOGIN', payload: auth.getToken() });
+    // }
 
     getLocation(positionHandler, positionErrorHandler);
 
@@ -93,7 +97,9 @@ const App = (props) => {
 
     getAllExercise()
       .then(res => res.json())
+      .then(res => res.result)
       .then(exercises => {
+        console.log(exercises);
         console.log(groupByExercise(exercises));
         infoDispatch({ type: 'SET_EXERCISES', payload: groupByExercise(exercises) });
       })
@@ -101,19 +107,33 @@ const App = (props) => {
 
     clubDispatch({ type: clubContextReducerType.FETCHING });
 
-    getAllClubs()
-      .then(res => res.json())
-      .then(clubs => {
-        infoDispatch({ type: 'SET_CLUBS', payload: clubs });
-        clubDispatch({ type: clubContextReducerType.FETCHED });
-      })
-      .catch(err => {
-        console.error("Cannot get clubs", err);
-        errorNotification(err.message, err.message);
-        clubDispatch({ type: clubContextReducerType.FETCHED });
-      })
-
   }, []);
+
+  useEffect(() => {
+
+    if (fetchedLocation) {
+      getAllClubsWithLocation(location.lat, location.lng)
+        .then(res => res.json())
+        .then(res => res.result)
+        .then(clubs => {
+          console.log('fetch clubs', clubs);
+          infoDispatch({ type: 'SET_CLUBS', payload: clubs });
+          clubDispatch({ type: clubContextReducerType.FETCHED });
+        })
+        .catch(err => {
+          console.error("Cannot get clubs", err);
+          errorNotification(err.message, err.message);
+          clubDispatch({ type: clubContextReducerType.FETCHED });
+        });
+    }
+
+  }, [location, fetchedLocation]);
+
+  useEffect(() => {
+    if (auth.isAuthenticated()) {
+      auth.fetchCurrentUser();
+    }
+  }, [auth.authenticated]);
 
   const groupBy = (xs, key) => {
     return xs.reduce((rv, x) => {
@@ -124,10 +144,11 @@ const App = (props) => {
 
   const groupByExercise = (exs) => {
     return exs.reduce((acc, cur) => {
-      if (cur.category) {
-        cur.category.forEach(cat => {
-          (acc[cat.categoryName] = acc[cat.categoryName] || []).push(cur);
-        });
+
+      const muscleGroup = cur.muscleGroup.name || '';
+
+      if (muscleGroup) {
+        (acc[muscleGroup] = acc[muscleGroup] || []).push(cur);
       }
       return acc;
     }, {});
@@ -147,13 +168,7 @@ const App = (props) => {
    */
   const positionErrorHandler = () => {
 
-    getUserIpInfo()
-      .then(res => res.json())
-      .then(info => {
-        appDispatch({ type: 'SET_LOCATION', payload: { lat: info.latitude, lng: info.longitude } })
-        // appDispatch({type:'SET_IP_INFO', payload: info})
-      })
-      .catch(err => console.error(err));
+    appDispatch({ type: FETCHED_LOCATION_ERROR });
 
   };
 
@@ -205,7 +220,7 @@ const App = (props) => {
 
   const getHeaderItems = () => {
 
-    if (authenticated) {
+    if (auth.authenticated) {
       return (
         <Row justify="space-between">
           <Col span={4}>
@@ -261,6 +276,25 @@ const App = (props) => {
     }
   }
 
+  const getUserAvatar = () => {
+    const user = auth.currentUser;
+    if (user) {
+      return (
+        <React.Fragment>
+          <Row
+            justify="space-around"
+            onClick={() => {
+              closeSideBar();
+            }}>
+            <Link to="/user">
+              {user.imageUrl ? <Avatar size="large" src={user.imageUrl} /> : <Avatar icon={<UserOutlined />} />}
+            </Link>
+          </Row>
+        </React.Fragment>
+      );
+    }
+  }
+
   // const getClubList = () => {
   //   if (fetching) {
   //     return <LoadingList />;
@@ -276,25 +310,27 @@ const App = (props) => {
         {getClubList()}
       </div> */}
 
-      <Drawer
-        title="Setting"
-        placement="right"
-        closable={false}
-        onClose={() => closeSideBar()}
-        visible={settingSideBarVisible}
-      >
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Gym Time V 1.0.0</p>
-        <Button danger onClick={() => {
-          auth.logout(() => {
-            appDispatch({ type: 'LOGOUT' });
-            closeSideBar();
-          });
-        }} >Logout</Button>
-      </Drawer>
-
       <Router>
+
+        <Drawer
+          className="setting-side"
+          title="Setting"
+          placement="right"
+          closable={false}
+          onClose={() => closeSideBar()}
+          visible={settingSideBarVisible}
+        >
+          {getUserAvatar()}
+          <p>Some contents...</p>
+          <p>Some contents...</p>
+          <p>Gym Time V 1.0.0</p>
+          <Button danger onClick={() => {
+            auth.logout(() => {
+              appDispatch({ type: 'LOGOUT' });
+              closeSideBar();
+            });
+          }} >Logout</Button>
+        </Drawer>
 
         <LoginModal
           visible={loginModalVisible}
@@ -330,7 +366,8 @@ const App = (props) => {
             <Route exact path="/exercise" component={ExercisePage} />
             <Route exact path={`/club/:clubUuid`} render={props => <ClubDetail currentPosition={location} {...props} />} />
             <Route path="/oauth2/redirect" component={OAuth2RedirectHandler}></Route>
-            <AuthRoute path='/post' component={UserPost} />
+            <AuthRoute exact path='/post' component={UserPost} />
+            <AuthRoute exact path='/post/:postUuid' component={PostEdit} />
             <AuthRoute path='/user' component={User} />
             <AuthRoute exact path='/logout' component={LogoutPage} />
             <Route path="*" component={() => "404 NOT FOUND"} />

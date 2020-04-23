@@ -14,8 +14,7 @@ export const PostContext = React.createContext();
 const PostContextProvider = (props) => {
 
     const initAppState = {
-        editing: false,
-        editingPost: null,
+        selectedPost: null,
         posts: []
     };
 

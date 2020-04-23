@@ -6,8 +6,12 @@ import { useHistory } from 'react-router-dom';
 import { ClubContext } from '../context/ClubContextProvider';
 import { InfoContext } from '../context/InfoContextProvider';
 import { AppContext } from '../context/AppContextProvider';
+import { Empty, Card, Row, Col } from 'antd';
+import { EnvironmentFilled, ClockCircleFilled, MehFilled, MoreOutlined, HomeOutlined, DownCircleOutlined, ShopOutlined } from '@ant-design/icons';
+import { WEEKDAY } from '../components/constants';
+import CardList from '../components/CardList';
 
-const Clubs = ({ markOnClick, detailOnClick }) => {
+const Clubs = (props) => {
 
     let history = useHistory();
 
@@ -24,20 +28,54 @@ const Clubs = ({ markOnClick, detailOnClick }) => {
 
     const { clubs } = infoState;
 
-    const { location } = appState;
+    const { location, fetchedLocation } = appState;
 
-    const markOnClickHander = (e, club) => {
-        console.log(e);
-    };
-
-    const detailOnClickHandler = (e, club) => {
-        console.log(e);
+    const detailOnClickHandler = (club) => {
 
         if (club) {
             history.push(`/club/${club.clubUuid.toLowerCase()}`);
-            detailOnClick(e, club);
         }
 
+    }
+
+    const getClubCard = (club) => {
+
+        let today = new Date();
+
+        return (
+            <Card title={club.clubName}
+                actions={[
+                    <DownCircleOutlined key="newPost" />,
+                    <MoreOutlined onClick={(e) => detailOnClickHandler(club)} key="more" />,
+                    <EnvironmentFilled key="map" />
+                ]}>
+                {club.icon ? <img width="100" src="https://www.lafitness.com/Pages/Images/LAF_logo_2C_H.gif" style={{ marginBottom: '15px' }} /> : <React.Fragment />}
+                <Row>
+                    <Col span={4}>
+                        <ShopOutlined />
+                    </Col>
+                    <Col span={20}>{`${club.brand.brandName}`}</Col>
+                </Row>
+                <Row>
+                    <Col span={4}>
+                        <EnvironmentFilled />
+                    </Col>
+                    <Col span={20}>{`${club.address} ${club.city}${club.state ? ' ,' + club.state : ''} ${club.zipCode ? ' ' + club.zipCode : ''}`}</Col>
+                </Row>
+                <Row>
+                    <Col span={4}>
+                        <ClockCircleFilled />
+                    </Col>
+                    <Col span={20}>{club.openHours ? club.openHours[WEEKDAY[today.getDay()]] : 'No Provide Data'}</Col>
+                </Row>
+                <Row>
+                    <Col span={4}>
+                        <MehFilled />
+                    </Col>
+                    <Col span={20}>{club.crowd}</Col>
+                </Row>
+            </Card>
+        );
     }
 
     const getList = () => {
@@ -45,22 +83,19 @@ const Clubs = ({ markOnClick, detailOnClick }) => {
             return <LoadingList />;
         };
 
-        const nearClubs = clubs ? clubs.sort(compare).slice(0,50) : []; 
+        if (!fetchedLocation) {
+            return (
+                <Empty
+                    description={() => <span>Please allow location permission to check out near clubs</span>}
+                />
+            );
+        }
+
+        const clubCards = clubs ? clubs.map((c, i) => getClubCard(c)) : [];
 
         return (
-            <ClubList clubs={nearClubs} markOnClick={markOnClick} detailOnClick={detailOnClickHandler} />
+            <CardList cards={clubCards} />
         );
-    }
-
-    const compare = (a, b) => {
-
-        const { lat, lng } = location;
-
-        if ((Math.pow(lat - a.latitude, 2) + Math.pow(lng - a.longitude, 2)) < (Math.pow(lat - b.latitude, 2) + Math.pow(lng - b.longitude, 2))) {
-            return -1;
-        } else {
-            return 1;
-        }
     }
 
     return (

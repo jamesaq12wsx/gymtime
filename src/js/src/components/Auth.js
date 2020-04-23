@@ -1,4 +1,4 @@
-import { login, signUp, checkToken } from '../api/client';
+import { login, signUp, checkToken, getCurrentUser } from '../api/client';
 import decode from 'jwt-decode';
 import { wait } from '@testing-library/react';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from './constants';
@@ -10,18 +10,19 @@ class Auth {
         this.refreshToken = localStorage.getItem(REFRESH_TOKEN);
         this.authenticated = this.isAuthenticated();
         this.serverCheck = false;
+        this.currentUser = null;
     }
 
-    signUp(values, cb, errCb){
+    signUp(values, cb, errCb) {
         signUp(values)
             .then(res => {
-                if(cb){
+                if (cb) {
                     cb();
                 }
             })
             .catch(err => {
                 console.error(err);
-                if(errCb){
+                if (errCb) {
                     errCb(err);
                 }
             });
@@ -39,7 +40,7 @@ class Auth {
 
                 localStorage.setItem(ACCESS_TOKEN, token);
 
-                if(cb){
+                if (cb) {
                     cb(token);
                 }
 
@@ -53,13 +54,39 @@ class Auth {
             })
     }
 
+    fetchCurrentUser(cb,errCb){
+        getCurrentUser()
+                .then(res => res.json())
+                .then(res => {
+                    this.currentUser = res.result;
+
+                    if (cb) {
+                        cb(res.result);
+                    }
+                })
+                .catch(err => {
+
+                    if (errCb) {
+                        errCb(err);
+                    }
+
+                });
+    }
+
+    getCurrentUser() {
+
+        return this.currentUser;
+    }
+
     logout(cb) {
 
         console.log('logout');
 
         localStorage.setItem(ACCESS_TOKEN, '');
 
-        if(cb){
+        this.authenticated = false;
+
+        if (cb) {
             cb();
         }
 
@@ -73,7 +100,7 @@ class Auth {
 
         const token = localStorage.getItem(ACCESS_TOKEN) || '';
 
-        if(token === ''){
+        if (token === '') {
             localStorage.setItem(ACCESS_TOKEN, '');
 
             return false;
@@ -90,11 +117,13 @@ class Auth {
 
                 this.accessToken = '';
 
+                this.currentUser = null;
+
                 localStorage.setItem(ACCESS_TOKEN, '');
 
-            }else{
+            } else {
 
-                if(this.serverCheck && this.authenticated){
+                if (this.serverCheck && this.authenticated) {
                     return true;
                 }
 
@@ -102,28 +131,28 @@ class Auth {
 
                 console.log('check token from server', authenticated);
 
-                if(authenticated){
+                if (authenticated) {
 
-                   this.authenticated = true;
+                    this.authenticated = true;
 
-                   this.serverCheck = true;
-                   
-                   return true;
+                    this.serverCheck = true;
 
-                }else{
-                    
+                    return true;
+
+                } else {
+
                     localStorage.setItem(ACCESS_TOKEN, '');
 
                     this.authenticated = false;
 
-                    return false;
+                    return this.authenticated;
 
                 }
 
             }
 
-        }catch(e) {
-            
+        } catch (e) {
+
             localStorage.setItem(ACCESS_TOKEN, '');
 
             this.authenticated = false;
@@ -131,7 +160,7 @@ class Auth {
             return false;
 
         }
-        
+
     }
 
 }

@@ -1,7 +1,16 @@
-export const API_BASE_URL = 'https://localhost:8443';
+export const API_BASE_URL = 'https://localhost:8080';
 export const ACCESS_TOKEN = 'accessToken';
 export const REFRESH_TOKEN = 'refreshToken';
 
+export const WEEKDAY = {
+    1: 'MONDAY',
+    2: 'TUESDAY',
+    3: 'WEDNESDAY',
+    4: 'THURSDAY',
+    5: 'FRIDAY',
+    6: 'SATURDAY',
+    0: 'SUNDAY'
+};
 
 export const OAUTH2_REDIRECT_URI = 'http://localhost:3000/oauth2/redirect'
 

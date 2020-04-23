@@ -1,10 +1,14 @@
 var _ = require('lodash');
 
+export const SET_POSTS = 'SET_POSTS';
+export const SELECT_POST = "SELECT_POST";
+export const DESELECT_POST = "DESELECT_POST";
+
 export const postContextReducer = (state, action) => {
 
     switch (action.type) {
 
-        case 'SET_POSTS':
+        case SET_POSTS:
 
             state = { ...state, posts: action.payload };
 
@@ -22,17 +26,17 @@ export const postContextReducer = (state, action) => {
 
             break;
 
-        case 'EDITING':
+        case SELECT_POST:
             
             // console.log('set editing post', JSON.stringify(action, null, 4));
 
-            state = { ...state, editing: true, editingPost: action.post, editingPostChanged: action.payload };
+            state = { ...state, selectedPost: action.payload };
 
             break;
 
-        case 'FINISH_EDIT':
+        case DESELECT_POST:
 
-            state = { ...state, editing: false, editingPost: {}, editingPostChanged: {} };
+            state = { ...state, selectedPost: null };
 
             break;
 

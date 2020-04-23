@@ -11,11 +11,9 @@ const AppContextProvider = (props) => {
 
     const initAppState = {
         auth: auth,
-        authenticated: false,
-        accessToken: '',
-        user: {},
         location: {},
-        fetchedLocation: false
+        fetchedLocation: false,
+        userBodyStat: null
     };
 
     const [state, dispatch] = useReducer(appContextReducer,initAppState);

@@ -22,22 +22,22 @@ const checkStatus = response => {
 }
 
 export const getAllClubs = () => {
-    
+
     const jwtToken = localStorage.getItem(ACCESS_TOKEN);
 
-    if(jwtToken){
-        return fetch(apiRoot + '/clubs', {
+    if (jwtToken) {
+        return fetch(apiRoot + '/club', {
             headers: {
                 'Authorization': `Bearer ${jwtToken}`
             }
         }).then(checkStatus);
 
-    }else{
+    } else {
         return fetch(apiRoot + '/clubs').then(checkStatus);
     }
 }
 
-export const getAllClubsWithLocation = (lat, lon) => fetch(apiRoot + `/clubs/location?lat=${lat}&lon=${lon}`).then(checkStatus);
+export const getAllClubsWithLocation = (lat, lng) => fetch(apiRoot + `/club?lat=${lat}&lng=${lng}`).then(checkStatus);
 
 // export const getClubDetail = (uuid) => fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
 
@@ -45,24 +45,45 @@ export const getClubDetailWithToken = (uuid) => {
 
     const token = localStorage.getItem(ACCESS_TOKEN);
 
-    if(token){
-        return fetch(apiRoot + `/clubs/club/${uuid}`,{
+    if (token) {
+        return fetch(apiRoot + `/club/${uuid}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         }).then(checkStatus);
-    }else{
-        return fetch(apiRoot + `/clubs/club/${uuid}`).then(checkStatus);
+    } else {
+        return fetch(apiRoot + `/club/${uuid}`).then(checkStatus);
     }
 }
 
-export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/clubs/club/${clubUuid}/posts/${date}`).then(checkStatus);
+export const getClubPosts = (clubUuid, date) => fetch(apiRoot + `/club/${clubUuid}/post/${date}`).then(checkStatus);
 
 export const getUserPost = (year) => fetch(apiRoot + `/post`, {
     headers: {
         'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
     }
 }).then(checkStatus);
+
+export const getPostByUuid = (uuid) => fetch(apiRoot + `/post/${uuid}`, {
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+    }
+}).then(checkStatus);
+
+export const newPostRecord = (postUuid, recordValues) =>
+    fetch(apiRoot + `/post/${postUuid}/record`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(recordValues)
+    }).then(checkStatus);
+
+export const deletePostRecord = (postUuid, recordUuid) =>
+    fetch(apiRoot + `/post/${postUuid}/record/${recordUuid}`, {
+        method: 'DELETE'
+    }).then(checkStatus);
 
 export const signUp = (values) => fetch(
     apiRoot + '/auth/signup',
@@ -86,6 +107,12 @@ export const login = (values) => fetch(
     }
 ).then(checkStatus);
 
+export const getCurrentUser = () => fetch(apiRoot + '/user/me', {
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+    }
+}).then(checkStatus);
+
 export const checkToken = async () => {
 
     let response = await fetch(apiRoot + '/auth/check', {
@@ -99,19 +126,68 @@ export const checkToken = async () => {
     return response.status === 200 ? true : false;
 }
 
-export const quickPost = (clubUuid, token) => {
-    if(token){
-        return fetch(apiRoot + `/post`,{
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({clubUuid: clubUuid})
-        }).then(checkStatus);
-    }else{
-        return Promise.reject(new Error('No token'));
+export const fetchUserBodyStat = () =>
+    fetch(apiRoot + '/user/stat', {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+        },
+    }).then(checkStatus);
+
+export const changeUserHeight = (values) =>
+    fetch(apiRoot + '/user/height', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+    }).then(checkStatus);
+
+export const newUserWeight = (values) =>
+    fetch(apiRoot + '/user/weight', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+    }).then(checkStatus);
+
+export const deleteWeight = (id) => fetch(apiRoot + `/user/weight/${id}`, {
+    method: 'DELETE',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        'Content-Type': 'application/json'
     }
+}).then(checkStatus);
+
+export const newUserBodyFat = (values) =>
+    fetch(apiRoot + '/user/bodyfat', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+    }).then(checkStatus);
+
+export const deleteBodyFat = (id) => fetch(apiRoot + `/user/bodyfat/${id}`, {
+    method: 'DELETE',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        'Content-Type': 'application/json'
+    }
+}).then(checkStatus);
+
+export const quickPost = (clubUuid) => {
+    return fetch(apiRoot + `/post`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ clubUuid: clubUuid })
+    }).then(checkStatus);
 }
 
 export const newPost = (post) => fetch(apiRoot + '/post', {
@@ -132,7 +208,7 @@ export const updatePost = (post) => fetch(apiRoot + '/post', {
     body: JSON.stringify(post)
 }).then(checkStatus);
 
-export const deletePost = (postUuid) => fetch(apiRoot+`/post/${postUuid}`, {
+export const deletePost = (postUuid) => fetch(apiRoot + `/post/${postUuid}`, {
     method: 'DELETE',
     headers: {
         'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
@@ -141,11 +217,9 @@ export const deletePost = (postUuid) => fetch(apiRoot+`/post/${postUuid}`, {
 
 export const getCountryItems = () => fetch(apiRoot + '/info/select/country').then(checkStatus);
 
-export const getAllExercise = () => fetch(apiRoot+'/exercise').then(checkStatus);
+export const getAllExercise = () => fetch(apiRoot + '/exercise').then(checkStatus);
 
-export const getAllFitness = (country) => fetch(apiRoot + `/select/club?country=${country}`).then(checkStatus); 
-
-export const getUserIpInfo = () => fetch('http://api.ipstack.com/check?access_key=07ba5f3189ccf2badb42ac5d0311a522').then(checkStatus);
+export const getAllFitness = (country) => fetch(apiRoot + `/select/club?country=${country}`).then(checkStatus);
 
 // export const getStudentCourses = studentId => fetch(`/api/students/${studentId}/courses`).then(checkStatus);
 
