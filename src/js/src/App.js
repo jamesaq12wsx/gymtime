@@ -46,7 +46,9 @@ const AuthRoute = ({ component: Component, ...rest }) => {
   return <Route {...rest} render={props => (
     auth.authenticated ?
       (
-        <Component {...props} />
+        auth.currentUser ?
+        <Component {...props} /> :
+        <Redirect to="/" />
       ) : (
         <Redirect
           to={{
@@ -81,6 +83,14 @@ const App = (props) => {
   const closeSideBar = () => setSettingSideBarVisible(false);
 
   useEffect(() => {
+    if (auth.isAuthenticated()) {
+      if(!auth.currentUser){
+        auth.fetchCurrentUser();
+      }
+    }
+  });
+
+  useEffect(() => {
 
     // if (auth.isAuthenticated()) {
     //   appDispatch({ type: 'LOGIN', payload: auth.getToken() });
@@ -108,32 +118,6 @@ const App = (props) => {
     clubDispatch({ type: clubContextReducerType.FETCHING });
 
   }, []);
-
-  useEffect(() => {
-
-    if (fetchedLocation) {
-      getAllClubsWithLocation(location.lat, location.lng)
-        .then(res => res.json())
-        .then(res => res.result)
-        .then(clubs => {
-          console.log('fetch clubs', clubs);
-          infoDispatch({ type: 'SET_CLUBS', payload: clubs });
-          clubDispatch({ type: clubContextReducerType.FETCHED });
-        })
-        .catch(err => {
-          console.error("Cannot get clubs", err);
-          errorNotification(err.message, err.message);
-          clubDispatch({ type: clubContextReducerType.FETCHED });
-        });
-    }
-
-  }, [location, fetchedLocation]);
-
-  useEffect(() => {
-    if (auth.isAuthenticated()) {
-      auth.fetchCurrentUser();
-    }
-  }, [auth.authenticated]);
 
   const groupBy = (xs, key) => {
     return xs.reduce((rv, x) => {

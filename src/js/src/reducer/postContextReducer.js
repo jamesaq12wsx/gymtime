@@ -10,7 +10,7 @@ export const postContextReducer = (state, action) => {
 
         case SET_POSTS:
 
-            state = { ...state, posts: action.payload };
+            state = { ...state, posts: action.payload, fetched: true };
 
             break;
 

@@ -15,7 +15,8 @@ const PostContextProvider = (props) => {
 
     const initAppState = {
         selectedPost: null,
-        posts: []
+        posts: [],
+        fetched: false
     };
 
     const [state, dispatch] = useReducer(postContextReducer,initAppState);

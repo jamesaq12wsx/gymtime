@@ -43,7 +43,7 @@ const ExercisePage = (props) => {
                 return (
                     <Panel
                         header={cat.toUpperCase()}
-                        key={i}
+                        key={cat}
                     >
                         <CardList
                             grid={{
@@ -77,6 +77,7 @@ const ExercisePage = (props) => {
 
         return (
             <Card
+                key={ex.name}
                 hoverable
                 // style={{ width: 240 }}
                 cover={images ? getCardCarouselCover(images) : <FaRegImage color={'grey'} size={70} />}
@@ -94,6 +95,7 @@ const ExercisePage = (props) => {
                 {images.map((img, i) => {
                     return (
                         <img
+                            key={img}
                             height="300"
                             src={img}
                             style={{ width: 240 }}
