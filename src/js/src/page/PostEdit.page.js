@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Input, Tag, Row, Col, Select, TreeSelect, Card, Modal } from 'antd';
+import { Button, Input, Tag, Row, Col, Select, TreeSelect, Card, Modal, InputNumber } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Link, useHistory } from 'react-router-dom';
 import { PostContext } from '../context/PostContextProvider';
@@ -58,12 +58,11 @@ const PostEdit = (props) => {
     }, []);
 
     useEffect(() => {
-        if (auth) {
-            auth.getCurrentUser((user) => {
-                const { weightUnit, distanceUnit } = user.userUnitSetting;
-                setWeightUnit(weightUnit);
-                setDistanceUnit(distanceUnit);
-            });
+        if (auth && auth.currentUser) {
+            const user = auth.currentUser;
+            const { weightUnit, distanceUnit } = user.userUnitSetting;
+            setWeightUnit(weightUnit);
+            setDistanceUnit(distanceUnit);
             // setWeightUnit(auth.currentUser.userUnitSetting.weightUnit);
         }
     }, [auth]);
@@ -148,27 +147,47 @@ const PostEdit = (props) => {
 
         return (
             <Container>
-                <CardList className='record-card-list' cards={cards} locale={{emptyText: 'Log New Exercise'}} />
+                <CardList className='record-card-list' cards={cards} locale={{ emptyText: 'Log New Exercise' }} />
             </Container>
         )
+    }
+
+    const getWeightUnitAlias = () => {
+        if (auth.currentUser) {
+            return auth.currentUser.userUnitSetting.weightUnit.alias;
+        }
+    }
+
+    const getDistanceUnitAlias = () => {
+        if (auth.currentUser) {
+            return auth.currentUser.userUnitSetting.distanceUnit.alias;
+        }
     }
 
     const getExerciseDataInput = () => {
         if (newRecordExercise) {
             return (
-                <Input.Group className="new-exercise-data">
-                    <Row gutter={8} justify="space-around">
-                        <Col span={12}>
-                            <Input
-                                value={newRecordDataOne} 
-                                onChange={(e) => setNewRecordDataOne(e.target.value)} 
-                                placeholder={newRecordExercise.measurementType.toLowerCase() === 'weight' ? weightUnit.alias : distanceUnit.alias} />
+                <Input.Group
+                    style={{ marginTop: 10 }}
+                    className="new-exercise-data">
+                    <Row gutter={12} justify="space-around">
+                        <Col span={10}>
+                            <InputNumber
+                                min={0}
+                                value={newRecordDataOne}
+                                onChange={(value) => setNewRecordDataOne(value)}
+                                placeholder={newRecordExercise.measurementType.toLowerCase() === 'weight' ? getWeightUnitAlias() : getDistanceUnitAlias()}
+                            />
                         </Col>
-                        <Col span={12}>
-                            <Input 
-                                value={newRecordDataTwo} 
-                                onChange={(e) => setNewRecordDataTwo(e.target.value)} 
-                                placeholder={newRecordExercise.measurementType.toLowerCase() === 'weight' ? 'Reps.' : 'Mins'} />
+                        <Col span={10}>
+
+                            <InputNumber
+                                min={0}
+                                value={newRecordDataTwo}
+                                onChange={(value) => setNewRecordDataTwo(value)}
+                                placeholder={newRecordExercise.measurementType.toLowerCase() === 'weight' ? 'Reps.' : 'Mins'}
+                            />
+
                         </Col>
                     </Row>
                 </Input.Group>
@@ -211,14 +230,13 @@ const PostEdit = (props) => {
                                 newRecord.exerciseId = newRecordExercise.id;
                                 switch (newRecordExercise.measurementType.toLowerCase()) {
                                     case 'weight':
-                                        newRecord.measurementUnitId = weightUnit.id;
+
                                         newRecord.weight = newRecordDataOne;
                                         newRecord.reps = newRecordDataTwo;
 
                                         break;
                                     case 'distance':
 
-                                        newRecord.measurementUnitId = distanceUnit.id;
                                         newRecord.distance = newRecordDataOne;
                                         newRecord.min = newRecordDataTwo;
 
@@ -247,6 +265,8 @@ const PostEdit = (props) => {
                 ]}
             >
                 <ExerciseSelect onChange={(ex) => { setNewRecordExercise(ex) }} style={{ width: '100%' }} />
+
+                <br />
 
                 {getExerciseDataInput()}
             </Modal>

@@ -24,7 +24,7 @@ const PostChart = (props) => {
         labels: hours,
         datasets: [
             {
-                label: 'Workout',
+                label: 'Today',
                 fill: false,
                 lineTension: 0.5,
                 backgroundColor: 'rgba(75,192,192,1)',
@@ -79,9 +79,8 @@ const PostChart = (props) => {
                         drawBorder: false
                     },
                     ticks: {
-                        max: 200,
                         min: 0,
-                        // stepSize: 10
+                        stepSize: 10
                     }
                 }],
                 xAxes: [

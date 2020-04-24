@@ -73,10 +73,10 @@ class Auth {
                 });
     }
 
-    getCurrentUser() {
+    // getCurrentUser() {
 
-        return this.currentUser;
-    }
+    //     return this.currentUser;
+    // }
 
     logout(cb) {
 

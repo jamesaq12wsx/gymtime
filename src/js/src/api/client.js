@@ -179,6 +179,39 @@ export const deleteBodyFat = (id) => fetch(apiRoot + `/user/bodyfat/${id}`, {
     }
 }).then(checkStatus);
 
+export const postUserHeightUnit = (id) => fetch(apiRoot + '/user/unit/height', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        "heightUnit": id
+    })
+})
+
+export const postUserWeightUnit = (id) => fetch(apiRoot + '/user/unit/weight', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        "weightUnit": id
+    })
+})
+
+export const postUserDistanceUnit = (id) => fetch(apiRoot + '/user/unit/distance', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        "distanceUnit": id
+    })
+})
+
 export const quickPost = (clubUuid) => {
     return fetch(apiRoot + `/post`, {
         method: 'POST',

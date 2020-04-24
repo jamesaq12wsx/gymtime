@@ -122,7 +122,7 @@ const ClubDetail = (props) => {
 
     const getQuickPostButton = () => {
         return (
-            <Button onClick={() => setNewPostModalVisible(true)} type="primary" shape="round" size={"medium"}>
+            <Button onClick={() => setNewPostModalVisible(true)} shape="round" size={"medium"} style={{backgroundColor: 'rgb(223, 123, 46)', color: 'white'}}>
                 Exercise
             </Button>
         );
@@ -155,14 +155,7 @@ const ClubDetail = (props) => {
 
         postDispatch({ type: 'NEW_POST', payload: club });
 
-        // quickPost(clubUuid, jwtToken)
-        //     .then(res => {
-        //         successNotification('Post Success', 'You have post an exercise');
-        //         fetchClub();
-        //     })
-        //     .catch(err => {
-        //         errorNotification('Post Fail', err.message);
-        //     });
+        
     }
 
     const getLocationListItem = () => {
@@ -189,7 +182,7 @@ const ClubDetail = (props) => {
                                 var win = window.open(googleMapUrl, '_blank');
                                 win.focus();
                             }}
-                            type="primary"
+                            style={{backgroundColor: 'rgb(223, 123, 46)', color: 'white'}}
                             shape="circle"
                             icon={<RightOutlined />}
                             size="small" />
@@ -326,11 +319,11 @@ const ClubDetail = (props) => {
                                 errorNotification('New Post Failed', err.error);
                             })
                     }}>
-                        New Post
+                        New Workout Log
                     </Button>
                 ]}
             >
-                <h2>{`Work Out at ------ ${club.clubName}`}</h2>
+                <h2>{`${club.clubName}`}</h2>
                 <h4>Time now : {moment().format('YYYY/MM/DD HH:mm:ss')}</h4>
             </Modal>
         </div>
