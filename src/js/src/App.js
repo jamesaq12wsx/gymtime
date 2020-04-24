@@ -156,8 +156,6 @@ const App = (props) => {
 
   const positionHandler = (position) => {
 
-    // setLocation({ ...location, lat: position.coords.latitude, lon: position.coords.longitude });
-
     appDispatch({ type: 'SET_LOCATION', payload: { lat: position.coords.latitude, lng: position.coords.longitude } });
 
   }

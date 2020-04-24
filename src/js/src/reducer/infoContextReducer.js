@@ -26,12 +26,6 @@ export const infoContextReducer = (state, action) => {
 
             break;
 
-        case 'SET_CLUBS':
-
-            state = { ...state, clubs: action.payload };
-
-            break;
-
     }
 
     return state;

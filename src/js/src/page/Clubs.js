@@ -1,16 +1,17 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 
 import LoadingList from '../components/list/LoadingList';
 import ClubList from '../components/list/ClubList';
 import { useHistory } from 'react-router-dom';
 import { ClubContext } from '../context/ClubContextProvider';
+import { clubContextReducerType } from '../reducer/clubContextReducer';
 import { InfoContext } from '../context/InfoContextProvider';
 import { AppContext } from '../context/AppContextProvider';
 import { Empty, Card, Row, Col, Tooltip, Modal, Button } from 'antd';
 import { EnvironmentFilled, ClockCircleFilled, MehFilled, MoreOutlined, HomeOutlined, DownCircleOutlined, ShopOutlined } from '@ant-design/icons';
 import { WEEKDAY, APP_BACKGROUND_COLOR } from '../components/constants';
 import CardList from '../components/CardList';
-import { newPost, quickPost } from '../api/client';
+import { newPost, quickPost, getAllClubsWithLocation } from '../api/client';
 import { successNotification, errorNotification } from '../components/Notification';
 
 const Clubs = (props) => {
@@ -18,7 +19,8 @@ const Clubs = (props) => {
     let history = useHistory();
 
     const clubContext = useContext(ClubContext);
-    const { state, dispatch } = clubContext;
+    const { state: clubState, dispatch: clubDispatch } = clubContext;
+    const { fetching, nearClubs: clubs } = clubState;
 
     const infoContext = useContext(InfoContext);
     const { state: infoState, dispatch: infoDispatch } = infoContext;
@@ -26,14 +28,34 @@ const Clubs = (props) => {
     const appContext = useContext(AppContext);
     const { state: appState } = appContext;
 
-    const { fetching } = state;
-
-    const { clubs } = infoState;
-
     const { location, fetchedLocation } = appState;
 
     const [newPostModalVisible, setNewPostModalVisible] = useState(false);
     const [newPostModalClub, setNewPostModalClub] = useState(null);
+
+    useEffect(() => {
+
+        if (!clubs || clubs.length === 0) {
+            if (fetchedLocation) {
+
+                clubDispatch({ type: clubContextReducerType.FETCHING });
+
+                getAllClubsWithLocation(location.lat, location.lng)
+                    .then(res => res.json())
+                    .then(res => res.result)
+                    .then(clubs => {
+                        console.log('fetch clubs', clubs);
+                        clubDispatch({ type: clubContextReducerType.SET_CLUBS, payload: clubs });
+                    })
+                    .catch(err => {
+                        console.error("Cannot get clubs", err);
+                        errorNotification(err.message, err.message);
+                        clubDispatch({ type: clubContextReducerType.FETCH_FAILED });
+                    });
+            }
+        }
+
+    }, [location]);
 
     const openNewPostModal = () => setNewPostModalVisible(true);
     const closeNewPostModal = () => {
