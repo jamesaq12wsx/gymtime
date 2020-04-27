@@ -1,17 +1,13 @@
 package com.jamesaq12wsx.gymtime.auth;
 
-import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
-import com.jamesaq12wsx.gymtime.database.BodyFatRepository;
-import com.jamesaq12wsx.gymtime.database.HeightRepository;
-import com.jamesaq12wsx.gymtime.database.WeightRepository;
+import com.jamesaq12wsx.gymtime.database.*;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
+import com.jamesaq12wsx.gymtime.model.MeasurementType;
 import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
 import com.jamesaq12wsx.gymtime.model.entity.*;
-import com.jamesaq12wsx.gymtime.model.payload.NewBodyFatRequest;
-import com.jamesaq12wsx.gymtime.model.payload.NewHeightRequest;
-import com.jamesaq12wsx.gymtime.model.payload.NewWeightRequest;
-import com.jamesaq12wsx.gymtime.model.payload.SignUpRequest;
+import com.jamesaq12wsx.gymtime.model.payload.*;
 import com.jamesaq12wsx.gymtime.security.PasswordConfig;
+import com.jamesaq12wsx.gymtime.service.ImageService;
 import com.jamesaq12wsx.gymtime.validator.EmailValidator;
 import com.jamesaq12wsx.gymtime.validator.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +16,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 import static com.jamesaq12wsx.gymtime.security.ApplicationUserRole.USER;
@@ -30,6 +29,8 @@ import static com.jamesaq12wsx.gymtime.security.ApplicationUserRole.USER;
 public class ApplicationUserService implements SelfUserDetailsService {
 
     private final ApplicationUserRepository applicationUserRepository;
+
+    private final MeasurementUnitRepository measurementUnitRepository;
 
     private final HeightRepository heightRepository;
 
@@ -41,14 +42,18 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final ImageService imageService;
+
     @Autowired
-    public ApplicationUserService(ApplicationUserRepository applicationUserRepository, HeightRepository heightRepository, WeightRepository weightRepository, BodyFatRepository bodyFatRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder) {
+    public ApplicationUserService(ApplicationUserRepository applicationUserRepository, MeasurementUnitRepository measurementUnitRepository, HeightRepository heightRepository, WeightRepository weightRepository, BodyFatRepository bodyFatRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder, ImageService imageService) {
         this.applicationUserRepository = applicationUserRepository;
+        this.measurementUnitRepository = measurementUnitRepository;
         this.heightRepository = heightRepository;
         this.weightRepository = weightRepository;
         this.bodyFatRepository = bodyFatRepository;
         this.passwordConfig = passwordConfig;
         this.passwordEncoder = passwordEncoder;
+        this.imageService = imageService;
     }
 
     @Override
@@ -121,6 +126,16 @@ public class ApplicationUserService implements SelfUserDetailsService {
         newUser.setAuthProvider(AuthProvider.LOCAL);
         newUser.setRole(USER);
 
+        newUser.setAudit(new Audit());
+
+        UserUnitSetting defaultSetting = new UserUnitSetting();
+        defaultSetting.setHeightUnit(new SimpleMeasurementUnit(1, MeasurementType.HEIGHT, "Centimeter", "cm"));
+        defaultSetting.setWeightUnit(new SimpleMeasurementUnit(4, MeasurementType.WEIGHT, "Kilogram", "kg"));
+        defaultSetting.setDistanceUnit(new SimpleMeasurementUnit(6, MeasurementType.DISTANCE, "kilometre", "km"));
+
+        newUser.setUserUnitSetting(defaultSetting);
+
+        applicationUserRepository.save(newUser);
 
 //        applicationUserDao.save(new ApplicationUser(null,request.getUsername(), request.getPassword(), request.getEmail(), USER,true,true,true,true,null,null));
 
@@ -133,38 +148,143 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public ApplicationUser updateUserUnitSetting(String email, UserUnitSetting userUnitSetting) {
+    public void updateUserName(UserInfoRequest request, Principal principal) {
+        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
 
-        ApplicationUser updateUser = applicationUserRepository.findByEmail(email).get();
-
-        UserUnitSetting preSetting = updateUser.getUserUnitSetting();
-
-        if (preSetting.getWeightUnit() == userUnitSetting.getWeightUnit() &&
-                preSetting.getHeightUnit() == userUnitSetting.getHeightUnit() &&
-                preSetting.getDistanceUnit() == userUnitSetting.getDistanceUnit()) {
-            return updateUser;
+        if (user.getAuthProvider() != AuthProvider.LOCAL){
+            throw new ApiRequestException("Social login could not change the name");
         }
 
-        updateUser.setUserUnitSetting(userUnitSetting);
+        user.setName(request.getName());
 
-        return applicationUserRepository.save(updateUser);
+        applicationUserRepository.save(user);
     }
 
     @Override
-    public ApplicationUser updateUserInfo(String email, UserInfo userInfo) {
+    public void updateUserBirthday(UserInfoRequest request, Principal principal) {
 
-        ApplicationUser updateUser = applicationUserRepository.findByEmail(email).get();
+        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
 
-        UserInfo preInfo = updateUser.getUserInfo();
-
-        if (preInfo.getGender() == userInfo.getGender() &&
-                preInfo.getBirthday().equals(userInfo.getBirthday())) {
-            return updateUser;
+        if (user.getUserInfo() == null){
+            user.setUserInfo(new UserInfo());
         }
 
-        updateUser.setUserInfo(userInfo);
+        user.getUserInfo().setBirthday(request.getBirthday());
 
-        return applicationUserRepository.save(updateUser);
+        applicationUserRepository.save(user);
+
+    }
+
+    @Override
+    public void updateUserGender(UserInfoRequest request, Principal principal) {
+
+        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+
+        if (user.getUserInfo() == null){
+            user.setUserInfo(new UserInfo());
+        }
+
+        user.getUserInfo().setGender(request.getGender());
+
+        applicationUserRepository.save(user);
+
+    }
+
+    @Override
+    public void updateUserPicture(MultipartFile picture, Principal principal) {
+
+        String fileUrl = null;
+
+        try {
+            fileUrl = imageService.saveImage(picture);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ApiRequestException(String.format("Save picture failed"));
+        }
+
+        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+
+        user.setImageUrl(fileUrl);
+
+        applicationUserRepository.save(user);
+
+    }
+
+    @Override
+    public void updateWeightUnit(UserUnitRequest request, Principal principal) {
+        ApplicationUser user = getUserFromDb(principal);
+
+        if(user.getUserUnitSetting().getWeightUnit().getId() != request.getWeightUnit()){
+            SimpleMeasurementUnit unit = getUnitFromDb(request.getWeightUnit());
+
+            if (!unit.getMeasurementType().equals(MeasurementType.WEIGHT)){
+                throw new ApiRequestException(String.format("Cannot change weight unit, unit %s is not for weight", unit.getId()));
+            }
+
+            user.getUserUnitSetting().setWeightUnit(unit);
+
+            applicationUserRepository.save(user);
+        }
+    }
+
+    @Override
+    public void updateHeightUnit(UserUnitRequest request, Principal principal) {
+        ApplicationUser user = getUserFromDb(principal);
+
+        if(user.getUserUnitSetting().getHeightUnit().getId() != request.getHeightUnit()){
+
+            SimpleMeasurementUnit unit = getUnitFromDb(request.getHeightUnit());
+
+            if (!unit.getMeasurementType().equals(MeasurementType.HEIGHT)){
+                throw new ApiRequestException(String.format("Cannot change height unit, unit %s is not for height", unit.getId()));
+            }
+
+            user.getUserUnitSetting().setHeightUnit(unit);
+
+            applicationUserRepository.save(user);
+        }
+    }
+
+    @Override
+    public void updateDistanceUnit(UserUnitRequest request, Principal principal) {
+        ApplicationUser user = getUserFromDb(principal);
+
+        if(user.getUserUnitSetting().getDistanceUnit().getId() != request.getDistanceUnit()){
+
+            SimpleMeasurementUnit unit = getUnitFromDb(request.getDistanceUnit());
+
+            if (!unit.getMeasurementType().equals(MeasurementType.DISTANCE)){
+                throw new ApiRequestException(String.format("Cannot change distance unit, unit %s is not for distance", unit.getId()));
+            }
+
+            user.getUserUnitSetting().setDistanceUnit(unit);
+
+            applicationUserRepository.save(user);
+        }
+    }
+
+    @Override
+    public void updateGender(UserInfoRequest request, Principal principal) {
+        ApplicationUser user = getUserFromDb(principal);
+
+        if(!user.getUserInfo().getGender().getValue().equals(request.getGender().getValue())){
+
+            user.getUserInfo().setGender(request.getGender());
+
+            applicationUserRepository.save(user);
+        }
+    }
+
+    @Override
+    public void updateBirthday(UserInfoRequest request, Principal principal) {
+        ApplicationUser user = getUserFromDb(principal);
+
+        if(!user.getUserInfo().getBirthday().equals(request.getBirthday())){
+
+            user.getUserInfo().setBirthday(request.getBirthday());
+
+            applicationUserRepository.save(user);
+        }
     }
 
     @Override
@@ -259,6 +379,7 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
     @Override
     public void deleteUserBodyFat(Integer id, Principal principal) {
+
         SimpleUserBodyFat userBodyFat = bodyFatRepository
                 .findById(id)
                 .orElseThrow(() -> new ApiRequestException(String.format("User body fat %s not found", id)));
@@ -267,13 +388,17 @@ public class ApplicationUserService implements SelfUserDetailsService {
             throw new ApiRequestException(String.format("You have no right delete this body fat record"));
         }
 
-        weightRepository.deleteById(id);
+        bodyFatRepository.deleteById(id);
     }
 
     private ApplicationUser getUserFromDb(Principal principal) {
 
         return applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
 
+    }
+
+    private SimpleMeasurementUnit getUnitFromDb(Integer id){
+        return measurementUnitRepository.findById(id).orElseThrow(() -> new ApiRequestException(String.format("Unit %s not found, can not update unit setting", id)));
     }
 
     private ApiRequestException getUserNotFoundException(Principal principal) {

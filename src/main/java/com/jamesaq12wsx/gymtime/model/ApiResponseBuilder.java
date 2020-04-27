@@ -15,4 +15,8 @@ public class ApiResponseBuilder {
         return new ApiResponse(false, message, null);
     }
 
+    public static ApiResponse createFailedResponse(String message, Object result){
+        return new ApiResponse(false, message, result);
+    }
+
 }

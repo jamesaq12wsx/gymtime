@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.controller;
 
+import com.jamesaq12wsx.gymtime.service.ImageService;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -19,8 +20,11 @@ public class ImageController {
 
     private final ResourceLoader resourceLoader;
 
-    public ImageController(ResourceLoader resourceLoader) {
+    private final ImageService imageService;
+
+    public ImageController(ResourceLoader resourceLoader, ImageService imageService) {
         this.resourceLoader = resourceLoader;
+        this.imageService = imageService;
     }
 
     @GetMapping("/{filename}")
@@ -31,7 +35,7 @@ public class ImageController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", String.format("image/%s", extension));
-        Resource resource = resourceLoader.getResource("file:"+UPLOAD_ROOT+"/"+filename);
+        Resource resource = imageService.loadResource(filename);
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
 
     }

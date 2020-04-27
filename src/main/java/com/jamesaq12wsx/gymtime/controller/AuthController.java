@@ -5,6 +5,8 @@ import com.jamesaq12wsx.gymtime.model.payload.SignUpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -17,7 +19,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public void signUp(@RequestBody SignUpRequest request){
+    public void signUp(@Valid @RequestBody SignUpRequest request){
 
         userDetailsService.addNewUser(request);
     }

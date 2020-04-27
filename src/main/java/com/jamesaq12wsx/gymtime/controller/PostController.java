@@ -102,7 +102,7 @@ public class PostController {
         return apiResponseBuilder.createSuccessResponse(newRecord);
     }
 
-    @PostMapping("/{postUuid}/record/{recordUuid}")
+    @PutMapping("/{postUuid}/record/{recordUuid}")
     public ApiResponse<SimplePostRecord> updateRecord(
             @PathVariable("postUuid") UUID postUuid,
             @PathVariable("recordUuid") UUID recordUuid,

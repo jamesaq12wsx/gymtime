@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ExerciseService {
@@ -33,15 +32,15 @@ public class ExerciseService {
 
     private final ApplicationUserRepository applicationUserRepository;
 
-    private final FileService fileService;
+    private final ImageService imageService;
 
     @Autowired
-    public ExerciseService(ExerciseRepository exerciseRepository, MuscleGroupRepository muscleGroupRepository, MuscleRepository muscleRepository, ApplicationUserRepository applicationUserRepository, FileService fileService) {
+    public ExerciseService(ExerciseRepository exerciseRepository, MuscleGroupRepository muscleGroupRepository, MuscleRepository muscleRepository, ApplicationUserRepository applicationUserRepository, ImageService imageService) {
         this.exerciseRepository = exerciseRepository;
         this.muscleGroupRepository = muscleGroupRepository;
         this.muscleRepository = muscleRepository;
         this.applicationUserRepository = applicationUserRepository;
-        this.fileService = fileService;
+        this.imageService = imageService;
     }
 
     public List<? extends Exercise> getAllExercise(Principal principal){
@@ -60,7 +59,7 @@ public class ExerciseService {
         ApplicationUser user = applicationUserRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ApiRequestException(String.format("User email %s could not find, cannot add new exercise", principal.getName())));
 
-        List<String> imageUrls = fileService.saveImages(exerciseRequest.getImages());
+        List<String> imageUrls = imageService.saveImages(exerciseRequest.getImages());
 
         SimpleMuscleGroup muscleGroup = muscleGroupRepository.findById(exerciseRequest.getMuscleGroupId())
                 .orElseThrow(() -> new ApiRequestException(String.format("Exercise muscle group %s not existed could not be null")));

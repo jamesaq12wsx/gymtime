@@ -4,23 +4,38 @@ import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
 import com.jamesaq12wsx.gymtime.model.entity.UserBodyStat;
 import com.jamesaq12wsx.gymtime.model.entity.UserInfo;
 import com.jamesaq12wsx.gymtime.model.entity.UserUnitSetting;
-import com.jamesaq12wsx.gymtime.model.payload.NewBodyFatRequest;
-import com.jamesaq12wsx.gymtime.model.payload.NewHeightRequest;
-import com.jamesaq12wsx.gymtime.model.payload.NewWeightRequest;
-import com.jamesaq12wsx.gymtime.model.payload.SignUpRequest;
+import com.jamesaq12wsx.gymtime.model.payload.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
+/**
+ *
+ */
 public interface SelfUserDetailsService extends UserDetailsService {
 
     void addNewUser(SignUpRequest request);
 
     ApplicationUser loadUserInfoByEmail(String email);
 
-    ApplicationUser updateUserUnitSetting(String email, UserUnitSetting setting);
+    void updateUserName(UserInfoRequest request, Principal principal);
 
-    ApplicationUser updateUserInfo(String email, UserInfo setting);
+    void updateUserBirthday(UserInfoRequest request, Principal principal);
+
+    void updateUserGender(UserInfoRequest request, Principal principal);
+
+    void updateUserPicture(MultipartFile picture, Principal principal);
+
+    void updateWeightUnit(UserUnitRequest request, Principal principal);
+
+    void updateHeightUnit(UserUnitRequest request, Principal principal);
+
+    void updateDistanceUnit(UserUnitRequest request, Principal principal);
+
+    void updateGender(UserInfoRequest request, Principal principal);
+
+    void updateBirthday(UserInfoRequest request, Principal principal);
 
     UserBodyStat getUserBodyStat(Principal principal);
 

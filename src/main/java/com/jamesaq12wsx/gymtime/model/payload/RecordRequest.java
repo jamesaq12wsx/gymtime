@@ -18,8 +18,6 @@ public class RecordRequest {
 
     private Integer exerciseId;
 
-    private Integer measurementUnitId;
-
     private Double weight;
 
     private Integer reps;

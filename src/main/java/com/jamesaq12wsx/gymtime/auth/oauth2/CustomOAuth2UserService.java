@@ -1,10 +1,14 @@
 package com.jamesaq12wsx.gymtime.auth.oauth2;
 
+import com.jamesaq12wsx.gymtime.model.MeasurementType;
+import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
 import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.jamesaq12wsx.gymtime.auth.UserPrincipal;
 import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
 import com.jamesaq12wsx.gymtime.exception.OAuth2AuthenticationProcessingException;
+import com.jamesaq12wsx.gymtime.model.entity.Audit;
+import com.jamesaq12wsx.gymtime.model.entity.UserUnitSetting;
 import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -71,6 +75,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.setEmailVerify(true);
         user.setImageUrl(oAuth2UserInfo.getImageUrl());
         user.setRole(ApplicationUserRole.USER);
+
+        user.setAudit(new Audit());
+
+        UserUnitSetting defaultSetting = new UserUnitSetting();
+        defaultSetting.setHeightUnit(new SimpleMeasurementUnit(1, MeasurementType.HEIGHT, "Centimeter", "cm"));
+        defaultSetting.setWeightUnit(new SimpleMeasurementUnit(4, MeasurementType.WEIGHT, "Kilogram", "kg"));
+        defaultSetting.setDistanceUnit(new SimpleMeasurementUnit(6, MeasurementType.DISTANCE, "kilometre", "km"));
+
+        user.setUserUnitSetting(defaultSetting);
+
         return userRepository.save(user);
     }
 

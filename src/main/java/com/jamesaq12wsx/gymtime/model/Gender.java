@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 
 public enum Gender {
@@ -22,6 +23,7 @@ public enum Gender {
         return this.getValue();
     }
 
+    @JsonCreator
     public static Gender getEnum(String value) {
         for(Gender v : values())
             if(v.getValue().equalsIgnoreCase(value)) return v;

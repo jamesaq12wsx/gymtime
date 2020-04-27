@@ -3,6 +3,8 @@ package com.jamesaq12wsx.gymtime.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.jamesaq12wsx.gymtime.model.Auditable;
+import com.jamesaq12wsx.gymtime.model.MeasurementType;
+import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
 import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.AllArgsConstructor;
@@ -11,16 +13,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
 @Entity
 @Table(name = "gym_time_user")
+@EntityListeners(AuditingEntityListener.class)
 @TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -66,9 +71,6 @@ public class ApplicationUser implements Auditable, Serializable {
     @Embedded
     private UserInfo userInfo;
 
-//    @Embedded
-//    private UserBodyStat userBodyStat;
-
     @Embedded
     private UserUnitSetting userUnitSetting;
 
@@ -76,20 +78,23 @@ public class ApplicationUser implements Auditable, Serializable {
     @Embedded
     private Audit audit;
 
-//    @Column(name = "created_at")
-//    private LocalDateTime createdAt;
-//
-//    @Column(name = "updated_at")
-//    private LocalDateTime updatedAt;
-
 //    @PrePersist
 //    public void beforeInsert(){
-//        LocalDateTime now = LocalDateTime.now();
+//        OffsetDateTime now = OffsetDateTime.now();
 //        this.uuid = UUID.randomUUID();
-//        this.createdAt = now;
-//        this.updatedAt = now;
-//    }
+//        if(this.audit == null){
+//            this.audit = new Audit();
+//        }
 //
+//        UserUnitSetting defaultSetting = new UserUnitSetting();
+//        defaultSetting.setHeightUnit(new SimpleMeasurementUnit(1, MeasurementType.HEIGHT, "Centimeter", "cm"));
+//        defaultSetting.setWeightUnit(new SimpleMeasurementUnit(4, MeasurementType.WEIGHT, "Kilogram", "kg"));
+//        defaultSetting.setDistanceUnit(new SimpleMeasurementUnit(6, MeasurementType.DISTANCE, "kilometre", "km"));
+//
+//        this.setUserUnitSetting(defaultSetting);
+//
+//    }
+
 //    @PreUpdate
 //    public void beforeUpdate(){
 //        LocalDateTime now = LocalDateTime.now();
