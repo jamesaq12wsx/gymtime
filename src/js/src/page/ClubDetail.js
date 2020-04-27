@@ -150,14 +150,6 @@ const ClubDetail = (props) => {
 
     }
 
-    const markOnClick = () => {
-        console.log(`mark ${clubUuid}`);
-
-        postDispatch({ type: 'NEW_POST', payload: club });
-
-        
-    }
-
     const getLocationListItem = () => {
         if (!club) {
             return <React.Fragment />
@@ -230,7 +222,7 @@ const ClubDetail = (props) => {
                         <GlobalOutlined />
                     </Col>
                     <Col span={22}>
-                        <a href={homeUrl}>Club Home Page</a>
+                        <a href={homeUrl} target="_blank">Club Home Page</a>
                         {/* {`${homeUrl}`} */}
                     </Col>
                 </Row>

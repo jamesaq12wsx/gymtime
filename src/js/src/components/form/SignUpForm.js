@@ -16,12 +16,12 @@ const SignUpForm = (props) => {
 
     return (
         <Formik
-            initialValues={{ username: '', email: '', password: '', passwordConfirm: '' }}
+            initialValues={{ name: '', email: '', password: '', passwordConfirm: '' }}
             validate={values => {
                 const errors = {};
 
-                if (!values.username) {
-                    errors.username = 'Username is Required';
+                if (!values.name) {
+                    errors.name = 'Name is Required';
                 }
 
                 if (!values.password) {
@@ -88,10 +88,10 @@ const SignUpForm = (props) => {
                             name="name"
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            value={values.username}
+                            value={values.name}
                             placeholder="Your Name"
                         />
-                        {errors.name && touched.usernamename && <Tag style={errorTagStyle}> {errors.name}</Tag>}
+                        {errors.name && touched.name && <Tag style={errorTagStyle}> {errors.name}</Tag>}
 
                         <br />
 

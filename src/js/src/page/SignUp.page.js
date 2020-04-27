@@ -3,7 +3,7 @@ import SignUpForm from '../components/form/SignUpForm';
 import auth from '../components/Auth';
 import { Redirect, useHistory } from 'react-router-dom';
 import { AppContext } from '../context/AppContextProvider';
-import { errorNotification } from '../components/Notification';
+import { errorNotification, successNotification } from '../components/Notification';
 import { Card, Col, Row, Divider, Button } from 'antd';
 import Container from '../components/Container';
 import { FACEBOOK_AUTH_URL, GOOGLE_AUTH_URL } from '../components/constants';
@@ -46,18 +46,10 @@ const SignUp = (props) => {
 
                             auth.signUp(values, () => {
 
-                                const { username, password } = values;
+                                successNotification('Sign up Success');
 
-                                auth.login({ username, password }, (token) => {
-                                    appDispatch({ type: 'LOGIN', payload: token });
-                                    history.push('/');
-                                    setSubmitting(false);
-                                }, (err) => {
-                                    console.log('sign in Fail');
-                                    setSubmitting(false);
-                                });
+                                history.push('/login');
 
-                                // props.onSuccess()
                             }, (err) => {
                                 setSubmitting(false);
                                 errorNotification('Sign Up Fail', err.message);

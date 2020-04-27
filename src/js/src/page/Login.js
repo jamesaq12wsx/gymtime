@@ -4,19 +4,21 @@ import { Redirect } from 'react-router-dom';
 import { AppContext } from '../context/AppContextProvider';
 import { Divider, Card, Alert } from 'antd';
 import SocialLogin from '../components/SocialLogin';
+import { errorNotification, successNotification } from '../components/Notification';
+import { SET_USER } from '../reducer/appContextReducer';
 
 const Login = ({ match: { params }, location }) => {
 
     const [errorMessage, setErrorMessage] = useState(null);
 
     const appContext = useContext(AppContext);
-    const { state: appState } = appContext;
+    const { state: appState, dispatch: appDispatch } = appContext;
 
     const { auth } = appState;
 
     useEffect(() => {
 
-        if(params.error){
+        if (params.error) {
             setErrorMessage(params.error);
         }
 
@@ -26,7 +28,7 @@ const Login = ({ match: { params }, location }) => {
         if (errorMessage) {
             return (
                 <Alert
-                    style={{marginTop: 10, marginBottom: 10}}
+                    style={{ marginTop: 10, marginBottom: 10 }}
                     className="login-error"
                     message={`${errorMessage}`}
                     type="error"
@@ -41,10 +43,10 @@ const Login = ({ match: { params }, location }) => {
     } else {
         return (
             <React.Fragment>
-                <Card 
-                    className="login-card" 
-                    style={{ 
-                        width: 400, 
+                <Card
+                    className="login-card"
+                    style={{
+                        width: 400,
                         margin: '0 auto',
                         boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
                     }} >
@@ -52,11 +54,22 @@ const Login = ({ match: { params }, location }) => {
 
                     {getAlert()}
 
-                    <LoginForm onFailure={(err) => {
-                        if(err.error.message){
-                            setErrorMessage(err.error.message);
-                        }
-                    }} />
+                    <LoginForm
+                        onSuccess={() => {
+
+                            successNotification('Login Success');
+
+                            auth.fetchCurrentUser((user) => {
+                                appDispatch({ type: SET_USER, payload: user });
+                            }, (err) => {
+                                errorNotification('Fetch User Info Failed', err.error.message);
+                            })
+                        }}
+                        onFailure={(err) => {
+                            if (err.error.message) {
+                                setErrorMessage(err.error.message);
+                            }
+                        }} />
                     <Divider> OR </Divider>
                     <SocialLogin login />
                 </Card>

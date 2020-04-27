@@ -126,6 +126,50 @@ export const checkToken = async () => {
     return response.status === 200 ? true : false;
 }
 
+export const updateUserName = (name) =>
+    fetch(apiRoot + '/user/name', {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: name })
+    }).then(checkStatus);
+
+export const updateUserGender = (gender) =>
+    fetch(apiRoot + '/user/gender', {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ gender: gender })
+    }).then(checkStatus);
+
+export const updateUserBirthday = (birthday) =>
+    fetch(apiRoot + '/user/birthday', {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ birthday: birthday })
+    }).then(checkStatus);
+
+export const updateUserPicture = (file) => {
+
+    var formData = new FormData();
+    formData.append('picture', file);
+
+    return fetch(apiRoot + '/user/picture', {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+        },
+        body: formData
+    }).then(checkStatus);
+}
+
 export const fetchUserBodyStat = () =>
     fetch(apiRoot + '/user/stat', {
         headers: {

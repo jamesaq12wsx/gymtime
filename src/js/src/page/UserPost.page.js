@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Calendar, Badge, Select, Radio, Col, Row, Button, Card, Descriptions, Modal, List } from 'antd';
+import { Calendar, Badge, Select, Radio, Col, Row, Button, Card, Descriptions, Modal, List, Tooltip } from 'antd';
 import moment from 'moment';
 import { getUserPost, deletePost, updatePost } from '../api/client';
 import { errorNotification } from '../components/Notification';
@@ -12,6 +12,7 @@ import { AppContext } from '../context/AppContextProvider';
 import { SELECT_POST, DESELECT_POST, SET_POSTS } from '../reducer/postContextReducer';
 import PostEdit from './PostEdit.page';
 import { convertUnit } from '../util';
+import { SET_USER } from '../reducer/appContextReducer';
 var _ = require('lodash');
 
 const { Group, Button: RadioButton } = Radio;
@@ -37,13 +38,13 @@ const UserPost = (props) => {
     const { state: postState, dispatch } = postContext;
 
     const appContext = useContext(AppContext);
-    const { state: appState } = appContext;
-    const { auth } = appState;
+    const { state: appState, dispatch: appDispatch } = appContext;
+    const { auth, currentUser } = appState;
 
-    const { posts, fetched, editing, editingPost, editingPostChanged } = postState;
+    const { posts, fetched } = postState;
 
     useEffect(() => {
-        if(!fetched){
+        if (!fetched) {
             getYearPost(moment().format('YYYY'));
         }
 
@@ -52,8 +53,12 @@ const UserPost = (props) => {
     }, []);
 
     useEffect(() => {
-        if (!auth.currentUser) {
-            auth.fetchCurrentUser();
+        if (!currentUser) {
+            auth.fetchCurrentUser((user) => {
+                appDispatch({ type: SET_USER, payload: user });
+            }, (err) => {
+                errorNotification('Fetch User Info Failed', err.error.message);
+            });
         }
     }, []);
 
@@ -157,7 +162,7 @@ const UserPost = (props) => {
                                     style={{ flexWrap: 'nowrap' }}
                                     gutter={8}>
                                     <Col
-                                        span={6}
+                                    // span={6}
                                     // style={{ flex: 'none' }}
                                     >
                                         <Group size="small" onChange={e => onTypeChange(e.target.value)} value={type}>
@@ -167,11 +172,11 @@ const UserPost = (props) => {
                                     </Col>
                                     <Col
                                         span={4}
-                                    // style={{ flex: 'auto' }}
                                     >
                                         <Select
                                             size="small"
-                                            dropdownMatchSelectWidth={false}
+                                            style={{ width: 100 }}
+                                            // dropdownMatchSelectWidth={false}
                                             className="my-year-select"
                                             onChange={newYear => {
                                                 const now = value.clone().year(newYear);
@@ -183,11 +188,12 @@ const UserPost = (props) => {
                                         </Select>
                                     </Col>
                                     <Col
-                                        span={4}
+                                    // span={4}
                                     // style={{ flex: 'auto' }}
                                     >
                                         <Select
                                             size="small"
+                                            style={{ width: '5rem' }}
                                             dropdownMatchSelectWidth={false}
                                             value={String(month)}
                                             onChange={selectedMonth => {
@@ -200,25 +206,31 @@ const UserPost = (props) => {
                                         </Select>
                                     </Col>
                                     <Col
-                                        span={6}
+                                    // span={6}
                                     >
-                                        <Button
-                                            size='small'
-                                            onClick={() => {
-                                                const newDate = selectedDate.clone().add(-1, 'month');
-                                                setToday(newDate);
-                                                setSelectedDate(newDate);
-                                                // onChange(selectedDate.add(-1, 'month'))
-                                            }}
-                                        >-</Button>
-                                        <Button
-                                            size='small'
-                                            onClick={() => {
-                                                const newDate = selectedDate.clone().add(1, 'month');
-                                                setToday(newDate);
-                                                setSelectedDate(newDate);
-                                            }}
-                                        >+</Button>
+                                        <Tooltip
+                                            title="last month">
+                                            <Button
+                                                size='small'
+                                                onClick={() => {
+                                                    const newDate = selectedDate.clone().add(-1, 'month');
+                                                    setToday(newDate);
+                                                    setSelectedDate(newDate);
+                                                    // onChange(selectedDate.add(-1, 'month'))
+                                                }}
+                                            >{"<"}</Button>
+                                        </Tooltip>
+                                        <Tooltip 
+                                            title="next month">
+                                            <Button
+                                                size='small'
+                                                onClick={() => {
+                                                    const newDate = selectedDate.clone().add(1, 'month');
+                                                    setToday(newDate);
+                                                    setSelectedDate(newDate);
+                                                }}
+                                            >{">"}</Button>
+                                        </Tooltip>
 
                                     </Col>
                                     {/* <Col
@@ -263,10 +275,10 @@ const UserPost = (props) => {
 
                 switch (measurementType.toLowerCase()) {
                     case 'weight':
-                        description = `${convertUnit(auth.currentUser.userUnitSetting.weightUnit, r.measurementUnit, r.weight)} ${getWeightUnitAlias()} x ${r.reps} reps`;
+                        description = `${convertUnit(currentUser.userUnitSetting.weightUnit, r.measurementUnit, r.weight)} ${getWeightUnitAlias()} x ${r.reps} reps`;
                         break;
                     case 'distance':
-                        description = `${convertUnit(auth.currentUser.userUnitSetting.distanceUnit, r.measurementUnit, r.distance)} ${getDistanceUnitAlias()} x ${r.min} mins`;
+                        description = `${convertUnit(currentUser.userUnitSetting.distanceUnit, r.measurementUnit, r.distance)} ${getDistanceUnitAlias()} x ${r.min} mins`;
                         break;
                     case 'duration':
                         description = `${r.duration} ${r.measurementUnit.alias} x ${r.reps} reps`;
@@ -276,7 +288,7 @@ const UserPost = (props) => {
                 }
 
                 return (
-                    <React.Fragment>
+                    <React.Fragment key={i}>
                         <Descriptions.Item key={i}>{`${r.exercise.name} - ${description}`}</Descriptions.Item>
                         <br />
                     </React.Fragment>
@@ -326,14 +338,14 @@ const UserPost = (props) => {
     }
 
     const getWeightUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.weightUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.weightUnit.alias;
         }
     }
 
     const getDistanceUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.distanceUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.distanceUnit.alias;
         }
     }
 

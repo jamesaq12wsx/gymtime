@@ -13,6 +13,7 @@ const AppContextProvider = (props) => {
         auth: auth,
         location: {},
         fetchedLocation: false,
+        currentUser: null,
         userBodyStat: null
     };
 

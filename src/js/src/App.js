@@ -30,7 +30,7 @@ import { GiJumpAcross } from "react-icons/gi";
 import Footer from './components/Footer';
 import Header from './components/Header';
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
-import { FETCHED_LOCATION_ERROR } from './reducer/appContextReducer';
+import { FETCHED_LOCATION_ERROR, SET_USER } from './reducer/appContextReducer';
 import PostEdit from './page/PostEdit.page';
 var _ = require('lodash');
 
@@ -41,14 +41,12 @@ const AuthRoute = ({ component: Component, ...rest }) => {
 
   const { state: appState } = appContext;
 
-  const { auth } = appState;
+  const { auth, currentUser } = appState;
 
   return <Route {...rest} render={props => (
     auth.authenticated ?
       (
-        auth.currentUser ?
-        <Component {...props} /> :
-        <Redirect to="/" />
+        <Component {...props} />
       ) : (
         <Redirect
           to={{
@@ -71,7 +69,7 @@ const App = (props) => {
   const { state: clubState, dispatch: clubDispatch } = clubContext;
   const { state: infoState, dispatch: infoDispatch } = infoContext;
 
-  const { auth, location, fetchedLocation } = appState;
+  const { auth, location, fetchedLocation, currentUser } = appState;
 
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [settingSideBarVisible, setSettingSideBarVisible] = useState(false);
@@ -84,8 +82,12 @@ const App = (props) => {
 
   useEffect(() => {
     if (auth.isAuthenticated()) {
-      if(!auth.currentUser){
-        auth.fetchCurrentUser();
+      if(!currentUser){
+        auth.fetchCurrentUser((user) => {
+          appDispatch({type: SET_USER, payload: user});
+        }, (err) => {
+          errorNotification('Fetch user detail Failed', err.error.message);
+        });
       }
     }
   });
@@ -259,7 +261,7 @@ const App = (props) => {
   }
 
   const getUserAvatar = () => {
-    const user = auth.currentUser;
+    const user = currentUser;
     if (user) {
       return (
         <React.Fragment>

@@ -28,7 +28,7 @@ const Clubs = (props) => {
     const appContext = useContext(AppContext);
     const { state: appState } = appContext;
 
-    const { location, fetchedLocation } = appState;
+    const { location, fetchedLocation, auth } = appState;
 
     const [newPostModalVisible, setNewPostModalVisible] = useState(false);
     const [newPostModalClub, setNewPostModalClub] = useState(null);
@@ -197,15 +197,18 @@ const Clubs = (props) => {
                         }}>
                         Cancle
                     </Button>,
-                    <Button
-                        shape="round"
-                        style={{ color: 'white', backgroundColor: APP_BACKGROUND_COLOR }}
-                        onClick={() => {
-                            newPost();
-                        }}
-                    >
-                        New Workout
+                    <Tooltip title={!auth.isAuthenticated() ? "Please login to log your exercise" : null}>
+                        <Button
+                            disabled={!auth.isAuthenticated()}
+                            shape="round"
+                            style={{ color: 'white', backgroundColor: APP_BACKGROUND_COLOR }}
+                            onClick={() => {
+                                newPost();
+                            }}
+                        >
+                            New Workout
                     </Button>
+                    </Tooltip>
                 ]}
             >
                 <div>

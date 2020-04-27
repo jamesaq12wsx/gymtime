@@ -5,6 +5,10 @@
     border-radius: 20px;
   }
 
+  .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner {
+    border-radius: 50%;
+  }
+
   .day-post{
       
   }

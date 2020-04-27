@@ -1,16 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Row, Avatar, Badge, List, Tooltip, Col, Modal, InputNumber, Tag, Typography, Radio } from 'antd';
-import { UserOutlined, GoogleOutlined, FacebookFilled, ProfileOutlined } from '@ant-design/icons';
+import { Button, Row, Avatar, Badge, List, Tooltip, Col, Modal, InputNumber, Input, Typography, Radio, Upload, Spin, DatePicker } from 'antd';
+import { UserOutlined, GoogleOutlined, FacebookFilled, ProfileOutlined, CameraOutlined, FileImageOutlined, CloseOutlined, SolutionOutlined } from '@ant-design/icons';
+import { FaBirthdayCake, FaTransgender } from "react-icons/fa";
 import { useHistory, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { AppContext } from '../context/AppContextProvider';
-import { SET_BODY_STAT } from '../reducer/appContextReducer';
-import { fetchUserBodyStat, changeUserHeight, newUserWeight, newUserBodyFat, deleteWeight, deleteBodyFat, postUserHeightUnit, postUserWeightUnit, postUserDistanceUnit } from '../api/client';
+import { SET_BODY_STAT, SET_USER } from '../reducer/appContextReducer';
+import { fetchUserBodyStat, changeUserHeight, newUserWeight, newUserBodyFat, deleteWeight, deleteBodyFat, postUserHeightUnit, postUserWeightUnit, postUserDistanceUnit, updateUserName, updateUserBirthday, updateUserGender, updateUserPicture } from '../api/client';
 import { errorNotification, successNotification } from '../components/Notification';
 import { convertUnit } from '../util';
 import WeightChart from '../components/chart/WeightChart';
 import BodyFatChart from '../components/chart/BodyFatChart';
 import DeleteIconButton from '../components/DeleteIconButton';
+import { APP_BACKGROUND_COLOR } from '../components/constants';
+import moment from 'moment';
 
+const { Dragger } = Upload;
 
 const User = (props) => {
 
@@ -33,39 +37,126 @@ const UserHome = () => {
 
     const appContext = useContext(AppContext);
     const { state: appState, dispatch: appDispatch } = appContext;
-
     const { auth } = appState;
+    const { currentUser } = appState;
 
-    const { currentUser } = auth;
+    const [uploadingPic, setUploadingPic] = useState(false);
+
+    const [uploadPic, setUploadPic] = useState(null);
+
+    const [userPicUploadModalVisible, setUserPicUploadModalVisible] = useState(false);
+
+    const [userNameModalVisible, setUserNameModalVisible] = useState(false);
+    const [userUpdateName, setUserUpdateName] = useState('');
+    const [updatingName, setUpdatingName] = useState(false);
+
+    const [userBirthdayModalVisible, setUserBirthdayModalVisible] = useState(false);
+    const [userUpdateBirthday, setUserUpdateBirthday] = useState(null);
+    const [updatingBirthday, setUpdatingBirthday] = useState(false);
+
+    const [userGenderModalVisible, setUserGenderModalVisible] = useState(false);
+    const [userUpdateGender, setUserUpdateGender] = useState(null);
+    const [updatingGender, setUpdatingGender] = useState(false);
+
+    useEffect(() => {
+        if (!currentUser) {
+            fetchCurrentUser();
+        }
+    }, []);
+
+    const openUploadPicModal = () => setUserPicUploadModalVisible(true);
+    const closeUploadPicModal = () => {
+        setUserPicUploadModalVisible(false);
+        setUploadingPic(false);
+        setUploadPic(null);
+    };
+
+    const openUserNameModal = () => {
+        setUserNameModalVisible(true);
+        setUserUpdateName(currentUser.name ? currentUser.name : '');
+    };
+    const closeUserNameModal = () => {
+
+        setUserNameModalVisible(false);
+        setUserUpdateName('');
+        setUpdatingName(false);
+    };
+
+    const openUserBirthdayModal = () => {
+        setUserBirthdayModalVisible(true);
+        if (currentUser) {
+            const { userInfo } = currentUser;
+            if (userInfo && userInfo.birthday) {
+                setUserUpdateBirthday(moment(currentUser.userInfo.birthday));
+            }
+        }
+    }
+
+    const closeUserBirthdayModal = () => {
+        setUserBirthdayModalVisible(false);
+        setUserUpdateBirthday(null);
+        setUpdatingBirthday(false);
+    }
+
+    const openUserGenderModal = () => {
+        setUserGenderModalVisible(true);
+        if (currentUser) {
+            const { userInfo } = currentUser;
+            if (userInfo && userInfo.gender) {
+                setUserUpdateGender(userInfo.gender.toLowerCase());
+            }
+        }
+    }
+
+    const closeUserGenderModal = () => {
+        setUserGenderModalVisible(false);
+        setUserUpdateGender(null);
+        setUpdatingGender(false);
+    }
+
+    const fetchCurrentUser = () => {
+        auth.fetchCurrentUser((user) => {
+            appDispatch({ type: SET_USER, payload: user });
+        }, (err) => {
+            errorNotification('Fetch User Info Failed', err.error.message);
+            console.error(err);
+        })
+    }
 
     const getAuthLocgo = () => {
 
         if (currentUser) {
+
+            const logoStyle = { fontSize: '2rem' };
+
             switch (currentUser.authProvider.toLowerCase()) {
                 case 'google':
                     return (
                         <Tooltip title="Login by Google">
-                            <GoogleOutlined />
+                            <GoogleOutlined style={logoStyle} />
                         </Tooltip>
                     );
                 case 'facebook':
-                    return <FacebookFilled />;
+                    return <FacebookFilled style={logoStyle} />;
+                case 'local':
+                    return (
+                        <Tooltip title="Upload Picture">
+                            <CameraOutlined style={logoStyle} onClick={() => openUploadPicModal()} />
+                        </Tooltip>
+                    );
             }
         }
 
     }
 
-    const getUserData = () => {
+    const getUserImage = () => {
         if (currentUser) {
             return (
                 <React.Fragment>
                     <Row className="user-image-row" justify="center">
-                        <Badge offset={[-20, 200]} count={currentUser.authProvider ? getAuthLocgo() : <React.Fragment />} >
+                        <Badge offset={[0, 200]} count={currentUser.authProvider ? getAuthLocgo() : <React.Fragment />} >
                             {currentUser.imageUrl ? <Avatar size={200} src={currentUser.imageUrl} /> : <Avatar size={200} icon={<UserOutlined />} />}
                         </Badge>
-                    </Row>
-                    <Row className="user-name-row" justify="center">
-                        <h2>{currentUser.name}</h2>
                     </Row>
                 </React.Fragment>
             );
@@ -81,10 +172,40 @@ const UserHome = () => {
                     locale={{ emptyText: 'No Setting' }}
                 >
                     <List.Item
+                        key="name"
+                        onClick={() => openUserNameModal()}
+                    >
+                        <List.Item.Meta
+                            avatar={<Avatar style={{ backgroundColor: APP_BACKGROUND_COLOR }} icon={<UserOutlined />} />}
+                            title={currentUser.name ? currentUser.name : ''}
+                        />
+                    </List.Item>
+
+                    <List.Item
+                        key="birthday"
+                        onClick={() => openUserBirthdayModal()}
+                    >
+                        <List.Item.Meta
+                            avatar={<Avatar style={{ backgroundColor: APP_BACKGROUND_COLOR }} icon={<FaBirthdayCake />} />}
+                            title={currentUser.userInfo ? currentUser.userInfo.birthday ? currentUser.userInfo.birthday : '' : ''}
+                        />
+                    </List.Item>
+
+                    <List.Item
+                        key="gender"
+                        onClick={() => openUserGenderModal()}
+                    >
+                        <List.Item.Meta
+                            avatar={<Avatar style={{ backgroundColor: APP_BACKGROUND_COLOR }} icon={<FaTransgender />} />}
+                            title={currentUser.userInfo ? currentUser.userInfo.gender ? currentUser.userInfo.gender : '' : ''}
+                        />
+                    </List.Item>
+
+                    <List.Item
                         onClick={() => history.push('/user/stat')}
                     >
                         <List.Item.Meta
-                            avatar={<Avatar icon={<UserOutlined />} />}
+                            avatar={<Avatar style={{ backgroundColor: APP_BACKGROUND_COLOR }} icon={<SolutionOutlined />} />}
                             title="Body Stat"
                         />
                     </List.Item>
@@ -92,7 +213,7 @@ const UserHome = () => {
                         onClick={() => history.push('/user/unit')}
                     >
                         <List.Item.Meta
-                            avatar={<Avatar icon={<ProfileOutlined />} />}
+                            avatar={<Avatar style={{ backgroundColor: APP_BACKGROUND_COLOR }} icon={<ProfileOutlined />} />}
                             title="Unit Setting"
                         />
                     </List.Item>
@@ -101,11 +222,268 @@ const UserHome = () => {
         }
     }
 
+    const beforeUpload = (file) => {
+
+        console.log('before upload', file);
+
+        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+        if (!isJpgOrPng) {
+            errorNotification('You can only upload JPG/PNG file!');
+
+            return false;
+        }
+        const isLt2M = file.size / 1024 / 1024 < 1;
+        if (!isLt2M) {
+            errorNotification('Image must smaller than 1MB!');
+
+            return false;
+        }
+        // return isJpgOrPng && isLt2M;
+
+        setUploadPic(file);
+
+        return false;
+
+    }
+
+    const onRemove = (file) => {
+
+        setUploadPic(null);
+
+    }
+
+    const handleUpload = () => {
+
+        if (uploadPic) {
+
+            setUploadingPic(true);
+
+            updateUserPicture(uploadPic)
+                .then(res => {
+                    successNotification('Update User Picture Success');
+
+                    fetchCurrentUser();
+
+                    closeUploadPicModal();
+
+                })
+                .catch(err => {
+                    errorNotification('Update User Picture Failed', err.error.message);
+                })
+                .finally(() => {
+                    setUploadingPic(false);
+                });
+        }
+
+    };
+
+    const updateName = () => {
+        if (userUpdateName) {
+
+            setUpdatingName(true);
+
+            updateUserName(userUpdateName)
+                .then(res => {
+                    successNotification('Update User Name Success');
+
+                    fetchCurrentUser();
+
+                    closeUserNameModal();
+                })
+                .catch(err => {
+                    errorNotification('Update User Name Failed');
+                    console.error('update user name failed', err);
+                })
+                .finally(() => {
+                    setUpdatingName(false);
+                });
+        }
+    }
+
+    const updateBirthday = () => {
+        setUpdatingBirthday(true);
+
+        updateUserBirthday(updateUserBirthday.format('YYYY-MM-DD'))
+            .then(res => {
+                successNotification('Update Birthday Success');
+                fetchCurrentUser();
+                closeUserBirthdayModal();
+            })
+            .catch(err => {
+                errorNotification('Update Birthday Failed');
+                console.error('Update Birthday Failed', err);
+            })
+            .finally(() => {
+                setUpdatingBirthday(false);
+            })
+    }
+
+    const updateGender = () => {
+        setUpdatingGender(true);
+
+        updateUserGender(userUpdateGender)
+            .then(res => {
+                successNotification('Update User Gender Success');
+                closeUserGenderModal();
+            })
+            .catch(err => {
+                errorNotification('Update User Gender Failed');
+
+                console.error('Update User Gender Failed', err);
+            })
+            .finally(() => {
+                setUpdatingGender(false);
+            });
+    }
+
+    const birthdayModal = () => {
+
+        if (currentUser) {
+            const { userInfo } = currentUser;
+            const { birthday } = userInfo || {};
+
+            const saveDisable = userUpdateBirthday === null || userUpdateBirthday.format('YYYY-MM-DD') === birthday;
+
+            return (
+                <Modal
+                    title="Birthday"
+                    visible={userBirthdayModalVisible}
+                    onCancel={() => closeUserBirthdayModal()}
+                    footer={[
+                        <Button shape="round" icon={<CloseOutlined />} onClick={() => closeUserBirthdayModal()} />,
+                        <Button
+                            onClick={() => {
+                                updateBirthday();
+                            }}
+                            disabled={saveDisable}
+                            shape="round"
+                            style={{ color: 'white', backgroundColor: saveDisable ? 'grey' : APP_BACKGROUND_COLOR }}>
+                            {updatingBirthday ? <Spin /> : 'Save'}
+                        </Button>
+                    ]}
+                >
+                    {/* <Input onChange={(e) => set(e.target.value)} value={userUpdateName} placeholder="Your Name" prefix={<UserOutlined />} /> */}
+                    <DatePicker
+                        value={userUpdateBirthday}
+                        onChange={(date, dateString) => {
+                            setUserUpdateBirthday(date);
+                        }} />
+                </Modal>
+            );
+        }
+
+    }
+
+    const genderModal = () => {
+
+        if (currentUser) {
+            const { userInfo } = currentUser;
+            const { gender } = userInfo || {};
+
+            const saveDisable = userUpdateGender === null || gender === null || userUpdateGender === gender.toLowerCase();
+
+            return (
+                <Modal
+                    title="Gender"
+                    visible={userGenderModalVisible}
+                    onCancel={() => closeUserGenderModal()}
+                    footer={[
+                        <Button shape="round" icon={<CloseOutlined />} onClick={() => closeUserGenderModal()} />,
+                        <Button
+                            onClick={() => {
+                                updateGender();
+                            }}
+                            disabled={saveDisable}
+                            shape="round"
+                            style={{ color: 'white', backgroundColor: saveDisable ? 'grey' : APP_BACKGROUND_COLOR }}>
+                            {updatingGender ? <Spin /> : 'Save'}
+                        </Button>
+                    ]}
+                >
+                    <Radio.Group value={userUpdateGender} onChange={(e) => setUserUpdateGender(e.target.value)}>
+                        <Radio.Button value="male">Male</Radio.Button>
+                        <Radio.Button value="female">Female</Radio.Button>
+                    </Radio.Group>
+                </Modal>
+            );
+        }
+
+    }
+
+    if (!currentUser) {
+        return (
+            <div className="user">
+                <h1>User Page</h1>
+                <Spin />
+            </div>
+        );
+    }
+
     return (
         <div className="user">
             <h1>User Page</h1>
-            {getUserData()}
+            {getUserImage()}
             {getUserSetting()}
+
+            <Modal
+                title="Upload New Picture"
+                className="image-upload-modal"
+                onCancel={() => closeUploadPicModal()}
+                onOk={() => closeUploadPicModal()}
+                visible={userPicUploadModalVisible}
+                footer={[
+                    <Button shape="round" icon={<CloseOutlined />} onClick={() => closeUploadPicModal()} />,
+                    <Button
+                        onClick={() => {
+                            handleUpload();
+                        }}
+                        disabled={uploadingPic ? true : uploadPic ? false : true}
+                        shape="round"
+                        style={{ color: 'white', backgroundColor: uploadPic ? APP_BACKGROUND_COLOR : 'grey' }}>
+                        {uploadingPic ? <Spin /> : 'Save'}
+                    </Button>
+                ]}
+            >
+                <Dragger
+                    name="file"
+                    multiple={false}
+                    beforeUpload={beforeUpload}
+                    onRemove={onRemove}
+                    fileList={uploadPic ? [uploadPic] : []}
+                >
+                    <p className="ant-upload-drag-icon">
+                        <FileImageOutlined
+                            style={{ color: APP_BACKGROUND_COLOR }}
+                        />
+                    </p>
+                    <p className="ant-upload-text">Click or drag image to this area to upload your account picture</p>
+                </Dragger>
+            </Modal>
+
+            <Modal
+                title="Name"
+                visible={userNameModalVisible}
+                onCancel={() => closeUserNameModal()}
+                footer={[
+                    <Button shape="round" icon={<CloseOutlined />} onClick={() => closeUserNameModal()} />,
+                    <Button
+                        onClick={() => {
+                            updateName();
+                        }}
+                        disabled={currentUser.name === userUpdateName ? true : false}
+                        shape="round"
+                        style={{ color: 'white', backgroundColor: currentUser.name === userUpdateName ? 'grey' : APP_BACKGROUND_COLOR }}>
+                        {updatingName ? <Spin /> : 'Save'}
+                    </Button>
+                ]}
+            >
+                <Input onChange={(e) => setUserUpdateName(e.target.value)} value={userUpdateName} placeholder="Your Name" prefix={<UserOutlined />} />
+            </Modal>
+
+            {birthdayModal()}
+
+            {genderModal()}
+
         </div>
     );
 }
@@ -115,7 +493,7 @@ const UserBodyStat = () => {
     const appContext = useContext(AppContext);
     const { state: appState, dispatch: appDispatch } = appContext;
 
-    const { userBodyStat, auth } = appState;
+    const { userBodyStat, auth, currentUser } = appState;
 
     const [newHeightModalVisible, setNewHeightModalVisible] = useState(false);
     const [newHeightValue, setNewHeightValue] = useState(0);
@@ -137,7 +515,7 @@ const UserBodyStat = () => {
     const openHeightModal = () => {
         setNewHeightModalVisible(true);
 
-        if (userBodyStat && auth.currentUser) {
+        if (userBodyStat && currentUser) {
             const { height } = userBodyStat;
             if (height) {
                 setNewHeightValue(getHeightValue());
@@ -169,10 +547,10 @@ const UserBodyStat = () => {
     const closeBodyFatModal = () => setNewBodyFatModalVisible(false);
 
     const getHeightValue = () => {
-        if (userBodyStat && auth.currentUser) {
+        if (userBodyStat && currentUser) {
             const { height } = userBodyStat;
             if (height) {
-                return convertUnit(auth.currentUser.userUnitSetting.heightUnit, height.measurementUnit, height.height);
+                return convertUnit(currentUser.userUnitSetting.heightUnit, height.measurementUnit, height.height);
             } else {
                 return null;
             }
@@ -180,20 +558,20 @@ const UserBodyStat = () => {
     }
 
     const getHeightUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.heightUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.heightUnit.alias;
         }
     }
 
     const getWeightValues = () => {
-        if (userBodyStat && auth.currentUser) {
+        if (userBodyStat && currentUser) {
             const { weights } = userBodyStat;
             if (weights && weights.length !== 0) {
                 return weights.map(w => {
                     return {
                         id: w.id,
                         date: new Date(w.date + ' 00:00'),
-                        value: convertUnit(auth.currentUser.userUnitSetting.weightUnit, w.measurementUnit, w.weight)
+                        value: convertUnit(currentUser.userUnitSetting.weightUnit, w.measurementUnit, w.weight)
                     };
                 }).sort((a, b) => b.date - a.date);
             } else {
@@ -205,19 +583,19 @@ const UserBodyStat = () => {
     const getLastWeightValue = () => {
         const weights = getWeightValues();
 
-        if (weights) {
+        if (weights && weights.length !== 0) {
             return weights[0].value;
         }
     }
 
     const getWeightUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.weightUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.weightUnit.alias;
         }
     }
 
     const getBodyFatValues = () => {
-        if (userBodyStat && auth.currentUser) {
+        if (userBodyStat && currentUser) {
             const { bodyFats } = userBodyStat;
             if (bodyFats && bodyFats.length !== 0) {
                 return bodyFats.map(bf => {
@@ -228,7 +606,7 @@ const UserBodyStat = () => {
                     }
                 }).sort((a, b) => b.date - a.date);
             } else {
-                return null;
+                return [];
             }
         }
     }
@@ -236,7 +614,7 @@ const UserBodyStat = () => {
     const getLastBodyFatValue = () => {
         const bodyFats = getBodyFatValues();
 
-        if (bodyFats) {
+        if (bodyFats && bodyFats.length !== 0) {
             return bodyFats[0].value;
         }
     }
@@ -287,7 +665,7 @@ const UserBodyStat = () => {
     const getBodyFat = () => {
         if (userBodyStat) {
             const { bodyFats } = userBodyStat;
-            if (bodyFats && bodyFats.length != 0) {
+            if (bodyFats && bodyFats.length !== 0) {
 
                 const bf = getLastBodyFatValue();
 
@@ -298,7 +676,7 @@ const UserBodyStat = () => {
                 );
             } else {
                 return (
-                    <p>Add Height Data</p>
+                    <p>Add Body Fat Data</p>
                 )
             }
         }
@@ -306,15 +684,19 @@ const UserBodyStat = () => {
 
     const getHeightUnit = () => {
         if (auth) {
-            if (auth.currentUser) {
-                return auth.currentUser.userUnitSetting.heightUnit.alias
+            if (currentUser) {
+                return currentUser.userUnitSetting.heightUnit.alias
             }
         }
     }
 
-    const newWeightBtnDisable = (userBodyStat && userBodyStat.weights && auth.currentUser) ? getWeightValues()[0].date.toLocaleDateString() === new Date().toLocaleDateString() : false;
+    const newWeightBtnDisable = (userBodyStat && userBodyStat.weights && currentUser) ?
+        userBodyStat.weights.length === 0 ? false :
+            getWeightValues()[0].date.toLocaleDateString() === new Date().toLocaleDateString() : false;
 
-    const newBodyFatBtnDisable = (userBodyStat && userBodyStat.bodyFats && auth.currentUser) ? getBodyFatValues()[0].date.toLocaleDateString() === new Date().toLocaleDateString() : false;
+    const newBodyFatBtnDisable = (userBodyStat && userBodyStat.bodyFats && currentUser) ?
+        userBodyStat.bodyFats.length === 0 ? false :
+            getBodyFatValues()[0].date.toLocaleDateString() === new Date().toLocaleDateString() : false;
 
     return (
         <div className="user-stat">
@@ -552,7 +934,7 @@ const UserUnitSetting = () => {
     const appContext = useContext(AppContext);
     const { state: appState, dispatch: appDispatch } = appContext;
 
-    const { userBodyStat, auth } = appState;
+    const { userBodyStat, auth, currentUser } = appState;
 
     const [newHeightUnit, setNewHeightUnit] = useState('');
     const [newWeightUnit, setNewWeightUnit] = useState('');
@@ -588,10 +970,15 @@ const UserUnitSetting = () => {
     useEffect(() => {
         // setWeightAlias(getWeightUnitAlias());
         console.log('current user changed');
+        if (!currentUser) {
+            auth.fetchCurrentUser((user) => {
+                appDispatch({ type: SET_USER, payload: user });
+            }, (err) => {
+                errorNotification('Fetch User Info Failed', err.error.message);
+            });
+        }
 
-        getUnitAliases();
-
-    }, [auth.currentUser]);
+    }, []);
 
     const getUnitAliases = () => {
         setHeightUnitAlias(getHeightUnitAlias());
@@ -600,32 +987,32 @@ const UserUnitSetting = () => {
     }
 
     const getHeightUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.heightUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.heightUnit.alias;
         }
     }
 
     const getHeightUnitId = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.heightUnit.id;
+        if (currentUser) {
+            return currentUser.userUnitSetting.heightUnit.id;
         }
     }
 
     const getWeightUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.weightUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.weightUnit.alias;
         }
     }
 
     const getWeightUnitId = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.weightUnit.id;
+        if (currentUser) {
+            return currentUser.userUnitSetting.weightUnit.id;
         }
     }
 
     const getDistanceUnitAlias = () => {
-        if (auth.currentUser) {
-            return auth.currentUser.userUnitSetting.distanceUnit.alias;
+        if (currentUser) {
+            return currentUser.userUnitSetting.distanceUnit.alias;
         }
     }
 
@@ -635,14 +1022,21 @@ const UserUnitSetting = () => {
         }
     }
 
+    if (!currentUser) {
+        return (
+            <Spin />
+        )
+    }
+
     return (
         <div className="user-unit-setting">
             <h2>Unit Setting</h2>
             <List>
                 <List.Item
+                    key="height"
                 >
                     <List.Item.Meta
-                        title={<h3 className="height-unit-lable" style={{ width: 100 }}>Height Unit</h3>}
+                        title={<div className="height-unit-lable" style={{ width: 100, fontWeight: 'bold' }}>Height Unit</div>}
                     />
                     <div className="height-unit">
                         <Button
@@ -655,10 +1049,11 @@ const UserUnitSetting = () => {
                     </div>
                 </List.Item>
                 <List.Item
+                    key="weight"
                 // onClick={() => openWeightModal()}
                 >
                     <List.Item.Meta
-                        title={<h3 style={{ width: 100 }}>Weight Unit</h3>}
+                        title={<div className="weight-unit-lable" style={{ width: 100, fontWeight: 'bold' }}>Weight Unit</div>}
                     />
                     <div className="weight-unit">
                         <Button
@@ -671,10 +1066,11 @@ const UserUnitSetting = () => {
                     </div>
                 </List.Item>
                 <List.Item
+                    key="distance"
                 // onClick={() => opentBodyFatModal()}
                 >
                     <List.Item.Meta
-                        title={<h3 style={{ width: 100 }}>Distance Unit</h3>}
+                        title={<div className="distance-unit-lable" style={{ width: 100, fontWeight: 'bold' }}>Distance Unit</div>}
                     />
                     <div className="distance-unit">
                         <Button
@@ -704,8 +1100,14 @@ const UserUnitSetting = () => {
                             postUserHeightUnit(newHeightUnit)
                                 .then(res => {
                                     successNotification('Change Height Unit Success');
+
                                     closeHeightUnitModal();
-                                    auth.fetchCurrentUser();
+
+                                    auth.fetchCurrentUser((user) => {
+                                        appDispatch({ type: SET_USER, payload: user });
+                                    }, (err) => {
+                                        errorNotification('Refresh User Info Failed');
+                                    });
                                 })
                                 .catch(err => {
                                     errorNotification('Change Height Unit Failed', err.error.message);
@@ -743,8 +1145,14 @@ const UserUnitSetting = () => {
                             postUserWeightUnit(newWeightUnit)
                                 .then(res => {
                                     successNotification('Change Weight Unit Success');
+
                                     closeWeightUnitModal();
-                                    auth.fetchCurrentUser();
+
+                                    auth.fetchCurrentUser((user) => {
+                                        appDispatch({ type: SET_USER, payload: user });
+                                    }, (err) => {
+                                        errorNotification('Refresh User Info Failed');
+                                    });
                                 })
                                 .catch(err => {
                                     errorNotification('Change Weight Unit Failed', err.error.message);
@@ -783,7 +1191,11 @@ const UserUnitSetting = () => {
                                 .then(res => {
                                     successNotification('Change Distance Unit Success');
                                     closeDistanceUnitModal();
-                                    auth.fetchCurrentUser();
+                                    auth.fetchCurrentUser((user) => {
+                                        appDispatch({ type: SET_USER, payload: user });
+                                    }, (err) => {
+                                        errorNotification('Refresh User Info Failed');
+                                    });
                                 })
                                 .catch(err => {
                                     errorNotification('Change Distance Unit Failed', err.error.message);

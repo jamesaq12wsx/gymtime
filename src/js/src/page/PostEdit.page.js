@@ -12,6 +12,7 @@ import CardList from '../components/CardList';
 import Container from '../components/Container';
 import ExerciseSelect from '../components/ExerciseSelect';
 import { AppContext } from '../context/AppContextProvider';
+import { SET_USER } from '../reducer/appContextReducer';
 
 const { Meta } = Card;
 
@@ -34,10 +35,10 @@ const PostEdit = (props) => {
     const appContext = useContext(AppContext);
 
     const { state: postState, dispatch: postDispatch } = postContext;
-    const { state: appState } = appContext;
+    const { state: appState, dispatch: appDispatch } = appContext;
 
     const { selectedPost } = postState;
-    const { auth } = appState;
+    const { auth, currentUser } = appState;
 
     const [post, setPost] = useState(selectedPost || null);
     const [weightUnit, setWeightUnit] = useState(null);
@@ -55,10 +56,14 @@ const PostEdit = (props) => {
         if (!post) {
             fetchPost(postUuid);
         }
+
+        if(!currentUser){
+            fetchUser();
+        }
     }, []);
 
     useEffect(() => {
-        if (auth && auth.currentUser) {
+        if (currentUser) {
             const user = auth.currentUser;
             const { weightUnit, distanceUnit } = user.userUnitSetting;
             setWeightUnit(weightUnit);
@@ -75,6 +80,14 @@ const PostEdit = (props) => {
         setNewRecordDataOne('');
         setNewRecordDataTwo('');
     };
+
+    const fetchUser = () => {
+        auth.fetchCurrentUser((user) => {
+            appDispatch({type: SET_USER, payload: user});
+        }, (err) => {
+            errorNotification('Fetch User Info Failed', err.error.message);
+        });
+    }
 
     const fetchPost = (uuid) => {
         getPostByUuid(uuid)
