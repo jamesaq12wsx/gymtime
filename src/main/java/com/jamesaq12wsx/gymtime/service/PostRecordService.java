@@ -49,7 +49,7 @@ public class PostRecordService {
 
     public SimplePostRecord getByRecordId(UUID recordId) throws Throwable {
 
-        return (SimplePostRecord) postRecordRepository
+        return postRecordRepository
                 .findById(recordId)
                 .orElseThrow(() -> new ApiRequestException(String.format("Record id %s not found, could not get record", recordId)));
 
@@ -67,8 +67,18 @@ public class PostRecordService {
         SimpleExercise exercise = exerciseRepository.findById(request.getExerciseId())
                 .orElseThrow(() -> new ApiRequestException(String.format("Exercise id %s not found, could not add record", request.getExerciseId())));
 
-        SimpleMeasurementUnit measurementUnit = measurementUnitRepository.findById(request.getMeasurementUnitId())
-                .orElseThrow(() -> new ApiRequestException(String.format("Measurement unit id %s not found, could not add record", request.getMeasurementUnitId())));
+        SimpleMeasurementUnit measurementUnit = null;
+
+        switch (exercise.getMeasurementType()){
+            case WEIGHT:
+                measurementUnit = post.getUser().getUserUnitSetting().getWeightUnit();
+                break;
+            case DISTANCE:
+                measurementUnit = post.getUser().getUserUnitSetting().getDistanceUnit();
+                break;
+            default:
+                throw new ApiRequestException(String.format("Exercise not support"));
+        }
 
         SimplePostRecord newRecord = SimplePostRecordFactory.getPostRecord(measurementUnit, request);
 
@@ -83,6 +93,10 @@ public class PostRecordService {
 
         SimplePostRecord record = postRecordRepository.findById(recordId).orElseThrow(() -> new ApiRequestException("Record not found, could not delete"));
 
+        if(!record.getPost().getUser().getEmail().equals(principal.getName())){
+            throw new ApiRequestException(String.format("You could not update this record"));
+        }
+
         if (record.getExercise().getId() != request.getExerciseId()){
 
             SimpleExercise exercise = exerciseRepository.findById(request.getExerciseId()).orElseThrow(() -> new ApiRequestException(""));
@@ -90,15 +104,19 @@ public class PostRecordService {
             record.setExercise(exercise);
         }
 
-        if (record.getMeasurementUnit().getId() != request.getMeasurementUnitId()){
+        SimpleMeasurementUnit measurementUnit = null;
 
-            SimpleMeasurementUnit measurementUnit = measurementUnitRepository.findById(request.getMeasurementUnitId())
-                    .orElseThrow(() -> new ApiRequestException(String.format("Measurement unit id %s not found, could not add record", request.getMeasurementUnitId())));
-
-            record.setMeasurementUnit(measurementUnit);
-
-            clearRecord(record);
-
+        switch (record.getExercise().getMeasurementType()){
+            case WEIGHT:
+                measurementUnit = record.getPost().getUser().getUserUnitSetting().getWeightUnit();
+                record.setMeasurementUnit(measurementUnit);
+                break;
+            case DISTANCE:
+                measurementUnit = record.getPost().getUser().getUserUnitSetting().getDistanceUnit();
+                record.setMeasurementUnit(measurementUnit);
+                break;
+            default:
+                throw new ApiRequestException(String.format("Exercise not support unit not support"));
         }
 
         setRecord(record, request, record.getMeasurementUnit().getMeasurementType());

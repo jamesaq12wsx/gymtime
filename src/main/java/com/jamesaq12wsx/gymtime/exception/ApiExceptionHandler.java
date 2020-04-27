@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.exception;
 
+import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
 import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
@@ -7,20 +8,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
 
     @ExceptionHandler(value = ApiRequestException.class)
     @ResponseBody
-    public ResponseEntity<Object> handleApiRequestException(HttpServletRequest request, ApiRequestException e){
+    public ResponseEntity<Object> handleApiRequestException(HttpServletRequest request, ApiRequestException e) {
 
         ApiResponse apiResponse = new ApiResponse(
                 false,
@@ -32,7 +38,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    public ResponseEntity<Object> handleAccessDeniedException(HttpServletRequest request, AccessDeniedException e){
+    public ResponseEntity<Object> handleAccessDeniedException(HttpServletRequest request, AccessDeniedException e) {
 
         ApiResponse apiResponse = new ApiResponse(
                 false,
@@ -45,7 +51,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
-    public ResponseEntity<Object> handleBadCredentialException(AuthenticationException e){
+    public ResponseEntity<Object> handleBadCredentialException(AuthenticationException e) {
 
         ApiResponse apiResponse = new ApiResponse(
                 false,
@@ -55,6 +61,25 @@ public class ApiExceptionHandler {
 
         return new ResponseEntity<>(apiResponse, HttpStatus.FORBIDDEN);
 
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+
+        ex.printStackTrace();
+
+        Map<String,String> errors = new HashMap<>();
+
+        ex.getBindingResult().getAllErrors().forEach((err) -> {
+            String fieldName = ((FieldError)err).getField();
+            String errMessage = err.getDefaultMessage();
+            errors.put(fieldName, errMessage);
+        });
+
+        ApiResponse response = ApiResponseBuilder.createFailedResponse("Request body valid error", errors);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 //    @ExceptionHandler(value = Exception.class)
