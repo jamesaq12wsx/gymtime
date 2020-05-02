@@ -7,7 +7,8 @@ import { ClubContext } from '../context/ClubContextProvider';
 import { clubContextReducerType } from '../reducer/clubContextReducer';
 import { InfoContext } from '../context/InfoContextProvider';
 import { AppContext } from '../context/AppContextProvider';
-import { Empty, Card, Row, Col, Tooltip, Modal, Button } from 'antd';
+import { PostContext } from '../context/PostContextProvider';
+import { Empty, Card, Row, Col, Tooltip, Modal, Button, Spin } from 'antd';
 import { EnvironmentFilled, ClockCircleFilled, MehFilled, MoreOutlined, HomeOutlined, DownCircleOutlined, ShopOutlined } from '@ant-design/icons';
 import { WEEKDAY, APP_BACKGROUND_COLOR } from '../components/constants';
 import CardList from '../components/CardList';
@@ -27,16 +28,16 @@ const Clubs = (props) => {
 
     const appContext = useContext(AppContext);
     const { state: appState } = appContext;
-
-    const { location, fetchedLocation, auth } = appState;
+    const { location, locationPermission, fetchedLocation, auth } = appState;
 
     const [newPostModalVisible, setNewPostModalVisible] = useState(false);
     const [newPostModalClub, setNewPostModalClub] = useState(null);
+    const [posting, setPosting] = useState(false);
 
     useEffect(() => {
 
         if (!clubs || clubs.length === 0) {
-            if (fetchedLocation) {
+            if (location) {
 
                 clubDispatch({ type: clubContextReducerType.FETCHING });
 
@@ -61,6 +62,7 @@ const Clubs = (props) => {
     const closeNewPostModal = () => {
         setNewPostModalClub(null);
         setNewPostModalVisible(false);
+        setPosting(false);
     };
 
     const postOnClickHandler = (club) => {
@@ -74,13 +76,21 @@ const Clubs = (props) => {
 
     const newPost = () => {
         if (newPostModalClub) {
+
+            setPosting(true);
+
             quickPost(newPostModalClub.clubUuid)
                 .then(res => {
                     successNotification('New Workout Saved');
                     closeNewPostModal();
                 })
                 .catch(err => {
-                    errorNotification('New Workout Save Failed', err.error.message);
+                    errorNotification('New Workout Save Failed');
+
+                    console.log('New Workout Save Failed', err);
+                })
+                .finally(() => {
+                    setPosting(false);
                 })
         }
     }
@@ -163,17 +173,19 @@ const Clubs = (props) => {
     }
 
     const getList = () => {
+
+        if (locationPermission !== 'granted') {
+            return (
+                <Empty
+                    description={() => <Button title="Allow Locatiion" />}>
+                    <Button shape="round" href="https://support.google.com/chrome/answer/142065?hl=en" >Location Permission</Button>
+                </Empty>
+            );
+        }
+
         if (fetching) {
             return <LoadingList />;
         };
-
-        if (!fetchedLocation) {
-            return (
-                <Empty
-                    description={() => <span>Please allow location permission to check out near clubs</span>}
-                />
-            );
-        }
 
         const clubCards = clubs ? clubs.map((c, i) => getClubCard(c)) : [];
 
@@ -182,41 +194,53 @@ const Clubs = (props) => {
         );
     }
 
+    const newPostModal = () => {
+
+        if (newPostModalClub) {
+
+            const postDisable = !auth.isAuthenticated() || posting;
+
+            return (
+                <Modal
+                    visible={newPostModalVisible}
+                    onCancel={() => closeNewPostModal()}
+                    footer={[
+                        <Button
+                            shape="round"
+                            onClick={() => {
+                                closeNewPostModal();
+                            }}>
+                            Cancle
+                        </Button>,
+                        <Tooltip title={!auth.isAuthenticated() ? "Please login to log your exercise" : null}>
+                            <Button
+                                disabled={postDisable}
+                                shape="round"
+                                style={{ color: 'white', backgroundColor: postDisable ? 'grey' : APP_BACKGROUND_COLOR }}
+                                onClick={() => {
+                                    newPost();
+                                }}
+                            >
+                                {posting ? <Spin /> : 'Workout'}
+                            </Button>
+                        </Tooltip>
+                    ]}
+                >
+                    <div>
+                        <h2>{`New Workout at `}</h2>
+                        <h3>{newPostModalClub ? newPostModalClub.clubName : ''}</h3>
+                        <p>{newPostModalClub ? newPostModalClub.brand.brandName : ''}</p>
+                    </div>
+                </Modal>
+            );
+        }
+    }
+
     return (
         <div className="clubs">
             {getList()}
 
-            <Modal
-                visible={newPostModalVisible}
-                onCancel={() => closeNewPostModal()}
-                footer={[
-                    <Button
-                        shape="round"
-                        onClick={() => {
-                            closeNewPostModal();
-                        }}>
-                        Cancle
-                    </Button>,
-                    <Tooltip title={!auth.isAuthenticated() ? "Please login to log your exercise" : null}>
-                        <Button
-                            disabled={!auth.isAuthenticated()}
-                            shape="round"
-                            style={{ color: 'white', backgroundColor: APP_BACKGROUND_COLOR }}
-                            onClick={() => {
-                                newPost();
-                            }}
-                        >
-                            New Workout
-                    </Button>
-                    </Tooltip>
-                ]}
-            >
-                <div>
-                    <h2>{`New Workout at `}</h2>
-                    <h3>{newPostModalClub ? newPostModalClub.clubName : ''}</h3>
-                    <p>{newPostModalClub ? newPostModalClub.brand.brandName : ''}</p>
-                </div>
-            </Modal>
+            {newPostModal()}
         </div>
     )
 }

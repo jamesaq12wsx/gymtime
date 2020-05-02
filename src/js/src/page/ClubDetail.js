@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import EmptyBar from '../components/chart/EmptyBar';
 import SimpleMap from '../components/SimpleMap';
 import NewPost from '../page/NewPost.page';
-import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button, Modal } from 'antd';
-import { getClubDetailWithToken, getClubPosts } from '../api/client';
+import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button, Modal, Tooltip } from 'antd';
+import { getClubDetailWithToken, getClubPosts, getClubRecentUser } from '../api/client';
 import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined } from '@ant-design/icons';
 import PostChart from '../components/chart/PostChart';
 import { AppContext } from '../context/AppContextProvider';
@@ -12,6 +12,7 @@ import { quickPost } from '../api/client';
 import { successNotification, errorNotification } from '../components/Notification';
 import { PostContext } from '../context/PostContextProvider';
 import moment from 'moment';
+import { useHistory } from 'react-router-dom';
 
 const { Meta } = Card;
 
@@ -64,9 +65,11 @@ const appendFront = (len, val) => {
 
 const ClubDetail = (props) => {
 
+    const history = useHistory();
+
     const appContext = useContext(AppContext);
     const { state, dispatch } = appContext;
-    const { authenticated, jwtToken } = state;
+    const { authenticated, currentUser } = state;
 
     const postContext = useContext(PostContext);
     const { state: postState, dispatch: postDispatch } = postContext;
@@ -80,6 +83,25 @@ const ClubDetail = (props) => {
     const [posts, setPosts] = useState([]);
     const [lastWeekPosts, setLastWeekPosts] = useState([]);
     const [newPostModalVisible, setNewPostModalVisible] = useState(false);
+
+    const [fetchingRecent, setFetchingRecent] = useState(false);
+    const [recentUser, setRecentUser] = useState(null);
+
+    useEffect(() => {
+
+        fetchClub();
+
+        fetchPostData();
+
+    }, [authenticated]);
+
+    useEffect(() => {
+
+        if (!recentUser) {
+            fetchRecentUser();
+        }
+
+    }, [club]);
 
     const fetchClub = () => {
         if (clubUuid) {
@@ -112,17 +134,28 @@ const ClubDetail = (props) => {
 
     }
 
-    useEffect(() => {
+    const fetchRecentUser = () => {
+        setFetchingRecent(true);
 
-        fetchClub();
+        getClubRecentUser(clubUuid)
+            .then(res => res.json())
+            .then(res => res.result)
+            .then(result => {
+                setRecentUser(result);
+            })
+            .catch(err => {
+                errorNotification('Get Recent User Failed');
+                console.error('Get Recent User Failed', err);
+            })
+            .finally(() => {
+                setFetchingRecent(false);
+            });
 
-        fetchPostData();
-
-    }, [authenticated]);
+    }
 
     const getQuickPostButton = () => {
         return (
-            <Button onClick={() => setNewPostModalVisible(true)} shape="round" size={"medium"} style={{backgroundColor: 'rgb(223, 123, 46)', color: 'white'}}>
+            <Button onClick={() => setNewPostModalVisible(true)} shape="round" size={"medium"} style={{ backgroundColor: 'rgb(223, 123, 46)', color: 'white' }}>
                 Exercise
             </Button>
         );
@@ -174,7 +207,7 @@ const ClubDetail = (props) => {
                                 var win = window.open(googleMapUrl, '_blank');
                                 win.focus();
                             }}
-                            style={{backgroundColor: 'rgb(223, 123, 46)', color: 'white'}}
+                            style={{ backgroundColor: 'rgb(223, 123, 46)', color: 'white' }}
                             shape="circle"
                             icon={<RightOutlined />}
                             size="small" />
@@ -246,6 +279,78 @@ const ClubDetail = (props) => {
 
     }
 
+    const getRencentListItem = () => {
+
+        // return (
+        //     <Row justify="center" gutter={8}>
+        //         <Col>
+        //             <Skeleton.Avatar active={true} size="large" shape="circle" />
+        //         </Col>
+        //         <Col>
+        //             <Skeleton.Avatar active={true} size="large" shape="circle" />
+        //         </Col>
+        //         <Col>
+        //             <Skeleton.Avatar active={true} size="large" shape="circle" />
+        //         </Col>
+        //         <Col>
+        //             <Skeleton.Avatar active={true} size="large" shape="circle" />
+        //         </Col>
+        //     </Row>
+        // );
+
+        if (recentUser && recentUser.length !== 0) {
+            const content = fetchingRecent ?
+                (
+                    <Row justify="center" gutter={8}>
+                        <Col>
+                            <Skeleton.Avatar active={true} size="large" shape="circle" />
+                        </Col>
+                        <Col>
+                            <Skeleton.Avatar active={true} size="large" shape="circle" />
+                        </Col>
+                        <Col>
+                            <Skeleton.Avatar active={true} size="large" shape="circle" />
+                        </Col>
+                        <Col>
+                            <Skeleton.Avatar active={true} size="large" shape="circle" />
+                        </Col>
+                    </Row>
+                ) :
+                <List
+                    itemLayout="horizontal"
+                    grid={{ gutter: 16, column: 8 }}
+                    dataSource={recentUser}
+                    renderItem={item => (
+                        <Tooltip title={item.name ? item.name : null}>
+                            <div onClick={() => history.push(`/profile/${item.id}`)}>
+                                <Avatar src={item.imageUrl ? item.imageUrl : null} />
+                            </div>
+                        </Tooltip>
+                    )}
+                />;
+
+            return (
+                <List.Item>
+                    <h4>Workout at Here</h4>
+                    {content}
+                </List.Item>
+            )
+        }
+    }
+
+    const getRecentUserAvatars = () => {
+        if (recentUser) {
+            return recentUser.map(u => {
+                return (
+                    <Tooltip title={u.name ? u.name : null}>
+                        <Avatar src={u.imageUrl ? u.imageUrl : null} />
+                    </Tooltip>
+                );
+            });
+        }
+    }
+
+
     const getDetailList = () => {
         return (
             <List
@@ -258,6 +363,7 @@ const ClubDetail = (props) => {
                         {getOpenHourListItem()}
                         {getUrlListItem()}
                         {getMapListItem()}
+                        {getRencentListItem()}
                         {/* TODO add amenities */}
                     </React.Fragment>
                 )}
