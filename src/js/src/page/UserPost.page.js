@@ -36,12 +36,11 @@ const UserPost = (props) => {
 
     const postContext = useContext(PostContext);
     const { state: postState, dispatch } = postContext;
+    const { posts, fetched } = postState;
 
     const appContext = useContext(AppContext);
     const { state: appState, dispatch: appDispatch } = appContext;
     const { auth, currentUser } = appState;
-
-    const { posts, fetched } = postState;
 
     useEffect(() => {
         if (!fetched) {

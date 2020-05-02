@@ -11,7 +11,8 @@ const AppContextProvider = (props) => {
 
     const initAppState = {
         auth: auth,
-        location: {},
+        location: null,
+        locationPermission: null,
         fetchedLocation: false,
         currentUser: null,
         userBodyStat: null

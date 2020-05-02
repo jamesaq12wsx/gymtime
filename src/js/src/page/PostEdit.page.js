@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Button, Input, Tag, Row, Col, Select, TreeSelect, Card, Modal, InputNumber } from 'antd';
+import { Button, Input, Tag, Row, Col, Select, TreeSelect, Card, Modal, InputNumber, Spin } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Link, useHistory } from 'react-router-dom';
 import { PostContext } from '../context/PostContextProvider';
@@ -13,6 +13,7 @@ import Container from '../components/Container';
 import ExerciseSelect from '../components/ExerciseSelect';
 import { AppContext } from '../context/AppContextProvider';
 import { SET_USER } from '../reducer/appContextReducer';
+import { APP_BACKGROUND_COLOR } from '../components/constants';
 
 const { Meta } = Card;
 
@@ -48,8 +49,9 @@ const PostEdit = (props) => {
 
     const [newRecordModalVisible, setNewRecordModalVisible] = useState(false);
     const [newRecordExercise, setNewRecordExercise] = useState(null);
-    const [newRecordDataOne, setNewRecordDataOne] = useState('');
-    const [newRecordDataTwo, setNewRecordDataTwo] = useState('');
+    const [newRecordDataOne, setNewRecordDataOne] = useState(0);
+    const [newRecordDataTwo, setNewRecordDataTwo] = useState(0);
+    const [updatingNewRecord, setUpdatingNewRecord] = useState(false);
 
 
     useEffect(() => {
@@ -57,7 +59,7 @@ const PostEdit = (props) => {
             fetchPost(postUuid);
         }
 
-        if(!currentUser){
+        if (!currentUser) {
             fetchUser();
         }
     }, []);
@@ -77,13 +79,14 @@ const PostEdit = (props) => {
     const closeNewRecordModal = () => {
         setNewRecordModalVisible(false);
         setNewRecordExercise(null);
-        setNewRecordDataOne('');
-        setNewRecordDataTwo('');
+        setNewRecordDataOne(0);
+        setNewRecordDataTwo(0);
+        setUpdatingNewRecord(false);
     };
 
     const fetchUser = () => {
         auth.fetchCurrentUser((user) => {
-            appDispatch({type: SET_USER, payload: user});
+            appDispatch({ type: SET_USER, payload: user });
         }, (err) => {
             errorNotification('Fetch User Info Failed', err.error.message);
         });
@@ -185,17 +188,20 @@ const PostEdit = (props) => {
                     className="new-exercise-data">
                     <Row gutter={12} justify="space-around">
                         <Col span={10}>
+                            <span>{newRecordExercise.measurementType.toLowerCase() === 'weight' ? getWeightUnitAlias() : getDistanceUnitAlias()}</span>
                             <InputNumber
                                 min={0}
+                                defaultValue={10}
                                 value={newRecordDataOne}
                                 onChange={(value) => setNewRecordDataOne(value)}
                                 placeholder={newRecordExercise.measurementType.toLowerCase() === 'weight' ? getWeightUnitAlias() : getDistanceUnitAlias()}
                             />
                         </Col>
                         <Col span={10}>
-
+                            <span>{newRecordExercise.measurementType.toLowerCase() === 'weight' ? 'Reps.' : 'Mins'}</span>
                             <InputNumber
                                 min={0}
+                                defaultValue={10}
                                 value={newRecordDataTwo}
                                 onChange={(value) => setNewRecordDataTwo(value)}
                                 placeholder={newRecordExercise.measurementType.toLowerCase() === 'weight' ? 'Reps.' : 'Mins'}
@@ -208,19 +214,12 @@ const PostEdit = (props) => {
         }
     }
 
-    if (!post) {
-        return <React.Fragment />
-    }
+    const newRecordModal = () => {
 
-    return (
-        <React.Fragment>
-            <h2>{post.club.clubName}</h2>
-            <span>{post.club.brand.brandName}</span>
-            <br />
-            <h3>{moment(post.exerciseTime).format("YYYY/MM/DD HH:mm")}</h3>
-            {getRecordCardList()}
-            <Button onClick={() => openNewRecordModal()} shape="round" style={{ color: 'white', backgroundColor: 'rgb(223, 123, 46)' }}>New Exercise</Button>
+        const saveDisable = updatingNewRecord || !newRecordExercise;
+        const saveBackgroundColor = saveDisable ? 'lightgray' : APP_BACKGROUND_COLOR;
 
+        return (
             <Modal
                 title="New Exercise"
                 visible={newRecordModalVisible}
@@ -229,13 +228,17 @@ const PostEdit = (props) => {
                     <Button
                         className="cancle-new-exercise-btn"
                         key="cancle"
+                        shape="round"
                         onClick={() => closeNewRecordModal()}>
                         Cancle
                     </Button>,
                     <Button
+                        shape="round"
                         className="new-exercise-btn"
                         type="primary"
                         key="newRecord"
+                        disabled={saveDisable}
+                        style={{ color: 'white', backgroundColor: saveBackgroundColor }}
                         onClick={() => {
                             console.log("New Record");
                             if (newRecordExercise) {
@@ -273,16 +276,37 @@ const PostEdit = (props) => {
                                 errorNotification('New Exercise Failed', 'You need to select Exercise');
                             }
                         }}>
-                        Save
+                        {updatingNewRecord ? <Spin /> : 'Save'}
                     </Button>
                 ]}
             >
-                <ExerciseSelect onChange={(ex) => { setNewRecordExercise(ex) }} style={{ width: '100%' }} />
+                <ExerciseSelect onChange={(ex) => {
+                    setNewRecordExercise(ex);
+                    setNewRecordDataOne(0);
+                    setNewRecordDataTwo(0);
+                }} style={{ width: '100%' }} />
 
                 <br />
 
                 {getExerciseDataInput()}
             </Modal>
+        );
+    }
+
+    if (!post) {
+        return <React.Fragment />
+    }
+
+    return (
+        <React.Fragment>
+            <h2>{post.club.clubName}</h2>
+            <span>{post.club.brand.brandName}</span>
+            <br />
+            <h3>{moment(post.exerciseTime).format("YYYY/MM/DD HH:mm")}</h3>
+            {getRecordCardList()}
+            <Button onClick={() => openNewRecordModal()} shape="round" style={{ color: 'white', backgroundColor: 'rgb(223, 123, 46)' }}>New Exercise</Button>
+
+            {newRecordModal()}
         </React.Fragment>
     );
 

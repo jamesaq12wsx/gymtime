@@ -3,15 +3,12 @@ import './App.css';
 import Container from './components/Container';
 import { getAllClubsWithLocation, getUserIpInfo, getCountryItems, getAllExercise, getAllClubs, signUp } from './api/client';
 import UserPost from './page/UserPost.page';
-import ClubList from './components/list/ClubList';
-import LoadingList from './components/list/LoadingList';
 import 'antd/dist/antd.css';
 import { successNotification, errorNotification } from './components/Notification';
 import { BrowserRouter as Router, Switch, Route, Link, useHistory, Redirect } from "react-router-dom";
 import Clubs from './page/Clubs';
 import ClubDetail from './page/ClubDetail';
 import User from './page/User';
-import AppContextProvider from './context/AppContextProvider';
 import { Modal, Row, Col, Drawer, Button, Layout, Menu, Tooltip, Avatar } from 'antd';
 import { LoginOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import LoginModal from './components/LoginModal';
@@ -30,7 +27,7 @@ import { GiJumpAcross } from "react-icons/gi";
 import Footer from './components/Footer';
 import Header from './components/Header';
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
-import { FETCHED_LOCATION_ERROR, SET_USER } from './reducer/appContextReducer';
+import { FETCHED_LOCATION_ERROR, LOCATION_STATE, SET_USER } from './reducer/appContextReducer';
 import PostEdit from './page/PostEdit.page';
 var _ = require('lodash');
 
@@ -82,15 +79,15 @@ const App = (props) => {
 
   useEffect(() => {
     if (auth.isAuthenticated()) {
-      if(!currentUser){
+      if (!currentUser) {
         auth.fetchCurrentUser((user) => {
-          appDispatch({type: SET_USER, payload: user});
+          appDispatch({ type: SET_USER, payload: user });
         }, (err) => {
           errorNotification('Fetch user detail Failed', err.error.message);
         });
       }
     }
-  });
+  }, []);
 
   useEffect(() => {
 
@@ -98,7 +95,9 @@ const App = (props) => {
     //   appDispatch({ type: 'LOGIN', payload: auth.getToken() });
     // }
 
-    getLocation(positionHandler, positionErrorHandler);
+    // getLocation(positionHandler, positionErrorHandler);
+
+    locationPermission();
 
     getCountryItems()
       .then(res => res.json())
@@ -152,16 +151,45 @@ const App = (props) => {
    */
   const positionErrorHandler = () => {
 
+    console.log('position error handler');
+
     appDispatch({ type: FETCHED_LOCATION_ERROR });
 
   };
 
   const getLocation = (successHandler, errorHandler) => {
+
+    console.log('get location');
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(successHandler);
     } else {
       errorHandler();
     }
+  }
+
+  const locationPermission = () => {
+    navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+
+      appDispatch({ type: LOCATION_STATE, payload: result.state });
+
+      if (result.state == 'granted') {
+        console.log(result.state);
+
+        getLocation(positionHandler, positionErrorHandler);
+      } else if (result.state == 'prompt') {
+
+        console.log(result.state);
+
+        getLocation(positionHandler, positionErrorHandler);
+
+      } else if (result.state == 'denied') {
+        console.log(result.state);
+      }
+      result.onchange = function () {
+        console.log(result.state);
+      }
+    });
   }
 
   // getLocation();
@@ -186,6 +214,8 @@ const App = (props) => {
           errorNotification('CANNOT GET CLUBS', err.message);
           clubDispatch({ type: 'FETCHED_NEAR_CLUBS', payload: [] });
         })
+    } else {
+      errorNotification('Please Allow Location Permision to Find Near Club');
     }
 
   }
@@ -215,6 +245,7 @@ const App = (props) => {
           <Col span={2} offset={18} >
             <NavBarIcon>
               <SettingOutlined
+                className="app-setting"
                 onClick={() => {
                   console.log('setting clicked');
                   openSideBar();
@@ -354,7 +385,14 @@ const App = (props) => {
             <AuthRoute exact path='/post/:postUuid' component={PostEdit} />
             <AuthRoute path='/user' component={User} />
             <AuthRoute exact path='/logout' component={LogoutPage} />
-            <Route path="*" component={() => "404 NOT FOUND"} />
+            <Route path="*" component={() => {
+              return (
+                <React.Fragment>
+                  <h1>Page Not Found</h1>
+                  <Link to="/">Home</Link>
+                </React.Fragment>
+              );
+            }} />
           </Switch>
         </Container>
 
