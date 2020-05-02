@@ -1,12 +1,11 @@
 package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
-import com.jamesaq12wsx.gymtime.model.FitnessClub;
-import com.jamesaq12wsx.gymtime.model.PostCount;
+import com.jamesaq12wsx.gymtime.model.*;
 import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.service.PostService;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
+import com.jamesaq12wsx.gymtime.service.UserDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +23,14 @@ public class FitnessClubController {
 
     private final FitnessClubService fitnessClubService;
 
+    private final UserDataService userDataService;
+
     private final PostService postService;
 
     @Autowired
-    public FitnessClubController(FitnessClubService fitnessClubService, PostService postService) {
+    public FitnessClubController(FitnessClubService fitnessClubService, UserDataService userDataService, PostService postService) {
         this.fitnessClubService = fitnessClubService;
+        this.userDataService = userDataService;
         this.postService = postService;
     }
 
@@ -64,6 +66,17 @@ public class FitnessClubController {
     @GetMapping("/{uuid}")
     public ApiResponse<FitnessClub> getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
         return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getFitnessById(uuid, principal));
+    }
+
+    @GetMapping("/{uuid}/recent")
+    public ApiResponse<UserData> getRecentUser(@PathVariable("uuid") UUID uuid, Principal principal){
+        if(uuid == null){
+            throw new ApiRequestException(String.format("Club id could not be empty"));
+        }
+
+        List<? extends UserData> results = userDataService.getRecentUserByClubId(uuid, principal);
+
+        return ApiResponseBuilder.createSuccessResponse(results);
     }
 
 //    @GetMapping("/{clubUuid}/post")
