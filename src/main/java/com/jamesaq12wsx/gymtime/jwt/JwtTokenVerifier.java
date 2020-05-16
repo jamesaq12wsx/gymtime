@@ -1,7 +1,7 @@
 package com.jamesaq12wsx.gymtime.jwt;
 
 import com.google.common.base.Strings;
-import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
+import com.jamesaq12wsx.gymtime.security.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -44,7 +44,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     request.getSession(),
                     null,
-                    ApplicationUserRole.ANONYMOUS.getGrantedAuthorities()
+                    Role.ANONYMOUS.getGrantedAuthorities()
 
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -53,7 +53,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             return;
         }
 
-        String token = authorizationHeader.replace(jwtConfig.getTokenPrefix(), "");
+        String token = authorizationHeader.replace(jwtConfig.getTokenPrefix(), "").trim();
 
         try{
 
@@ -78,7 +78,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         }catch (JwtException e){
-            throw new IllegalStateException(String.format("Token %s is not valid", token));
+            throw new IllegalStateException(String.format(e.getMessage()));
         }
 
         filterChain.doFilter(request, response);

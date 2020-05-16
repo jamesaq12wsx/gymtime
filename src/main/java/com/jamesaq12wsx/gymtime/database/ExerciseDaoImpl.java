@@ -2,7 +2,7 @@
 //
 //import com.fasterxml.jackson.core.JsonProcessingException;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.jamesaq12wsx.gymtime.model.Exercise;
+//import com.jamesaq12wsx.gymtime.model.entity.Exercise;
 //import com.jamesaq12wsx.gymtime.model.SimpleExercise;
 //import com.jamesaq12wsx.gymtime.model.SimpleExerciseAudit;
 //import com.zaxxer.hikari.HikariDataSource;

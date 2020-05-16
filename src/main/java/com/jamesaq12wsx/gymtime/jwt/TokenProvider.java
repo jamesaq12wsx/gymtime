@@ -45,12 +45,6 @@ public class TokenProvider {
                 .signWith(secretKey)
                 .compact();
 
-//        return Jwts.builder()
-//                .setSubject(userPrincipal.getId().toString())
-//                .setIssuedAt(new Date())
-//                .setExpiration(expiryDate)
-//                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecretKey())
-//                .compact();
     }
 
     public Long getUserIdFromToken(String token) {

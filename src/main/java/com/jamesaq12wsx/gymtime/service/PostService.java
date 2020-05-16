@@ -3,12 +3,11 @@ package com.jamesaq12wsx.gymtime.service;
 import com.jamesaq12wsx.gymtime.database.*;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.*;
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
-import com.jamesaq12wsx.gymtime.model.entity.Audit;
-import com.jamesaq12wsx.gymtime.model.entity.SimplePost;
-import com.jamesaq12wsx.gymtime.model.entity.SimplePostRecord;
+import com.jamesaq12wsx.gymtime.model.entity.*;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
 import com.jamesaq12wsx.gymtime.model.payload.UpdatePostRequest;
+import com.jamesaq12wsx.gymtime.service.dto.PostDto;
+import com.jamesaq12wsx.gymtime.service.mapper.PostMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,53 +31,55 @@ public class PostService {
 
     private final ApplicationUserRepository userRepository;
 
+    private final PostMapper postMapper;
+
     @Autowired
-    public PostService(PostRepository postRepository, PostRecordRepository postRecordRepository, PostCountRepository postCountRepository, FitnessClubRepository fitnessClubRepository, ApplicationUserRepository userRepository) {
+    public PostService(PostRepository postRepository, PostRecordRepository postRecordRepository, PostCountRepository postCountRepository, FitnessClubRepository fitnessClubRepository, ApplicationUserRepository userRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.postRecordRepository = postRecordRepository;
         this.postCountRepository = postCountRepository;
         this.fitnessClubRepository = fitnessClubRepository;
         this.userRepository = userRepository;
+        this.postMapper = postMapper;
     }
 
-    public List<? extends Post> getAllPostByUser(Principal principal) {
-        return postRepository.findAllByUserEmail(principal.getName());
+    public List<PostDto> getAllPostByUser(Principal principal) {
+
+        List<Post> posts = postRepository.findAllByUsername(principal.getName());
+
+        return postMapper.toDto(posts);
     }
 
-    public List<Post> getAllPostByUserWithYear(String year, Principal principal) {
-        return postRepository.findAllByAudit_CreatedByAndYear(principal.getName(), year);
+    public List<PostDto> getAllPostByUserWithYear(String year, Principal principal) {
+        return postMapper.toDto(postRepository.findAllByAudit_CreatedByAndYear(principal.getName(), year));
     }
 
-    public Post getPostById(UUID postId, Principal principal){
-        return postRepository.findById(postId).orElseThrow(() -> new ApiRequestException(String.format("Post %s not found", postId)));
+    public PostDto getPostById(Long postId, Principal principal){
+        return postMapper.toDto(postRepository.findById(postId).orElseThrow(() -> new ApiRequestException(String.format("Post %s not found", postId))));
     }
 
-    public SimplePost newPost(PostRequest mark, Principal principal) {
+    public PostDto newPost(PostRequest mark, Principal principal) {
 
-        SimpleFitnessClub postClub = fitnessClubRepository.findById(mark.getClubUuid()).orElseThrow(() -> new ApiRequestException(String.format("This club id %s is not exist", mark.getClubUuid())));
+        FitnessClub postClub = fitnessClubRepository.findById(mark.getClubId()).orElseThrow(() -> new ApiRequestException(String.format("This club id %s is not exist", mark.getClubId())));
 
-        ApplicationUser user = userRepository.findByEmail(principal.getName()).get();
+        User user = userRepository.findByEmail(principal.getName()).get();
 
-        SimplePost newPost = postRepository.save(
-                new SimplePost(
-                        null,
-                        OffsetDateTime.now(),
-                        mark.getPrivacy() == null ? PostPrivacy.PRIVATE : mark.getPrivacy(),
-                        postClub,
-                        null,
-                        user,
-                        new Audit()));
+        Post newPost = new Post(null, mark.getExerciseTime(), postClub, null, user);
 
-        return newPost;
+        newPost.setCreatedBy(user.getEmail());
+
+        Post savePost = postRepository.save(newPost);
+
+        return postMapper.toDto(savePost);
     }
 
-    public List<PostCount> dailyPost(UUID clubUuid, LocalDate date) {
+    public List<PostCount> dailyPost(Long clubId, LocalDate date) {
 
-        if (!fitnessClubRepository.existsById(clubUuid)) {
-            throw new ApiRequestException(String.format("Club %s not exist", clubUuid.toString()));
+        if (!fitnessClubRepository.existsById(clubId)) {
+            throw new ApiRequestException(String.format("Club %s not exist", clubId.toString()));
         }
 
-        List<PostCount> result = postCountRepository.findAllByClub(clubUuid, date == null ? LocalDate.now() : date);
+        List<PostCount> result = postCountRepository.findAllByClub(clubId, date == null ? LocalDate.now() : date);
 
         LocalDateTime startOfDay = date.atStartOfDay();
 
@@ -98,16 +99,16 @@ public class PostService {
         return result;
     }
 
-    public SimplePost update(UpdatePostRequest updatePostRequest, Principal principal) {
+    public PostDto update(UpdatePostRequest updatePostRequest, Principal principal) {
 
         //  TODO: check username with post
 
-        SimplePost updatePost = postRepository
-                .findById(updatePostRequest.getPostUuid())
-                .orElseThrow(() -> new ApiRequestException(String.format("Post %s not existed", updatePostRequest.getPostUuid())));
+        Post updatePost = postRepository
+                .findById(updatePostRequest.getPostId())
+                .orElseThrow(() -> new ApiRequestException(String.format("Post %s not existed", updatePostRequest.getPostId())));
 
-        if (updatePostRequest.getClubUuid() != updatePost.getClub().getClubUuid()){
-            SimpleFitnessClub club = fitnessClubRepository.findById(updatePostRequest.getClubUuid()).orElse(null);
+        if (updatePostRequest.getClubId() != updatePost.getClub().getId()){
+            FitnessClub club = fitnessClubRepository.findById(updatePostRequest.getClubId()).orElse(null);
 
             if(club != null){
                 updatePost.setClub(club);
@@ -118,22 +119,18 @@ public class PostService {
             updatePost.setExerciseTime(updatePostRequest.getExerciseTime());
         }
 
-        if (updatePostRequest.getPrivacy() != updatePost.getPrivacy()){
-            updatePost.setPrivacy(updatePostRequest.getPrivacy());
-        }
 
-
-        return postRepository.save(updatePost);
+        return postMapper.toDto(postRepository.save(updatePost));
 
     }
 
-    public void delete(UUID uuid, Principal principal) {
+    public void delete(Long postId, Principal principal) {
 
-        List<SimplePostRecord> records = postRecordRepository.findAllByPostUuid(uuid);
+        List<PostRecord> records = postRecordRepository.findAllByPostUuid(postId);
 
         postRecordRepository.deleteAll(records);
 
-        postRepository.deleteById(uuid);
+        postRepository.deleteById(postId);
 
     }
 }

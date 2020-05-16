@@ -2,10 +2,14 @@ package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.*;
+import com.jamesaq12wsx.gymtime.model.entity.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.service.PostService;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
 import com.jamesaq12wsx.gymtime.service.UserDataService;
+import com.jamesaq12wsx.gymtime.service.dto.FitnessClubDto;
+import com.jamesaq12wsx.gymtime.service.dto.UserDto;
+import com.jamesaq12wsx.gymtime.service.dto.UserShortDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,18 +38,10 @@ public class FitnessClubController {
         this.postService = postService;
     }
 
-//    @GetMapping
-//    public ApiResponse<List<? extends FitnessClub>> getAllFitnessClubs(@PathParam("brand") String brandId, @PathParam("country") String country, Principal principal){
-//
-//        List<? extends FitnessClub> result =  fitnessClubService.getAllFitnessClubs();
-//
-//        return ApiResponseBuilder.createSuccessResponse(result);
-//    }
-
     @GetMapping
-    public ApiResponse<List<? extends FitnessClub>> getClubByLocation(@PathParam("lat") Double lat, @PathParam("lng") Double lng){
+    public ApiResponse<List<FitnessClubDto>> getClubByLocation(@PathParam("lat") Double lat, @PathParam("lng") Double lng){
 
-        List<? extends FitnessClub> result = fitnessClubService.getClubByLocation(lat, lng);
+        List<FitnessClubDto> result = fitnessClubService.getClubByLocation(lat, lng);
 
         return ApiResponseBuilder.createSuccessResponse(result);
 
@@ -63,37 +59,31 @@ public class FitnessClubController {
         return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getAllFitnessByCountry(country));
     }
 
-    @GetMapping("/{uuid}")
-    public ApiResponse<FitnessClub> getFitnessByUuid(@PathVariable("uuid") UUID uuid, Principal principal){
-        return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getFitnessById(uuid, principal));
+    @GetMapping("/{id}")
+    public ApiResponse<FitnessClub> getFitnessByUuid(@PathVariable("id") Long id, Principal principal){
+        return ApiResponseBuilder.createSuccessResponse(fitnessClubService.getFitnessById(id, principal));
     }
 
-    @GetMapping("/{uuid}/recent")
-    public ApiResponse<UserData> getRecentUser(@PathVariable("uuid") UUID uuid, Principal principal){
-        if(uuid == null){
+    @GetMapping("/{id}/recent")
+    public ApiResponse<UserShortDto> getRecentUser(@PathVariable("id") Long id, Principal principal){
+        if(id == null){
             throw new ApiRequestException(String.format("Club id could not be empty"));
         }
 
-        List<? extends UserData> results = userDataService.getRecentUserByClubId(uuid, principal);
+        List<UserShortDto> results = userDataService.getRecentUserByClubId(id, principal);
 
         return ApiResponseBuilder.createSuccessResponse(results);
     }
 
-//    @GetMapping("/{clubUuid}/post")
-//    @PreAuthorize("permitAll()")
-//    public List<PostCount> getClubDailyPostNoDate(@PathVariable("clubUuid") UUID clubUuid){
-//        return postService.dailyPost(clubUuid, LocalDate.now());
-//    }
-
-    @GetMapping("/{clubUuid}/post/{date}")
+    @GetMapping("/{clubId}/post/{date}")
     @PreAuthorize("permitAll()")
-    public ApiResponse<List<PostCount>> getClubDailyPost(@PathVariable("clubUuid") UUID clubUuid, @PathVariable(value = "date") String dateStr){
+    public ApiResponse<List<PostCount>> getClubDailyPost(@PathVariable("clubId") Long clubId, @PathVariable(value = "date") String dateStr){
 
         try{
 
             LocalDate date = LocalDate.parse(dateStr);
 
-            return ApiResponseBuilder.createSuccessResponse(postService.dailyPost(clubUuid, date));
+            return ApiResponseBuilder.createSuccessResponse(postService.dailyPost(clubId, date));
 
         }catch (DateTimeParseException e){
             e.printStackTrace();

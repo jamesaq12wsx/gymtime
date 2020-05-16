@@ -1,15 +1,16 @@
 package com.jamesaq12wsx.gymtime.controller;
 
-import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
-import com.jamesaq12wsx.gymtime.model.Post;
-import com.jamesaq12wsx.gymtime.model.entity.SimplePostRecord;
+import com.jamesaq12wsx.gymtime.model.entity.Post;
+import com.jamesaq12wsx.gymtime.model.entity.PostRecord;
 import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.model.payload.PostRequest;
 import com.jamesaq12wsx.gymtime.model.payload.RecordRequest;
 import com.jamesaq12wsx.gymtime.model.payload.UpdatePostRequest;
 import com.jamesaq12wsx.gymtime.service.PostRecordService;
 import com.jamesaq12wsx.gymtime.service.PostService;
+import com.jamesaq12wsx.gymtime.service.dto.PostDto;
+import com.jamesaq12wsx.gymtime.service.mapper.PostMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,25 +29,28 @@ public class PostController {
 
     private final ApiResponseBuilder apiResponseBuilder;
 
+    private final PostMapper postMapper;
+
     @Autowired
-    public PostController(PostService postService, PostRecordService postRecordService, ApiResponseBuilder apiResponseBuilder) {
+    public PostController(PostService postService, PostRecordService postRecordService, ApiResponseBuilder apiResponseBuilder, PostMapper postMapper) {
         this.postService = postService;
         this.postRecordService = postRecordService;
         this.apiResponseBuilder = apiResponseBuilder;
+        this.postMapper = postMapper;
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse<List<? extends Post>> getAllUserPost(Principal principal){
+    public ApiResponse<List<PostDto>> getAllUserPost(Principal principal){
 
-        List<? extends Post> results = postService.getAllPostByUser(principal);
+        List<PostDto> results = postService.getAllPostByUser(principal);
 
         return apiResponseBuilder.createSuccessResponse(results);
     }
 
-    @GetMapping("/{postUuid}")
+    @GetMapping("/{postId}")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse<Post> getUserPostById(@PathVariable("postUuid")UUID postId, Principal principal){
+    public ApiResponse<Post> getUserPostById(@PathVariable("postId")Long postId, Principal principal){
 
         return apiResponseBuilder.createSuccessResponse(postService.getPostById(postId, principal));
 
@@ -64,71 +68,65 @@ public class PostController {
         return ApiResponseBuilder.createSuccessResponse(postService.update(post, principal));
     }
 
-    @DeleteMapping("/{postUuid}")
+    @DeleteMapping("/{postId}")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse deleteExercisePost(@PathVariable("postUuid") UUID postUuid, Principal principal){
+    public ApiResponse deleteExercisePost(@PathVariable("postId") Long postId, Principal principal){
 
-        postService.delete(postUuid, principal);
+        postService.delete(postId, principal);
 
         return ApiResponseBuilder.createSuccessResponse(true);
 
     }
 
-    @GetMapping("/{postUuid}/record")
-    public ApiResponse<List<SimplePostRecord>> getPostRecords(@PathVariable("postUuid") UUID postUuid, Principal principal){
+    @GetMapping("/{postId}/record")
+    public ApiResponse<List<PostRecord>> getPostRecords(@PathVariable("postId") Long postId, Principal principal){
 
-        List<SimplePostRecord> records = postRecordService.getByPostId(postUuid);
+        List<PostRecord> records = postRecordService.getByPostId(postId);
 
         return apiResponseBuilder.createSuccessResponse(records);
     }
 
-    @GetMapping("/{postUuid}/record/{recordUuid}")
-    public ApiResponse<SimplePostRecord> getPostRecords(@PathVariable("postUuid") UUID postUuid, @PathVariable("recordUuid") UUID recordUuid) throws Throwable {
+    @GetMapping("/{postId}/record/{recordId}")
+    public ApiResponse<PostRecord> getPostRecords(@PathVariable("postId") Long postId, @PathVariable("recordId") Long recordId) throws Throwable {
 
-        SimplePostRecord record = postRecordService.getByRecordId(recordUuid);
+        PostRecord record = postRecordService.getByRecordId(recordId);
 
         return apiResponseBuilder.createSuccessResponse(record);
 
     }
 
-    @PostMapping("/{postUuid}/record")
-    public ApiResponse<SimplePostRecord> newPostRecord(
-            @PathVariable("postUuid") UUID postUuid,
+    @PostMapping("/{postId}/record")
+    public ApiResponse<PostRecord> newPostRecord(
+            @PathVariable("postId") Long postId,
             @RequestBody RecordRequest recordRequest,
             Principal principal){
 
-        SimplePostRecord newRecord = postRecordService.newRecord(postUuid, recordRequest, principal);
+        PostRecord newRecord = postRecordService.newRecord(postId, recordRequest, principal);
 
         return apiResponseBuilder.createSuccessResponse(newRecord);
     }
 
-    @PutMapping("/{postUuid}/record/{recordUuid}")
-    public ApiResponse<SimplePostRecord> updateRecord(
-            @PathVariable("postUuid") UUID postUuid,
-            @PathVariable("recordUuid") UUID recordUuid,
+    @PutMapping("/{postId}/record/{recordId}")
+    public ApiResponse<PostRecord> updateRecord(
+            @PathVariable("postId") Long postId,
+            @PathVariable("recordId") Long recordId,
             @RequestBody RecordRequest recordRequest,
             Principal principal){
 
-        SimplePostRecord newRecord = postRecordService.updateRecord(postUuid, recordUuid, recordRequest, principal);
+        PostRecord newRecord = postRecordService.updateRecord(postId, recordId, recordRequest, principal);
 
         return apiResponseBuilder.createSuccessResponse(newRecord);
     }
 
-    @DeleteMapping("/{postUuid}/record/{recordUuid}")
-    public ApiResponse<SimplePostRecord> deleteRecord(
-            @PathVariable("postUuid") UUID postUuid,
-            @PathVariable("recordUuid") UUID recordUuid,
+    @DeleteMapping("/{postId}/record/{recordId}")
+    public ApiResponse<PostRecord> deleteRecord(
+            @PathVariable("postId") Long postId,
+            @PathVariable("recordId") Long recordId,
             Principal principal) throws Throwable {
 
-        postRecordService.deleteRecord(recordUuid);
+        postRecordService.deleteRecord(recordId);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
-
-//    @PostMapping
-//    @PreAuthorize("hasAnyRole('ROLE_USER')")
-//    public void quickPost(@RequestBody PostRequest post, Principal principal){
-//        exercisePostService.newPost(post, principal);
-//    }
 
 }

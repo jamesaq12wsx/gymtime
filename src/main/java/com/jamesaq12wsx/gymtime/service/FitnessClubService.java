@@ -4,8 +4,8 @@ import com.jamesaq12wsx.gymtime.database.BrandRepository;
 import com.jamesaq12wsx.gymtime.database.CountryRepository;
 import com.jamesaq12wsx.gymtime.database.FitnessClubRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.FitnessClub;
-import com.jamesaq12wsx.gymtime.model.FitnessClubSelectItem;
+import com.jamesaq12wsx.gymtime.service.dto.FitnessClubDto;
+import com.jamesaq12wsx.gymtime.service.mapper.FitnessClubMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,63 +22,53 @@ public class FitnessClubService {
 
     private final BrandRepository brandRepository;
 
+    private final FitnessClubMapper fitnessClubMapper;
+
     @Autowired
-    public FitnessClubService(FitnessClubRepository fitnessClubRepository, CountryRepository countryRepository, BrandRepository brandRepository) {
+    public FitnessClubService(FitnessClubRepository fitnessClubRepository, CountryRepository countryRepository, BrandRepository brandRepository, FitnessClubMapper fitnessClubMapper) {
         this.fitnessClubRepository = fitnessClubRepository;
-//        this.applicationUserDao = applicationUserDao;
         this.countryRepository = countryRepository;
         this.brandRepository = brandRepository;
+        this.fitnessClubMapper = fitnessClubMapper;
     }
 
-    public List<? extends FitnessClub> getAllFitnessClubs(){
+    public List<FitnessClubDto> getAllFitnessClubs(){
 
-        return fitnessClubRepository.findAll();
+        return fitnessClubMapper.toDto(fitnessClubRepository.findAll());
 
     }
 
-    public List<? extends FitnessClub> getClubByLocation(Double lat, Double lng){
+    public List<FitnessClubDto> getClubByLocation(Double lat, Double lng){
 
         if(lat == null || lng == null){
             throw new ApiRequestException(String.format("Location not valid, you should provide lat and lng"));
         }
 
-        return fitnessClubRepository.findAllByLocation(lat, lng);
+        return fitnessClubMapper.toDto(fitnessClubRepository.findAllByLocation(lat, lng));
     }
 
-    public List<? extends FitnessClub> getAllClubsByBrandId(Integer brandId){
+    public List<FitnessClubDto> getAllClubsByBrandId(Integer brandId){
 
         if (!brandRepository.existsById(brandId)){
             throw new ApiRequestException(String.format("Brand id %s is not existed", brandId));
         }
 
-        return fitnessClubRepository.findAllByBrand_BrandId(brandId);
+        return fitnessClubMapper.toDto(fitnessClubRepository.findAllByBrandId(brandId));
     }
 
-    public List<? extends FitnessClub> getAllFitnessByCountry(String countryCode){
+    public List<FitnessClubDto> getAllFitnessByCountry(String countryCode){
 
         if (!countryRepository.existsByAlphaTwoCode(countryCode)){
             throw new ApiRequestException(String.format("Country code %s is not valid", countryCode));
         }
 
-        return fitnessClubRepository.findAllByBrand_Country_AlphaTwoCode(countryCode);
+        return fitnessClubMapper.toDto(fitnessClubRepository.findAllByBrand_Country_AlphaTwoCode(countryCode));
     }
 
-    /**
-     *
-     * @param country alpha two code
-     * @return
-     */
-    public List<FitnessClubSelectItem> getFitnessSelectItems(String country){
 
-        return null;
+    public FitnessClubDto getFitnessById(Long id, Principal principal) {
 
-//        return fitnessClubDao.getClubItemsByCountryCode(country);
-
-    }
-
-    public FitnessClub getFitnessById(UUID uuid, Principal principal) {
-
-        return fitnessClubRepository.findById(uuid).orElseThrow(() -> new ApiRequestException(String.format("Cannot get club, club id %s is not existed", uuid)));
+        return fitnessClubMapper.toDto(fitnessClubRepository.findAllById(id).orElseThrow(() -> new ApiRequestException(String.format("Cannot get club, club id %s is not existed", id))));
 
     }
 }

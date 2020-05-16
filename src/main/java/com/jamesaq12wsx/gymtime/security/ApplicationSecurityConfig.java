@@ -83,12 +83,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                     .userInfoEndpoint()
                         .userService(customOAuth2UserService)
                 .and().and()
-//                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
                 .addFilter(tokenAuthenticationFilter())
-//                .addFilterBefore(new ExceptionTranslationFilter(
-//                        new Http403ForbiddenEntryPoint(),
-//                ))
-//                    .exceptionHandling()
                 .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig), JwtAuthenticationFilter.class)
                 .antMatcher("/**").authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()

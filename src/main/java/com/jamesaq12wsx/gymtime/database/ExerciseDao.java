@@ -1,6 +1,6 @@
 //package com.jamesaq12wsx.gymtime.database;
 //
-//import com.jamesaq12wsx.gymtime.model.Exercise;
+//import com.jamesaq12wsx.gymtime.model.entity.Exercise;
 //
 //import java.util.List;
 //

@@ -1,15 +1,15 @@
 package com.jamesaq12wsx.gymtime.auth.oauth2;
 
 import com.jamesaq12wsx.gymtime.model.MeasurementType;
-import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
+import com.jamesaq12wsx.gymtime.model.entity.MeasurementUnit;
+import com.jamesaq12wsx.gymtime.model.entity.User;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.jamesaq12wsx.gymtime.auth.UserPrincipal;
 import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
 import com.jamesaq12wsx.gymtime.exception.OAuth2AuthenticationProcessingException;
-import com.jamesaq12wsx.gymtime.model.entity.Audit;
+import com.jamesaq12wsx.gymtime.model.entity.BaseEntity;
 import com.jamesaq12wsx.gymtime.model.entity.UserUnitSetting;
-import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
+import com.jamesaq12wsx.gymtime.security.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -48,8 +48,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
         }
 
-        Optional<ApplicationUser> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
-        ApplicationUser user;
+        Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
+        User user;
         if(userOptional.isPresent()) {
             user = userOptional.get();
             if(!user.getAuthProvider().equals(AuthProvider.getEnum(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
@@ -65,8 +65,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return UserPrincipal.create(user, oAuth2User.getAttributes());
     }
 
-    private ApplicationUser registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
-        ApplicationUser user = new ApplicationUser();
+    private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
+        User user = new User();
 
         user.setAuthProvider(AuthProvider.getEnum(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
         user.setProviderId(oAuth2UserInfo.getId());
@@ -74,21 +74,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.setEmail(oAuth2UserInfo.getEmail());
         user.setEmailVerify(true);
         user.setImageUrl(oAuth2UserInfo.getImageUrl());
-        user.setRole(ApplicationUserRole.USER);
-
-        user.setAudit(new Audit());
+        user.setRole(Role.USER);
 
         UserUnitSetting defaultSetting = new UserUnitSetting();
-        defaultSetting.setHeightUnit(new SimpleMeasurementUnit(1, MeasurementType.HEIGHT, "Centimeter", "cm"));
-        defaultSetting.setWeightUnit(new SimpleMeasurementUnit(4, MeasurementType.WEIGHT, "Kilogram", "kg"));
-        defaultSetting.setDistanceUnit(new SimpleMeasurementUnit(6, MeasurementType.DISTANCE, "kilometre", "km"));
+        defaultSetting.setHeightUnit(new MeasurementUnit(1, MeasurementType.HEIGHT, "Centimeter", "cm"));
+        defaultSetting.setWeightUnit(new MeasurementUnit(4, MeasurementType.WEIGHT, "Kilogram", "kg"));
+        defaultSetting.setDistanceUnit(new MeasurementUnit(6, MeasurementType.DISTANCE, "kilometre", "km"));
 
         user.setUserUnitSetting(defaultSetting);
 
         return userRepository.save(user);
     }
 
-    private ApplicationUser updateExistingUser(ApplicationUser existingUser, OAuth2UserInfo oAuth2UserInfo) {
+    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
         existingUser.setName(oAuth2UserInfo.getName());
         existingUser.setImageUrl(oAuth2UserInfo.getImageUrl());
         return userRepository.save(existingUser);

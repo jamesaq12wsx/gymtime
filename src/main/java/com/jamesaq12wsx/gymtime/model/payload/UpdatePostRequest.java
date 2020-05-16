@@ -1,6 +1,6 @@
 package com.jamesaq12wsx.gymtime.model.payload;
 
-import com.jamesaq12wsx.gymtime.model.PostPrivacy;
+import com.jamesaq12wsx.gymtime.model.entity.PostPrivacy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -18,12 +19,12 @@ import java.util.UUID;
 public class UpdatePostRequest {
 
     @NotNull
-    private UUID postUuid;
+    private Long postId;
 
-    private UUID clubUuid;
+    private Long clubId;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private OffsetDateTime exerciseTime;
+    private LocalDateTime exerciseTime;
 
     private PostPrivacy privacy;
 

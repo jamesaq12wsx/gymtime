@@ -6,15 +6,17 @@ import lombok.Setter;
 
 public enum MeasurementType {
 
-    DISTANCE("distance"),
-    HEIGHT("height"),
-    WEIGHT("weight"),
-    DURATION("duration");
+    DISTANCE("distance", "Distance unit"),
+    HEIGHT("height", "Height unit"),
+    WEIGHT("weight", "Weight unit"),
+    DURATION("duration", "Duration unit");
 
     private String value;
+    private String description;
 
-    MeasurementType(String value) {
+    MeasurementType(String value, String description) {
         this.value = value;
+        this.description = description;
     }
 
     public String getValue() {

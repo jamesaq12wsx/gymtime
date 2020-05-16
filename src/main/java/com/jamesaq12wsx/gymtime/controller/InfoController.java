@@ -1,9 +1,13 @@
 package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.*;
+import com.jamesaq12wsx.gymtime.model.entity.Country;
+import com.jamesaq12wsx.gymtime.model.entity.FitnessClub;
 import com.jamesaq12wsx.gymtime.service.FitnessClubService;
 import com.jamesaq12wsx.gymtime.service.InfoService;
+import com.jamesaq12wsx.gymtime.service.dto.BrandDto;
+import com.jamesaq12wsx.gymtime.service.dto.CountryDto;
+import com.jamesaq12wsx.gymtime.service.dto.FitnessClubDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -33,19 +37,19 @@ public class InfoController {
 
     @GetMapping("/select/brand")
     @PreAuthorize("hasAuthority('info:read')")
-    public List<? extends Brand> getAllBrand(){
+    public List<BrandDto> getAllBrand(){
         return infoService.getAllBrand();
     }
 
     @GetMapping("/select/country")
     @PreAuthorize("hasAuthority('info:read')")
-    public List<SimpleCountry> getAllCountry(){
+    public List<CountryDto> getAllCountry(){
         return infoService.getAllCountry();
     }
 
     @GetMapping("/select/club")
     @PreAuthorize("hasAuthority('info:read')")
-    public List<? extends FitnessClub> getAllFitnessClubSelectItems(
+    public List<FitnessClubDto> getAllFitnessClubSelectItems(
             @RequestParam(name = "country", required = false) String alphaTwoCode
     ){
 

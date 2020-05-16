@@ -1,11 +1,10 @@
 package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
-import com.jamesaq12wsx.gymtime.model.Exercise;
-import com.jamesaq12wsx.gymtime.model.SimpleExercise;
 import com.jamesaq12wsx.gymtime.model.payload.ApiResponse;
 import com.jamesaq12wsx.gymtime.model.payload.ExerciseRequest;
 import com.jamesaq12wsx.gymtime.service.ExerciseService;
+import com.jamesaq12wsx.gymtime.service.dto.ExerciseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,18 +28,18 @@ public class ExerciseController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('exercise:read')")
-    public ApiResponse<List<? extends Exercise>> getAllExercise(Principal principal){
+    public ApiResponse<List<? extends ExerciseDto>> getAllExercise(Principal principal){
 
-        List<? extends Exercise> results = exerciseService.getAllExercise(principal);
+        List<? extends ExerciseDto> results = exerciseService.getAllExercise(principal);
 
         return apiResponseBuilder.createSuccessResponse(results);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('exercise:read')")
-    public ApiResponse<Exercise> getExerciseById(@PathVariable("id") Integer id, Principal principal){
+    public ApiResponse<ExerciseDto> getExerciseById(@PathVariable("id") Integer id, Principal principal){
 
-        Exercise ex = exerciseService.getExerciseById(id, principal);
+        ExerciseDto ex = exerciseService.getExerciseById(id, principal);
 
         return apiResponseBuilder.createSuccessResponse(ex);
 
@@ -48,9 +47,9 @@ public class ExerciseController {
 
     @PreAuthorize("hasAuthority('exercise:write')")
     @PostMapping
-    public ApiResponse<Exercise> newExercise(@RequestBody ExerciseRequest request, Principal principal){
+    public ApiResponse<ExerciseDto> newExercise(@RequestBody ExerciseRequest request, Principal principal){
 
-        Exercise newExercise = exerciseService.addNewExercise(request, principal);
+        ExerciseDto newExercise = exerciseService.addNewExercise(request, principal);
 
         return apiResponseBuilder.createSuccessResponse(newExercise);
 
@@ -58,9 +57,9 @@ public class ExerciseController {
 
     @PreAuthorize("hasAuthority('exercise:write')")
     @PutMapping("/{id}")
-    public ApiResponse<Exercise> updateExercise(@RequestParam("id") int id, @RequestBody ExerciseRequest request, Principal principal){
+    public ApiResponse<ExerciseDto> updateExercise(@RequestParam("id") int id, @RequestBody ExerciseRequest request, Principal principal){
 
-        Exercise updatedExercise = exerciseService.updateExercise(id, request, principal);
+        ExerciseDto updatedExercise = exerciseService.updateExercise(id, request, principal);
 
         return apiResponseBuilder.createSuccessResponse(updatedExercise);
 

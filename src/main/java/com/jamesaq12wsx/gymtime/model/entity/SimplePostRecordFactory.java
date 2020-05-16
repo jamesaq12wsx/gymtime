@@ -1,14 +1,13 @@
 package com.jamesaq12wsx.gymtime.model.entity;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.SimpleMeasurementUnit;
 import com.jamesaq12wsx.gymtime.model.payload.RecordRequest;
 
 public class SimplePostRecordFactory {
 
-    public static SimplePostRecord getPostRecord(SimpleMeasurementUnit unit, RecordRequest request) {
+    public static PostRecord getPostRecord(MeasurementUnit unit, RecordRequest request) {
 
-        SimplePostRecord newRecord = new SimplePostRecord();
+        PostRecord newRecord = new PostRecord();
 
         newRecord.setMeasurementUnit(unit);
 

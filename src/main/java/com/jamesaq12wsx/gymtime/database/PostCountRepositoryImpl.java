@@ -22,16 +22,16 @@ public class PostCountRepositoryImpl implements PostCountRepository {
     }
 
     @Override
-    public List<PostCount> findAllByClub(UUID clubUuid, LocalDate date) {
+    public List<PostCount> findAllByClub(Long clubId, LocalDate date) {
 
         String sql = "select date_trunc('hour', time + interval '1 hour') as date_time, count(*)\n" +
                 "from post as ep\n" +
-                "where location = ?::uuid and date(time) = date(?)" +
+                "where club = ?::int and date(time) = date(?)" +
                 "group by date_time";
 
         return jdbcTemplate.query(
                 sql,
-                new Object[]{clubUuid.toString(), date},
+                new Object[]{clubId.toString(), date},
                 mapHourPostFromDb()
         );
 

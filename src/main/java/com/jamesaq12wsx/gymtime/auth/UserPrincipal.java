@@ -1,6 +1,6 @@
 package com.jamesaq12wsx.gymtime.auth;
 
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
+import com.jamesaq12wsx.gymtime.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,17 +19,17 @@ import java.util.UUID;
 @Setter
 public class UserPrincipal implements OAuth2User, UserDetails {
 
-    private UUID id;
+    private Long id;
     private String email;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
     private Map<String, Object> attributes;
 
-    public static UserPrincipal create(ApplicationUser user){
-        return new UserPrincipal(user.getUuid(), user.getEmail(), user.getPassword(), user.getRole().getGrantedAuthorities());
+    public static UserPrincipal create(User user){
+        return new UserPrincipal(user.getId(), user.getEmail(), user.getPassword(), user.getRole().getGrantedAuthorities());
     }
 
-    public static UserPrincipal create(ApplicationUser user, Map<String,Object> attributes){
+    public static UserPrincipal create(User user, Map<String,Object> attributes){
 
         UserPrincipal userPrincipal =  create(user);
 
@@ -38,7 +38,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
         return userPrincipal;
     }
 
-    public UserPrincipal(UUID id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserPrincipal(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;

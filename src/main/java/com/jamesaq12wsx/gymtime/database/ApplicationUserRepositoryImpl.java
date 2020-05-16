@@ -1,7 +1,6 @@
 package com.jamesaq12wsx.gymtime.database;
 
-import com.jamesaq12wsx.gymtime.model.ShortUserData;
-import com.jamesaq12wsx.gymtime.model.UserData;
+import com.jamesaq12wsx.gymtime.model.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -19,42 +18,51 @@ public class ApplicationUserRepositoryImpl implements ApplicationUserRepositoryC
     }
 
     @Override
-    public List<? extends UserData> findRecentUserByClubId(UUID clubId) {
+    public List<User> findRecentUserByClubId(Long clubId) {
 
-        String query = "select gtu.user_uuid, gtu.name, gtu.image_url\n" +
+        String query = "select gtu.*, post.time \n" +
                 "from post\n" +
-                "join gym_time_user gtu on post.created_by = gtu.email\n" +
-                "join fitness_club fc on post.location = fc.club_uid\n" +
-                "where fc.club_uid = ?::uuid\n" +
-                "group by gtu.user_uuid, gtu.image_url, gtu.name\n" +
-                "order by gtu.created_at desc";
+                "join gym_time_user gtu on post.created_by = gtu.username\n" +
+                "join fitness_club fc on post.club = fc.club_id\n" +
+                "where fc.club_id = ?\n" +
+                "group by gtu.user_uuid, post.time\n" +
+                "order by post.time desc\n" +
+                "limit 30";
 
-        return jdbcTemplate.query(query, new Object[]{clubId.toString()}, shortUserDataRowMapper());
+        return jdbcTemplate.query(query, new Object[]{clubId}, shortUserDataRowMapper());
 
     }
 
     @Override
-    public List<? extends UserData> findRecentUserByClubIdExcludeUser(UUID clubId, String username) {
+    public List<User> findRecentUserByClubIdExcludeUser(UUID clubId, String username) {
 
         String query = "select gtu.user_uuid, gtu.name, gtu.image_url\n" +
                 "from post\n" +
-                "join gym_time_user gtu on post.created_by = gtu.email\n" +
+                "join gym_time_user gtu on post.created_by = gtu.username\n" +
                 "join fitness_club fc on post.location = fc.club_uid\n" +
-                "where fc.club_uid = ?::uuid and gtu.email <> ?\n" +
+                "where fc.club_uid = ?::int and gtu.username <> ?\n" +
                 "group by gtu.user_uuid, gtu.name\n" +
-                "order by gtu.created_at desc;";
+                "order by gtu.created_at desc";
 
         return jdbcTemplate.query(query, new Object[]{clubId.toString(), username}, shortUserDataRowMapper());
     }
 
-    public RowMapper<ShortUserData> shortUserDataRowMapper(){
+    public RowMapper<User> shortUserDataRowMapper(){
         return (resultSet, i) -> {
-            String idStr = resultSet.getString("user_uuid");
-            UUID userUuid = UUID.fromString(idStr);
+            String uuidStr = resultSet.getString("user_uuid");
+            UUID userUuid = UUID.fromString(uuidStr);
+
+            String idStr = resultSet.getString("user_id");
+            Long id = Long.valueOf(idStr);
             String name = resultSet.getString("name");
             String imageUrl = resultSet.getString("image_url");
 
-            return new ShortUserData(userUuid, name, imageUrl);
+            User user = new User();
+            user.setId(id);
+            user.setName(name);
+            user.setImageUrl(imageUrl);
+
+            return user;
         };
     }
 }

@@ -12,6 +12,6 @@ import java.util.UUID;
 
 public interface PostCountRepository {
 
-    List<PostCount> findAllByClub(UUID clubUuid, LocalDate date);
+    List<PostCount> findAllByClub(Long clubUuid, LocalDate date);
 
 }

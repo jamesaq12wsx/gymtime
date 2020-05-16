@@ -1,10 +1,10 @@
 package com.jamesaq12wsx.gymtime.auth;
 
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
-import com.jamesaq12wsx.gymtime.model.entity.UserBodyStat;
-import com.jamesaq12wsx.gymtime.model.entity.UserInfo;
-import com.jamesaq12wsx.gymtime.model.entity.UserUnitSetting;
+import com.jamesaq12wsx.gymtime.model.entity.User;
+import com.jamesaq12wsx.gymtime.model.entity.UserBodyRecord;
 import com.jamesaq12wsx.gymtime.model.payload.*;
+import com.jamesaq12wsx.gymtime.service.dto.UserBodyRecordDto;
+import com.jamesaq12wsx.gymtime.service.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +17,7 @@ public interface SelfUserDetailsService extends UserDetailsService {
 
     void addNewUser(SignUpRequest request);
 
-    ApplicationUser loadUserInfoByEmail(String email);
+    UserDto loadUserInfoByEmail(String email);
 
     void updateUserName(UserInfoRequest request, Principal principal);
 
@@ -37,7 +37,7 @@ public interface SelfUserDetailsService extends UserDetailsService {
 
     void updateBirthday(UserInfoRequest request, Principal principal);
 
-    UserBodyStat getUserBodyStat(Principal principal);
+    UserBodyRecordDto getUserBodyStat(Principal principal);
 
     void updateUserHeight(NewHeightRequest request, Principal principal);
 

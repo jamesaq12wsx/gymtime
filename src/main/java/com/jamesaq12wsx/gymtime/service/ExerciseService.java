@@ -5,14 +5,15 @@ import com.jamesaq12wsx.gymtime.database.ExerciseRepository;
 import com.jamesaq12wsx.gymtime.database.MuscleGroupRepository;
 import com.jamesaq12wsx.gymtime.database.MuscleRepository;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
-import com.jamesaq12wsx.gymtime.model.SimpleMuscle;
-import com.jamesaq12wsx.gymtime.model.SimpleMuscleGroup;
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
-import com.jamesaq12wsx.gymtime.model.entity.Audit;
-import com.jamesaq12wsx.gymtime.model.Exercise;
-import com.jamesaq12wsx.gymtime.model.SimpleExercise;
+import com.jamesaq12wsx.gymtime.model.entity.Muscle;
+import com.jamesaq12wsx.gymtime.model.entity.MuscleGroup;
+import com.jamesaq12wsx.gymtime.model.entity.User;
+import com.jamesaq12wsx.gymtime.model.entity.BaseEntity;
+import com.jamesaq12wsx.gymtime.model.entity.Exercise;
 import com.jamesaq12wsx.gymtime.model.payload.ExerciseRequest;
-import com.jamesaq12wsx.gymtime.security.ApplicationUserRole;
+import com.jamesaq12wsx.gymtime.security.Role;
+import com.jamesaq12wsx.gymtime.service.dto.ExerciseDto;
+import com.jamesaq12wsx.gymtime.service.mapper.ExerciseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,62 +35,69 @@ public class ExerciseService {
 
     private final ImageService imageService;
 
+    private final ExerciseMapper exerciseMapper;
+
     @Autowired
-    public ExerciseService(ExerciseRepository exerciseRepository, MuscleGroupRepository muscleGroupRepository, MuscleRepository muscleRepository, ApplicationUserRepository applicationUserRepository, ImageService imageService) {
+    public ExerciseService(ExerciseRepository exerciseRepository, MuscleGroupRepository muscleGroupRepository, MuscleRepository muscleRepository, ApplicationUserRepository applicationUserRepository, ImageService imageService, ExerciseMapper exerciseMapper) {
         this.exerciseRepository = exerciseRepository;
         this.muscleGroupRepository = muscleGroupRepository;
         this.muscleRepository = muscleRepository;
         this.applicationUserRepository = applicationUserRepository;
         this.imageService = imageService;
+        this.exerciseMapper = exerciseMapper;
     }
 
-    public List<? extends Exercise> getAllExercise(Principal principal){
+    public List<? extends ExerciseDto> getAllExercise(Principal principal){
 
-        return exerciseRepository.findAllByUsername(principal.getName());
+        return exerciseMapper.toDto(exerciseRepository.findAllByUsername(principal.getName()));
     }
 
-    public Exercise getExerciseById(Integer id, Principal principal){
+    public ExerciseDto getExerciseById(Integer id, Principal principal){
 
-        return exerciseRepository.findByIdAndUsername(id, principal.getName()).orElseThrow(() -> new ApiRequestException(String.format("Exercise id %s not found", id)));
+        return exerciseMapper.toDto(exerciseRepository.findByIdAndUsername(id, principal.getName()).orElseThrow(() -> new ApiRequestException(String.format("Exercise id %s not found", id))));
 
     }
 
-    public Exercise addNewExercise(ExerciseRequest exerciseRequest, Principal principal){
+    public ExerciseDto addNewExercise(ExerciseRequest exerciseRequest, Principal principal){
 
-        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName())
+        User user = applicationUserRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ApiRequestException(String.format("User email %s could not find, cannot add new exercise", principal.getName())));
 
         List<String> imageUrls = imageService.saveImages(exerciseRequest.getImages());
 
-        SimpleMuscleGroup muscleGroup = muscleGroupRepository.findById(exerciseRequest.getMuscleGroupId())
+        MuscleGroup muscleGroup = muscleGroupRepository.findById(exerciseRequest.getMuscleGroupId())
                 .orElseThrow(() -> new ApiRequestException(String.format("Exercise muscle group %s not existed could not be null")));
 
-        SimpleMuscle primaryMuscle = null;
+        Muscle primaryMuscle = null;
 
         if (exerciseRequest.getPrimaryMuscleId() != null){
             primaryMuscle = muscleRepository.findById(exerciseRequest.getPrimaryMuscleId()).orElse(null);
 
         }
 
-        SimpleMuscle secondaryMuscle = null;
+        Muscle secondaryMuscle = null;
 
         if (exerciseRequest.getSecondaryMuscleId() != null){
             secondaryMuscle = muscleRepository.findById(exerciseRequest.getSecondaryMuscleId()).orElse(null);
 
         }
 
-        return exerciseRepository.save(new SimpleExercise(null, exerciseRequest.getName(), exerciseRequest.getDescription(), exerciseRequest.getMeasurementType(), muscleGroup, primaryMuscle, secondaryMuscle, imageUrls, false, user, new Audit()));
+        Exercise newExercise = new Exercise(null, exerciseRequest.getName(), exerciseRequest.getDescription(), exerciseRequest.getMeasurementType(), muscleGroup, primaryMuscle, secondaryMuscle, imageUrls);
+
+        newExercise.setCreatedBy(principal.getName());
+
+        return exerciseMapper.toDto(exerciseRepository.save(newExercise));
 
     }
 
-    public Exercise updateExercise(Integer exerciseId, ExerciseRequest exerciseRequest, Principal principal){
+    public ExerciseDto updateExercise(Integer exerciseId, ExerciseRequest exerciseRequest, Principal principal){
 
-        SimpleExercise updateExercise = exerciseRepository.findById(exerciseId).orElseThrow(() -> new ApiRequestException(String.format("Exercise id %s not found, couldn't update", exerciseId)));
+        Exercise updateExercise = exerciseRepository.findById(exerciseId).orElseThrow(() -> new ApiRequestException(String.format("Exercise id %s not found, couldn't update", exerciseId)));
 
-        ApplicationUser user = applicationUserRepository.findByEmail(principal.getName())
+        User user = applicationUserRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ApiRequestException(String.format("User email %s could not find, cannot add new exercise", principal.getName())));
 
-        if (user.getRole() != ApplicationUserRole.ADMIN &&updateExercise.getCreatedBy().getEmail() != principal.getName()){
+        if (user.getRole() != Role.ADMIN &&updateExercise.getCreatedBy() != principal.getName()){
             throw new ApiRequestException(String.format("User %s has no right update this exercise", user.getEmail()));
         }
 
@@ -112,26 +120,26 @@ public class ExerciseService {
             updateExercise.setSecondaryMuscle(muscleRepository.findById(exerciseRequest.getSecondaryMuscleId()).orElse(null));
         }
 
-        return exerciseRepository.save(updateExercise);
+        return exerciseMapper.toDto(exerciseRepository.save(updateExercise));
 
     }
 
     public void deleteExercise(Integer id, Principal principal){
 
-        SimpleExercise exercise = exerciseRepository.findById(id).orElseThrow(() -> new ApiRequestException(String.format("Cannot delete exercise, id %s not existed", id)));
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow(() -> new ApiRequestException(String.format("Cannot delete exercise, id %s not existed", id)));
 
-        ApplicationUser user =
+        User user =
                 applicationUserRepository
                 .findByEmail(principal.getName())
                 .orElseThrow(() -> new ApiRequestException(String.format("Could not found user email %s, couldn't delete exercise", principal.getName())));
 
-        if (exercise.getSystem()){
-            if (user.getRole() != ApplicationUserRole.ADMIN){
+        if (exercise.getCreatedBy().equals("system")){
+            if (user.getRole() != Role.ADMIN){
                 throw new ApiRequestException(String.format("User %s is not ADMIN, could not delete system exercise", user.getEmail()));
             }
 
         }else{
-            if (exercise.getCreatedBy().getEmail() != principal.getName()){
+            if (!exercise.getCreatedBy().equals(principal.getName())){
                 throw new ApiRequestException(String.format("User %s could not delete this exercise", user.getEmail()));
             }
 

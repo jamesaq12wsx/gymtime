@@ -2,18 +2,18 @@ package com.jamesaq12wsx.gymtime.controller;
 
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
-import com.jamesaq12wsx.gymtime.model.entity.ApplicationUser;
+import com.jamesaq12wsx.gymtime.model.entity.User;
 import com.jamesaq12wsx.gymtime.auth.SelfUserDetailsService;
-import com.jamesaq12wsx.gymtime.model.entity.UserBodyStat;
-import com.jamesaq12wsx.gymtime.model.entity.UserInfo;
+import com.jamesaq12wsx.gymtime.model.entity.UserBodyRecord;
 import com.jamesaq12wsx.gymtime.model.payload.*;
+import com.jamesaq12wsx.gymtime.service.dto.UserBodyRecordDto;
+import com.jamesaq12wsx.gymtime.service.dto.UserDto;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.security.Principal;
 
 @RestController
@@ -32,11 +32,11 @@ public class UserController {
 
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse<ApplicationUser> me(Principal principal){
+    public ApiResponse<UserDto> me(Principal principal){
 
-        ApplicationUser user = userDetailsService.loadUserInfoByEmail(principal.getName());
+        UserDto user = userDetailsService.loadUserInfoByEmail(principal.getName());
 
-        ApiResponse<ApplicationUser> apiResponse = new ApiResponse<>(
+        ApiResponse<UserDto> apiResponse = new ApiResponse<>(
                 true,
                 "",
                 user
@@ -57,19 +57,6 @@ public class UserController {
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
-
-//    @PutMapping("/picture")
-//    @PreAuthorize("hasAnyRole('ROLE_USER')")
-//    public ApiResponse updateUserPicture(@RequestBody UserInfoRequest request, Principal principal){
-//
-//        if(request.getPicture() == null){
-//            throw new ApiRequestException(String.format("Could not update user picture with empty file"));
-//        }
-//
-//        userDetailsService.updateUserPicture(request, principal);
-//
-//        return apiResponseBuilder.createSuccessResponse(null);
-//    }
 
     @PutMapping("/picture")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
@@ -191,7 +178,7 @@ public class UserController {
 
     @GetMapping("/stat")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse<UserBodyStat> getUserBodyStat(Principal principal){
+    public ApiResponse<UserBodyRecordDto> getUserBodyStat(Principal principal){
         return ApiResponseBuilder.createSuccessResponse(userDetailsService.getUserBodyStat(principal));
     }
 
