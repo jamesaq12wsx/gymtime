@@ -10,6 +10,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gymtime-tools</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
+    <dependencies>
+        <!--  Loggin Module Contain Common Module      -->
+        <dependency>
+            <groupId>com.jamesaq12wsx</groupId>
+            <artifactId>gymtime-loggin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>

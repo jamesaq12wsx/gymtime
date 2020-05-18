@@ -10,6 +10,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gymtime-common</artifactId>
+    <name>Common Module</name>
 
+    <properties>
+        <hutool.version>5.0.6</hutool.version>
+    </properties>
+
+    <dependencies>
+        <!-- tool -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
