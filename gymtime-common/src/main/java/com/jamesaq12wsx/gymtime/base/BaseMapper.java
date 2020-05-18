@@ -1,4 +1,4 @@
-package com.jamesaq12wsx.gymtime.service.mapper;
+package com.jamesaq12wsx.gymtime.base;
 
 import java.util.List;
 

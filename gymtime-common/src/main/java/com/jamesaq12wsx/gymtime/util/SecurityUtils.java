@@ -16,7 +16,7 @@ import java.util.*;
  * @author James Lin
  * @date 2020-05-16
  */
-public class SecurityUtil {
+public class SecurityUtils {
 
     public static Authentication getCurrentAuthentication(){
         return SecurityContextHolder.getContext().getAuthentication();
@@ -55,7 +55,7 @@ public class SecurityUtil {
 
     /**
      * Get Current User Id
-     * @return 系统用户ID
+     * @return system user id
      */
     public static Long getCurrentUserId() {
 

@@ -13,15 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package me.zhengjie.exception.handler;
+package com.jamesaq12wsx.gymtime.exception.handler;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
- * @author Zheng Jie
- * @date 2018-11-23
+ * @author James Lin
+ * @date 2020-05-16
  */
 @Data
 class ApiError {

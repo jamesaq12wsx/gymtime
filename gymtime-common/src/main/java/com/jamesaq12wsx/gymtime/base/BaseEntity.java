@@ -1,4 +1,4 @@
-package com.jamesaq12wsx.gymtime.model.entity;
+package com.jamesaq12wsx.gymtime.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,12 +30,12 @@ public class BaseEntity implements Serializable {
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)
-    @ApiModelProperty(value = "創建人", hidden = true)
+    @ApiModelProperty(value = "Craete User", hidden = true)
     private String createdBy;
 
     @LastModifiedBy
     @Column(name = "updated_by")
-    @ApiModelProperty(value = "更新人", hidden = true)
+    @ApiModelProperty(value = "Update User", hidden = true)
     private String updatedBy;
 
     @CreationTimestamp

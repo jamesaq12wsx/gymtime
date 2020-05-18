@@ -12,7 +12,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     private static ApplicationContext applicationContext = null;
 
     /**
-     * 从静态变量applicationContext中取得Bean, 自动转型为所赋值对象的类型.
+     * Get Static Bean from applicationContext
      */
     @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) {
@@ -21,7 +21,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     }
 
     /**
-     * 从静态变量applicationContext中取得Bean, 自动转型为所赋值对象的类型.
+     * Get Bean of require type
      */
     public static <T> T getBean(Class<T> requiredType) {
         assertContextInjected();
@@ -29,7 +29,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     }
 
     /**
-     * 检查ApplicationContext不为空.
+     * Check application context
      */
     private static void assertContextInjected() {
         if (applicationContext == null) {
@@ -39,7 +39,7 @@ public class SpringContextHolder implements ApplicationContextAware, DisposableB
     }
 
     /**
-     * 清除SpringContextHolder中的ApplicationContext为Null.
+     * clear context holder applicationContext to null
      */
     private static void clearHolder() {
         log.debug("清除SpringContextHolder中的ApplicationContext:"

@@ -1,4 +1,4 @@
-package com.jamesaq12wsx.gymtime.config;
+package com.jamesaq12wsx.gymtime.configuration;
 
 import com.jamesaq12wsx.gymtime.util.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,4 +1,4 @@
-package com.jamesaq12wsx.gymtime.service.dto;
+package com.jamesaq12wsx.gymtime.base;
 
 import lombok.Getter;
 import lombok.Setter;

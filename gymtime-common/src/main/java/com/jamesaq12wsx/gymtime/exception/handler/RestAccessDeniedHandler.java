@@ -1,6 +1,7 @@
-package com.jamesaq12wsx.gymtime.exception;
+package com.jamesaq12wsx.gymtime.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.ApiResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,8 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException, ServletException {
-        ApiResponse response = new ApiResponse(false, "Access Denied", null);
-        response.setMessage("Access Denied");
+
+        ApiError response = ApiError.error("Access Denied");
 
         httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
 

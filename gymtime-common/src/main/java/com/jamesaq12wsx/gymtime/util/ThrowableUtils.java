@@ -6,7 +6,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class ThrowableUtil {
+public class ThrowableUtils {
 
     /**
      * Get stack message
