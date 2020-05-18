@@ -2,6 +2,7 @@ package com.jamesaq12wsx.gymtime.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.jamesaq12wsx.gymtime.base.BaseEntity;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

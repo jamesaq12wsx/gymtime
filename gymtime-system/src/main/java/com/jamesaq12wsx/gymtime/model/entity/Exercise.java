@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model.entity;
 
+import com.jamesaq12wsx.gymtime.base.BaseEntity;
 import com.jamesaq12wsx.gymtime.model.MeasurementType;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;

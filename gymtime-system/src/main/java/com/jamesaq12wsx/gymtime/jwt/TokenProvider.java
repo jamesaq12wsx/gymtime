@@ -1,17 +1,23 @@
 package com.jamesaq12wsx.gymtime.jwt;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.jamesaq12wsx.gymtime.auth.UserPrincipal;
 import com.jamesaq12wsx.gymtime.configuration.AppProperties;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TokenProvider {
@@ -19,10 +25,10 @@ public class TokenProvider {
     private static final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
 
     private final AppProperties appProperties;
-
     private final JwtConfig jwtConfig;
-
     private final SecretKey secretKey;
+
+    private final String AUTHORITIES_KEY = "authorities";
 
     @Autowired
     public TokenProvider(AppProperties appProperties, JwtConfig jwtConfig, SecretKey secretKey) {
@@ -45,6 +51,22 @@ public class TokenProvider {
                 .signWith(secretKey)
                 .compact();
 
+    }
+
+    Authentication getAuthentication(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+
+        // fix bug: 当前用户如果没有任何权限时，在输入用户名后，刷新验证码会抛IllegalArgumentException
+        var authorities = (List<Map<String,String>>) claims.get(AUTHORITIES_KEY);
+
+        Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream().map(auth -> new SimpleGrantedAuthority(auth.get("authority"))).collect(Collectors.toSet());
+
+        User principal = new User(claims.getSubject(), "", simpleGrantedAuthorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, token, simpleGrantedAuthorities);
     }
 
     public Long getUserIdFromToken(String token) {

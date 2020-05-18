@@ -1,6 +1,5 @@
 package com.jamesaq12wsx.gymtime.auth.oauth2;
 
-import com.jamesaq12wsx.gymtime.exception.OAuth2AuthenticationProcessingException;
 import com.jamesaq12wsx.gymtime.model.MeasurementType;
 import com.jamesaq12wsx.gymtime.model.entity.MeasurementUnit;
 import com.jamesaq12wsx.gymtime.model.entity.User;
@@ -9,6 +8,7 @@ import com.jamesaq12wsx.gymtime.security.Role;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.jamesaq12wsx.gymtime.auth.UserPrincipal;
 import com.jamesaq12wsx.gymtime.database.ApplicationUserRepository;
+import com.jamesaq12wsx.gymtime.exception.OAuth2AuthenticationProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;

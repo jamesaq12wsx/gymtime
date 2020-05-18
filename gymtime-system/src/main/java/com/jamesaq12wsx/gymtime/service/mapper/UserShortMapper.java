@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.service.mapper;
 
+import com.jamesaq12wsx.gymtime.base.BaseMapper;
 import com.jamesaq12wsx.gymtime.model.entity.User;
 import com.jamesaq12wsx.gymtime.service.dto.UserShortDto;
 import org.mapstruct.Mapper;

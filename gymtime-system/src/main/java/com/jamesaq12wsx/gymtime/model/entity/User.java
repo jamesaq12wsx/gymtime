@@ -1,6 +1,7 @@
 package com.jamesaq12wsx.gymtime.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jamesaq12wsx.gymtime.base.BaseEntity;
 import com.jamesaq12wsx.gymtime.security.Role;
 import com.jamesaq12wsx.gymtime.auth.AuthProvider;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;

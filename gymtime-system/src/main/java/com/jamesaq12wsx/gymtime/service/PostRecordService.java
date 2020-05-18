@@ -1,7 +1,5 @@
 package com.jamesaq12wsx.gymtime.service;
 
-import com.gymtime.database.*;
-import com.gymtime.model.entity.*;
 import com.jamesaq12wsx.gymtime.database.*;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.MeasurementType;

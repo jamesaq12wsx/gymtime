@@ -10,6 +10,7 @@ import com.jamesaq12wsx.gymtime.model.payload.*;
 import com.jamesaq12wsx.gymtime.service.*;
 import com.jamesaq12wsx.gymtime.service.dto.*;
 import com.jamesaq12wsx.gymtime.service.mapper.*;
+import com.jamesaq12wsx.gymtime.util.SecurityUtils;
 import com.jamesaq12wsx.gymtime.validator.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,7 +24,7 @@ import java.io.IOException;
 import java.security.Principal;
 
 @Service
-public class ApplicationUserService implements SelfUserDetailsService {
+public class UserService implements SelfUserDetailsService {
 
     private final ApplicationUserRepository applicationUserRepository;
     private final UserMapper userMapper;
@@ -37,7 +38,7 @@ public class ApplicationUserService implements SelfUserDetailsService {
     private final ImageService imageService;
 
     @Autowired
-    public ApplicationUserService(ApplicationUserRepository applicationUserRepository, UserMapper userMapper, UserBodyRecordMapper userBodyRecordMapper, MeasurementUnitRepository measurementUnitRepository, HeightRepository heightRepository, WeightRepository weightRepository, BodyFatRepository bodyFatRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder, ImageService imageService) {
+    public UserService(ApplicationUserRepository applicationUserRepository, UserMapper userMapper, UserBodyRecordMapper userBodyRecordMapper, MeasurementUnitRepository measurementUnitRepository, HeightRepository heightRepository, WeightRepository weightRepository, BodyFatRepository bodyFatRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder, ImageService imageService) {
         this.applicationUserRepository = applicationUserRepository;
         this.userMapper = userMapper;
         this.userBodyRecordMapper = userBodyRecordMapper;
@@ -139,8 +140,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateUserName(UserInfoRequest request, Principal principal) {
-        User user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+    public void updateUserName(UserInfoRequest request) {
+
+        User user = applicationUserRepository.findByEmail(getCurrentUsername()).orElseThrow(() -> getUserNotFoundException(getCurrentUsername()));
 
         if (user.getAuthProvider() != AuthProvider.LOCAL) {
             throw new ApiRequestException("Social login could not change the name");
@@ -152,9 +154,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateUserBirthday(UserInfoRequest request, Principal principal) {
+    public void updateUserBirthday(UserInfoRequest request) {
 
-        User user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+        User user = applicationUserRepository.findByEmail(getCurrentUsername()).orElseThrow(() -> getUserNotFoundException(getCurrentUsername()));
 
         if (user.getUserInfo() == null) {
             user.setUserInfo(new UserInfo());
@@ -167,9 +169,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateUserGender(UserInfoRequest request, Principal principal) {
+    public void updateUserGender(UserInfoRequest request) {
 
-        User user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+        User user = applicationUserRepository.findByEmail(getCurrentUsername()).orElseThrow(() -> getUserNotFoundException(getCurrentUsername()));
 
         if (user.getUserInfo() == null) {
             user.setUserInfo(new UserInfo());
@@ -182,7 +184,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateUserPicture(MultipartFile picture, Principal principal) {
+    public void updateUserPicture(MultipartFile picture) {
+
+        User user = applicationUserRepository.findByEmail(getCurrentUsername()).orElseThrow(() -> getUserNotFoundException(getCurrentUsername()));
 
         String fileUrl = null;
 
@@ -193,8 +197,6 @@ public class ApplicationUserService implements SelfUserDetailsService {
             throw new ApiRequestException(String.format("Save picture failed"));
         }
 
-        User user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
-
         user.setImageUrl(fileUrl);
 
         applicationUserRepository.save(user);
@@ -202,8 +204,8 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateWeightUnit(UserUnitRequest request, Principal principal) {
-        User user = getUserFromDb(principal);
+    public void updateWeightUnit(UserUnitRequest request) {
+        User user = applicationUserRepository.findByEmail(getCurrentUsername()).orElseThrow(() -> getUserNotFoundException(getCurrentUsername()));
 
         if (user.getUserUnitSetting().getWeightUnit().getId() != request.getWeightUnit()) {
             MeasurementUnit unit = getUnitFromDb(request.getWeightUnit());
@@ -219,8 +221,8 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateHeightUnit(UserUnitRequest request, Principal principal) {
-        User user = getUserFromDb(principal);
+    public void updateHeightUnit(UserUnitRequest request) {
+        User user = getCurrentUser();
 
         if (user.getUserUnitSetting().getHeightUnit().getId() != request.getHeightUnit()) {
 
@@ -237,8 +239,8 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateDistanceUnit(UserUnitRequest request, Principal principal) {
-        User user = getUserFromDb(principal);
+    public void updateDistanceUnit(UserUnitRequest request) {
+        User user = getCurrentUser();
 
         if (user.getUserUnitSetting().getDistanceUnit().getId() != request.getDistanceUnit()) {
 
@@ -255,8 +257,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateGender(UserInfoRequest request, Principal principal) {
-        User user = getUserFromDb(principal);
+    public void updateGender(UserInfoRequest request) {
+
+        User user = getCurrentUser();
 
         if (!user.getUserInfo().getGender().getValue().equals(request.getGender().getValue())) {
 
@@ -267,8 +270,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void updateBirthday(UserInfoRequest request, Principal principal) {
-        User user = getUserFromDb(principal);
+    public void updateBirthday(UserInfoRequest request) {
+
+        User user = getCurrentUser();
 
         if (!user.getUserInfo().getBirthday().equals(request.getBirthday())) {
 
@@ -279,24 +283,26 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public UserBodyRecordDto getUserBodyStat(Principal principal) {
+    public UserBodyRecordDto getUserBodyStat() {
+
+        User user = getCurrentUser();
 
         UserBodyRecord userBodyRecord = new UserBodyRecord();
 
-        userBodyRecord.setHeight(heightRepository.findByUsername(principal.getName()).orElse(null));
+        userBodyRecord.setHeight(heightRepository.findByUsername(getCurrentUsername()).orElse(null));
 
-        userBodyRecord.setWeights(weightRepository.findAllByUsername(principal.getName()));
+        userBodyRecord.setWeights(weightRepository.findAllByUsername(getCurrentUsername()));
 
-        userBodyRecord.setBodyFats(bodyFatRepository.findAllByUsername(principal.getName()));
+        userBodyRecord.setBodyFats(bodyFatRepository.findAllByUsername(getCurrentUsername()));
 
         return userBodyRecordMapper.toDto(userBodyRecord);
 
     }
 
     @Override
-    public void updateUserHeight(NewHeightRequest request, Principal principal) {
+    public void updateUserHeight(NewHeightRequest request) {
 
-        User user = applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+        User user = getCurrentUser();
 
         MeasurementUnit heightUnit = user.getUserUnitSetting().getHeightUnit();
 
@@ -310,26 +316,23 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
                 heightRepository.save(userHeight);
 
-                return;
             }
         } else {
 
             UserHeight newRecord = new UserHeight(null, heightUnit, request.getHeight());
 
-            newRecord.setCreatedBy(principal.getName());
+            newRecord.setCreatedBy(getCurrentUsername());
 
             heightRepository.save(newRecord);
-
-            return;
 
         }
 
     }
 
     @Override
-    public void newUserWeight(NewWeightRequest request, Principal principal) {
+    public void newUserWeight(NewWeightRequest request) {
 
-        User user = getUserFromDb(principal);
+        User user = getCurrentUser();
 
         MeasurementUnit weightUnit = user.getUserUnitSetting().getWeightUnit();
 
@@ -341,7 +344,7 @@ public class ApplicationUserService implements SelfUserDetailsService {
 
             UserWeight newRecord = new UserWeight(null, user, weightUnit, request.getWeight(), request.getDate());
 
-            newRecord.setCreatedBy(principal.getName());
+            newRecord.setCreatedBy(getCurrentUsername());
 
             weightRepository.save(newRecord);
 
@@ -349,13 +352,13 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void deleteUserWeight(Integer id, Principal principal) {
+    public void deleteUserWeight(Integer id) {
 
         UserWeight userWeight = weightRepository
                 .findById(id)
                 .orElseThrow(() -> new ApiRequestException(String.format("User weight %s not found", id)));
 
-        if (!userWeight.getCreatedBy().equals(principal.getName())) {
+        if (!userWeight.getCreatedBy().equals(getCurrentUsername())) {
             throw new ApiRequestException(String.format("You have no right delete this weight record"));
         }
 
@@ -363,9 +366,9 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void newUserBodyFat(NewBodyFatRequest request, Principal principal) {
+    public void newUserBodyFat(NewBodyFatRequest request) {
 
-        User user = getUserFromDb(principal);
+        User user = getCurrentUser();
 
         if (bodyFatRepository.existsByUserAndDate(user, request.getDate())) {
 
@@ -381,30 +384,34 @@ public class ApplicationUserService implements SelfUserDetailsService {
     }
 
     @Override
-    public void deleteUserBodyFat(Integer id, Principal principal) {
+    public void deleteUserBodyFat(Integer id) {
 
         UserBodyFat userBodyFat = bodyFatRepository
                 .findById(id)
                 .orElseThrow(() -> new ApiRequestException(String.format("User body fat %s not found", id)));
 
-        if (!userBodyFat.getCreatedBy().equals(principal.getName())) {
+        if (!userBodyFat.getCreatedBy().equals(getCurrentUsername())) {
             throw new ApiRequestException(String.format("You have no right delete this body fat record"));
         }
 
         bodyFatRepository.deleteById(id);
     }
 
-    private User getUserFromDb(Principal principal) {
+    private User getCurrentUser() {
 
-        return applicationUserRepository.findByEmail(principal.getName()).orElseThrow(() -> getUserNotFoundException(principal));
+        return applicationUserRepository.findByEmail(getCurrentUsername()).orElseThrow(() -> getUserNotFoundException(getCurrentUsername()));
 
+    }
+
+    private String getCurrentUsername(){
+        return SecurityUtils.getCurrentUsername();
     }
 
     private MeasurementUnit getUnitFromDb(Integer id) {
         return measurementUnitRepository.findById(id).orElseThrow(() -> new ApiRequestException(String.format("Unit %s not found, can not update unit setting", id)));
     }
 
-    private ApiRequestException getUserNotFoundException(Principal principal) {
-        return new ApiRequestException(String.format("Username %s not found", principal.getName()));
+    private ApiRequestException getUserNotFoundException(String username) {
+        return new ApiRequestException(String.format("Username %s not found", username));
     }
 }

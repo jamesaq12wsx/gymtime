@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.model.entity;
 
+import com.jamesaq12wsx.gymtime.base.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

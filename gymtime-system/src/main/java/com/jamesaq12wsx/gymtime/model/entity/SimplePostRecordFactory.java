@@ -14,7 +14,7 @@ public class SimplePostRecordFactory {
 
         switch (unit.getMeasurementType()){
 
-            case MeasurementType.WEIGHT:
+            case WEIGHT:
 
                 newRecord.setWeight(request.getWeight());
 
@@ -22,7 +22,7 @@ public class SimplePostRecordFactory {
 
                 break;
 
-            case MeasurementType.DISTANCE:
+            case DISTANCE:
 
                 newRecord.setDistance(request.getDistance());
 
@@ -30,7 +30,7 @@ public class SimplePostRecordFactory {
 
                 break;
 
-            case MeasurementType.DURATION:
+            case DURATION:
 
                 newRecord.setDuration(request.getDuration());
 

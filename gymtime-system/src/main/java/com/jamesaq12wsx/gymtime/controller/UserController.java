@@ -1,12 +1,13 @@
 package com.jamesaq12wsx.gymtime.controller;
 
-import com.gymtime.model.payload.*;
+import com.jamesaq12wsx.gymtime.annotation.Log;
 import com.jamesaq12wsx.gymtime.service.dto.UserDto;
 import com.jamesaq12wsx.gymtime.exception.ApiRequestException;
 import com.jamesaq12wsx.gymtime.model.ApiResponseBuilder;
 import com.jamesaq12wsx.gymtime.auth.SelfUserDetailsService;
 import com.jamesaq12wsx.gymtime.model.payload.*;
 import com.jamesaq12wsx.gymtime.service.dto.UserBodyRecordDto;
+import com.jamesaq12wsx.gymtime.util.SecurityUtils;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,11 +30,12 @@ public class UserController {
         this.userDetailsService = userDetailsService;
     }
 
+    @Log("User Get Self Data")
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse<UserDto> me(Principal principal){
+    public ApiResponse<UserDto> me(){
 
-        UserDto user = userDetailsService.loadUserInfoByEmail(principal.getName());
+        UserDto user = userDetailsService.loadUserInfoByEmail(getCurrentUsername());
 
         ApiResponse<UserDto> apiResponse = new ApiResponse<>(
                 true,
@@ -44,22 +46,24 @@ public class UserController {
         return apiResponse;
     }
 
+    @Log("User Update Name")
     @PutMapping("/name")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateUserName(@RequestBody UserInfoRequest request, Principal principal){
+    public ApiResponse updateUserName(@RequestBody UserInfoRequest request){
 
         if(request.getName() == null || StringUtil.isBlank(request.getName())){
             throw new ApiRequestException(String.format("Update name could not be empty"));
         }
 
-        userDetailsService.updateUserName(request, principal);
+        userDetailsService.updateUserName(request);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
 
+    @Log("User Update Picture")
     @PutMapping("/picture")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse handleFileUpload(@RequestParam("picture") MultipartFile file, Principal principal) {
+    public ApiResponse handleFileUpload(@RequestParam("picture") MultipartFile file) {
 
         if (file == null){
             throw new ApiRequestException(String.format("Cannot upload empty picture file"));
@@ -78,152 +82,145 @@ public class UserController {
             throw new ApiRequestException(String.format("User picture does not accept %s type", mimeType));
         }
 
-        userDetailsService.updateUserPicture(file, principal);
+        userDetailsService.updateUserPicture(file);
 
         return ApiResponseBuilder.createSuccessResponse(null);
 
     }
 
-    @PutMapping("/gender")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateUserGender(@RequestBody UserInfoRequest request, Principal principal){
-
-        if(request.getGender() == null){
-            throw new ApiRequestException(String.format("Could not update user gender with empty value"));
-        }
-
-        userDetailsService.updateUserGender(request, principal);
-
-        return apiResponseBuilder.createSuccessResponse(null);
-    }
-
-    @PutMapping("/birthday")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateUserBirthday(@RequestBody UserInfoRequest request, Principal principal){
-
-        if(request.getBirthday() == null){
-            throw new ApiRequestException(String.format("Could not update user birthday with empty value"));
-        }
-
-        userDetailsService.updateUserBirthday(request, principal);
-
-        return apiResponseBuilder.createSuccessResponse(null);
-    }
-
+    @Log("User Update Wieght Unit")
     @PostMapping("/unit/weight")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateWeightUnit(@RequestBody UserUnitRequest request, Principal principal){
+    public ApiResponse updateWeightUnit(@RequestBody UserUnitRequest request){
 
         if(request.getWeightUnit() == null){
             throw new ApiRequestException(String.format("Could not update user weight unit, request is empty"));
         }
 
-        userDetailsService.updateWeightUnit(request, principal);
+        userDetailsService.updateWeightUnit(request);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
 
+    @Log("User Update Height Unit")
     @PostMapping("/unit/height")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateHeightUnit(@RequestBody UserUnitRequest request, Principal principal){
+    public ApiResponse updateHeightUnit(@RequestBody UserUnitRequest request){
 
         if(request.getHeightUnit() == null){
             throw new ApiRequestException(String.format("Could not update user height unit, request is empty"));
         }
 
-        userDetailsService.updateHeightUnit(request, principal);
+        userDetailsService.updateHeightUnit(request);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
 
+    @Log("User Update Distance Unit")
     @PostMapping("/unit/distance")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateDistanceUnit(@RequestBody UserUnitRequest request, Principal principal){
+    public ApiResponse updateDistanceUnit(@RequestBody UserUnitRequest request){
 
         if(request.getDistanceUnit() == null){
             throw new ApiRequestException(String.format("Could not update user height unit, request is empty"));
         }
 
-        userDetailsService.updateDistanceUnit(request, principal);
+        userDetailsService.updateDistanceUnit(request);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
 
+    @Log("User Update Gender")
     @PostMapping("/info/gender")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateGender(@RequestBody UserInfoRequest request, Principal principal){
+    public ApiResponse updateGender(@RequestBody UserInfoRequest request){
 
         if(request.getGender() == null){
             throw new ApiRequestException(String.format("Could not update user gender, request is empty"));
         }
 
-        userDetailsService.updateGender(request, principal);
+        userDetailsService.updateGender(request);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
 
+    @Log("User Update Birthday")
     @PostMapping("/info/birthday")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse updateBirthday(@RequestBody UserInfoRequest request, Principal principal){
+    public ApiResponse updateBirthday(@RequestBody UserInfoRequest request){
 
         if(request.getBirthday() == null){
             throw new ApiRequestException(String.format("Could not update user gender, request is empty"));
         }
 
-        userDetailsService.updateBirthday(request, principal);
+        userDetailsService.updateBirthday(request);
 
         return apiResponseBuilder.createSuccessResponse(null);
     }
 
+    @Log("User Get Self Body Stat Data")
     @GetMapping("/stat")
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    public ApiResponse<UserBodyRecordDto> getUserBodyStat(Principal principal){
-        return ApiResponseBuilder.createSuccessResponse(userDetailsService.getUserBodyStat(principal));
+    public ApiResponse<UserBodyRecordDto> getUserBodyStat(){
+        return ApiResponseBuilder.createSuccessResponse(userDetailsService.getUserBodyStat());
     }
 
+    @Log("User Update Height")
     @PostMapping("/height")
-    public ApiResponse updateUserHeight(@RequestBody NewHeightRequest request, Principal principal){
+    public ApiResponse updateUserHeight(@RequestBody NewHeightRequest request){
 
-        userDetailsService.updateUserHeight(request, principal);
+        userDetailsService.updateUserHeight(request);
 
         return ApiResponseBuilder.createSuccessResponse(true);
 
     }
 
+    @Log("User Add Weight Record")
     @PostMapping("/weight")
-    public ApiResponse newUserWeight(@RequestBody NewWeightRequest request, Principal principal){
+    public ApiResponse newUserWeight(@RequestBody NewWeightRequest request){
 
-        userDetailsService.newUserWeight(request, principal);
+        userDetailsService.newUserWeight(request);
 
         return ApiResponseBuilder.createSuccessResponse(true);
 
     }
 
+    @Log("User Delete Weight Record")
     @DeleteMapping("/weight/{id}")
-    public ApiResponse deleteUserWeight(@PathVariable("id") Integer id, Principal principal){
+    public ApiResponse deleteUserWeight(@PathVariable("id") Integer id){
 
-        userDetailsService.deleteUserWeight(id, principal);
+        userDetailsService.deleteUserWeight(id);
 
         return ApiResponseBuilder.createSuccessResponse(true);
 
     }
 
+    @Log("User Add BodyFat Record")
     @PostMapping("/bodyfat")
-    public ApiResponse newUserBodyFat(@RequestBody NewBodyFatRequest request, Principal principal){
+    public ApiResponse newUserBodyFat(@RequestBody NewBodyFatRequest request){
 
-        userDetailsService.newUserBodyFat(request, principal);
+        userDetailsService.newUserBodyFat(request);
 
         return ApiResponseBuilder.createSuccessResponse(true);
 
     }
 
+    @Log("User Delete Body Fat Record")
     @DeleteMapping("/bodyfat/{id}")
-    public ApiResponse deleteUserBodyFat(@PathVariable("id") Integer id, Principal principal){
+    public ApiResponse deleteUserBodyFat(@PathVariable("id") Integer id){
 
-        userDetailsService.deleteUserBodyFat(id, principal);
+        userDetailsService.deleteUserBodyFat(id);
 
         return ApiResponseBuilder.createSuccessResponse(true);
 
+    }
+
+    private Principal getCurrentUser(){
+        return SecurityUtils.getCurrentAuthentication();
+    }
+
+    private String getCurrentUsername(){
+        return SecurityUtils.getCurrentUsername();
     }
 
 }

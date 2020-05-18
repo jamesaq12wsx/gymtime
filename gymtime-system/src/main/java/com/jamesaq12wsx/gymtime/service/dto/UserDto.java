@@ -1,6 +1,7 @@
 package com.jamesaq12wsx.gymtime.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jamesaq12wsx.gymtime.base.BaseDto;
 import lombok.Getter;
 import lombok.Setter;
 

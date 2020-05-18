@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import EmptyBar from '../components/chart/EmptyBar';
 import SimpleMap from '../components/SimpleMap';
-import NewPost from '../page/NewPost.page';
+import NewPost from './NewPost.page';
 import { Skeleton, Switch, Card, List, Avatar, Row, Col, Button, Modal, Tooltip } from 'antd';
 import { getClubDetailWithToken, getClubPosts, getClubRecentUser } from '../api/client';
 import { EnvironmentFilled, GlobalOutlined, ClockCircleOutlined, RightOutlined } from '@ant-design/icons';

@@ -27,10 +27,12 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
+    private final TokenProvider tokenProvider;
 
-    public JwtTokenVerifier(SecretKey secretKey, JwtConfig jwtConfig) {
+    public JwtTokenVerifier(SecretKey secretKey, JwtConfig jwtConfig, TokenProvider tokenProvider) {
         this.secretKey = secretKey;
         this.jwtConfig = jwtConfig;
+        this.tokenProvider = tokenProvider;
     }
 
     @Override
@@ -57,23 +59,19 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         try{
 
-            Jws<Claims> claimsJws = Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(token);
+//            Jws<Claims> claimsJws = Jwts.parser()
+//                    .setSigningKey(secretKey)
+//                    .parseClaimsJws(token);
+//
+//            Claims body = claimsJws.getBody();
+//
+//            String username = body.getSubject();
+//
+//            var authorities = (List<Map<String,String>>) body.get("authorities");
+//
+//            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream().map(auth -> new SimpleGrantedAuthority(auth.get("authority"))).collect(Collectors.toSet());
 
-            Claims body = claimsJws.getBody();
-
-            String username = body.getSubject();
-
-            var authorities = (List<Map<String,String>>) body.get("authorities");
-
-            Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream().map(auth -> new SimpleGrantedAuthority(auth.get("authority"))).collect(Collectors.toSet());
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    simpleGrantedAuthorities
-            );
+            Authentication authentication = tokenProvider.getAuthentication(token);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 

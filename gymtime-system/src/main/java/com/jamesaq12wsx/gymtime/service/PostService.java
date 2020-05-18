@@ -1,6 +1,5 @@
 package com.jamesaq12wsx.gymtime.service;
 
-import com.gymtime.database.*;
 import com.jamesaq12wsx.gymtime.model.PostCount;
 import com.jamesaq12wsx.gymtime.model.entity.FitnessClub;
 import com.jamesaq12wsx.gymtime.model.entity.Post;

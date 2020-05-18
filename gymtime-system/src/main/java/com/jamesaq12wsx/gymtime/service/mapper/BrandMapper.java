@@ -1,5 +1,6 @@
 package com.jamesaq12wsx.gymtime.service.mapper;
 
+import com.jamesaq12wsx.gymtime.base.BaseMapper;
 import com.jamesaq12wsx.gymtime.model.entity.Brand;
 import com.jamesaq12wsx.gymtime.service.dto.BrandDto;
 import org.mapstruct.Mapper;

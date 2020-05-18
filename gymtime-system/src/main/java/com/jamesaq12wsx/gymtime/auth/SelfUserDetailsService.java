@@ -1,6 +1,5 @@
 package com.jamesaq12wsx.gymtime.auth;
 
-import com.gymtime.model.payload.*;
 import com.jamesaq12wsx.gymtime.service.dto.UserBodyRecordDto;
 import com.jamesaq12wsx.gymtime.service.dto.UserDto;
 import com.jamesaq12wsx.gymtime.model.payload.*;
@@ -18,34 +17,34 @@ public interface SelfUserDetailsService extends UserDetailsService {
 
     UserDto loadUserInfoByEmail(String email);
 
-    void updateUserName(UserInfoRequest request, Principal principal);
+    void updateUserName(UserInfoRequest request);
 
-    void updateUserBirthday(UserInfoRequest request, Principal principal);
+    void updateUserBirthday(UserInfoRequest request);
 
-    void updateUserGender(UserInfoRequest request, Principal principal);
+    void updateUserGender(UserInfoRequest request);
 
-    void updateUserPicture(MultipartFile picture, Principal principal);
+    void updateUserPicture(MultipartFile picture);
 
-    void updateWeightUnit(UserUnitRequest request, Principal principal);
+    void updateWeightUnit(UserUnitRequest request);
 
-    void updateHeightUnit(UserUnitRequest request, Principal principal);
+    void updateHeightUnit(UserUnitRequest request);
 
-    void updateDistanceUnit(UserUnitRequest request, Principal principal);
+    void updateDistanceUnit(UserUnitRequest request);
 
-    void updateGender(UserInfoRequest request, Principal principal);
+    void updateGender(UserInfoRequest request);
 
-    void updateBirthday(UserInfoRequest request, Principal principal);
+    void updateBirthday(UserInfoRequest request);
 
-    UserBodyRecordDto getUserBodyStat(Principal principal);
+    UserBodyRecordDto getUserBodyStat();
 
-    void updateUserHeight(NewHeightRequest request, Principal principal);
+    void updateUserHeight(NewHeightRequest request);
 
-    void newUserWeight(NewWeightRequest request, Principal principal);
+    void newUserWeight(NewWeightRequest request);
 
-    void deleteUserWeight(Integer id, Principal principal);
+    void deleteUserWeight(Integer id);
 
-    void newUserBodyFat(NewBodyFatRequest request, Principal principal);
+    void newUserBodyFat(NewBodyFatRequest request);
 
-    void deleteUserBodyFat(Integer id, Principal principal);
+    void deleteUserBodyFat(Integer id);
 
 }
